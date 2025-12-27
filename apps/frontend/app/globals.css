@@ -1,0 +1,122 @@
+@import "tailwindcss";
+
+/* Optional: Use class-based dark mode for manual toggling (e.g., add 'dark' class to <html>) */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  /* -------------------------
+     BACKGROUNDS
+     ------------------------- */
+  --color-bg: #e4e1e0; /* dim_grey 900 - Light */
+  --color-surface: #ffffff; /* Light */
+  --color-surface-elevated: #dbd5dd; /* Light */
+  --color-muted: #cac3c0; /* Light */
+  --color-inverse: #0d060f; /* coffee_bean 500 - Shared */
+  --color-inverse-muted: #272640; /* space_indigo 500 - Shared */
+
+  /* -------------------------
+     TEXT
+     ------------------------- */
+  --color-text-primary: #0d060f; /* coffee_bean 500 - Light */
+  --color-text-secondary: #47403d; /* dim_grey 300 - Light */
+  --color-text-muted: #766b65; /* dim_grey 500 - Light */
+  --color-text-inverse: #ffffff; /* Inverse text - Shared */
+
+  /* -------------------------
+     BORDERS
+     ------------------------- */
+  --color-border-default: #dbd5dd; /* Light */
+  --color-border-muted: #b7abbc; /* Light */
+  --color-border-strong: #94819a; /* Light */
+  --color-border-inverse: #0d060f; /* Shared */
+
+  /* -------------------------
+     BRAND / ACCENT (shared across light/dark)
+     ------------------------- */
+  --color-accent-primary: #7f5cad; /* midnight_violet 700 */
+  --color-accent-secondary: #5a7baf; /* deep_space_blue 700 */
+  --color-accent-muted: #464573; /* space_indigo 600 */
+
+  /* -------------------------
+     BUTTONS
+     ------------------------- */
+  --color-btn-primary-bg: #7f5cad; /* midnight_violet 700 - Light */
+  --color-btn-primary-hover: #703880; /* midnight_violet 600 - Light */
+  --color-btn-primary-text: #ffffff; /* Shared */
+
+  --color-btn-secondary-bg: #5a7baf; /* deep_space_blue 700 - Light */
+  --color-btn-secondary-hover: #3c547c; /* deep_space_blue 600 - Light */
+  --color-btn-secondary-text: #ffffff; /* Shared */
+
+  --color-btn-ghost-hover: rgba(0, 0, 0, 0.06); /* Light */
+  --color-btn-disabled-bg: #cac3c0; /* Light */
+  --color-btn-disabled-text: #766b65; /* Shared */
+
+  /* -------------------------
+     STATES
+     ------------------------- */
+  --color-state-hover: rgba(0, 0, 0, 0.08); /* Light */
+  --color-state-active: rgba(0, 0, 0, 0.14); /* Light */
+  --color-state-focus: #7f5cad; /* Shared accent */
+}
+
+/* Dark mode overrides (class-based or media query) */
+@layer theme {
+  .dark {
+    /* -------------------------
+       BACKGROUNDS
+       ------------------------- */
+    --color-bg: #0d060f; /* coffee_bean 500 */
+    --color-surface: #1b3a4b; /* charcoal_blue 500 */
+    --color-surface-elevated: #212f45; /* deep_space_blue 500 */
+    --color-muted: #272640; /* space_indigo 500 */
+    --color-inverse: #e4e1e0; /* dim_grey 900 */
+    --color-inverse-muted: #cac3c0; /* dim_grey 800 */
+
+    /* -------------------------
+       TEXT
+       ------------------------- */
+    --color-text-primary: #ffffff;
+    --color-text-secondary: #cdd9d4; /* jet_black 900 */
+    --color-text-muted: #afa6a1; /* dim_grey 700 */
+    --color-text-inverse: #0d060f; /* coffee_bean 500 */
+
+    /* -------------------------
+       BORDERS
+       ------------------------- */
+    --color-border-default: #272640; /* space_indigo 500 */
+    --color-border-muted: #47403d; /* dim_grey 300 */
+    --color-border-strong: #316987; /* charcoal_blue 600 */
+    --color-border-inverse: #0d060f;
+
+    /* -------------------------
+       BUTTONS
+       ------------------------- */
+    --color-btn-primary-bg: #703880; /* midnight_violet 600 */
+    --color-btn-primary-hover: #a055b4; /* midnight_violet 700 */
+
+    --color-btn-secondary-bg: #3c547c; /* deep_space_blue 600 */
+    --color-btn-secondary-hover: #5a7baf; /* deep_space_blue 700 */
+
+    --color-btn-ghost-hover: rgba(255, 255, 255, 0.06);
+    --color-btn-disabled-bg: #181c28; /* space_indigo 300 */
+
+    /* -------------------------
+       STATES
+       ------------------------- */
+    --color-state-hover: rgba(255, 255, 255, 0.08);
+    --color-state-active: rgba(255, 255, 255, 0.14);
+  }
+}
+
+/* Apply root styles using the variables */
+@layer base {
+  body {
+    @apply bg-[var(--color-bg)] text-[var(--color-text-primary)];
+  }
+
+  /* Example utility usage in HTML:
+       <div class="bg-[var(--color-surface)] border-[var(--color-border-default)]">
+       <button class="bg-[var(--color-btn-primary-bg)] hover:bg-[var(--color-btn-primary-hover)] text-[var(--color-btn-primary-text)]">
+     */
+}
