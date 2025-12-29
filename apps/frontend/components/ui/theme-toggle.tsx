@@ -1,4 +1,3 @@
-// components/ThemeToggle.tsx
 "use client";
 
 import { useTheme } from "next-themes";
@@ -14,7 +13,6 @@ export default function ThemeToggle() {
   }, []);
 
   if (!mounted) {
-    // You can return a placeholder or nothing while mounting
     return null;
   }
 
@@ -23,14 +21,14 @@ export default function ThemeToggle() {
   return (
     <button
       onClick={() => setTheme(isDark ? "light" : "dark")}
-      className="p-2 rounded-full bg-surface-elevated border border-default hover:bg-muted transition-colors duration-200 flex items-center gap-2"
+      className="p-2 rounded-full bg-surface border border-default hover:bg-muted transition-colors duration-200 flex items-center gap-2"
     >
       {/* Sun icon for light mode */}
       <svg
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 20 20"
         fill="currentColor"
-        className={`w-5 h-5 text-accent-primary transition-opacity ${isDark ? "opacity-100" : "opacity-0"}`}
+        className={`w-5 h-5 text-yellow-200 transition-opacity ${isDark ? "opacity-100" : "opacity-0"}`}
       >
         <path
           fillRule="evenodd"
@@ -44,7 +42,7 @@ export default function ThemeToggle() {
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 20 20"
         fill="currentColor"
-        className={`w-5 h-5 text-accent-primary absolute transition-opacity ${isDark ? "opacity-0" : "opacity-100"}`}
+        className={`w-5 h-5 text-neutral-700 absolute transition-opacity ${isDark ? "opacity-0" : "opacity-100"}`}
       >
         <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
       </svg>

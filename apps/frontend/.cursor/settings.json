@@ -1,7 +1,25 @@
 {
-  "tailwindCSS.experimental.configFile": "apps/web/tailwind.config.ts",
-  "tailwindCSS.includeLanguages": {
-    "typescript": "typescript",
-    "typescriptreact": "javascript"
-  }
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[javascriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+
+  "eslint.format.enable": false,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true
+  },
+
+  "typescript.format.enable": false,
+  "javascript.format.enable": false
 }
