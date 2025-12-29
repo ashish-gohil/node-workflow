@@ -34,7 +34,7 @@ export default function RootLayout({
           <div className={`fixed top-0 left-0 right-0 z-50`}>
             <Header />
           </div>
-          <main className="pt-16 h-full bg-bg">{children}</main>
+          <main className="pt-20 h-full bg-bg">{children}</main>
         </ThemeProvider>
       </body>
     </html>

@@ -9,12 +9,16 @@ export default function DottedBackground({
   className?: string
 }) {
   return (
-    <div
-      className={cn(
-        'min-h-screen flex items-center justify-center bg-bg bg-[radial-gradient(var(--color-surface)_1px,transparent_1px)] bg-size-[20px_20px]',
-        className
-      )}
-    >
+    <div className="relative flex h-full w-full items-center justify-center bg-bg">
+      <div
+        className={cn(
+          'absolute inset-0',
+          'bg-size-[25px_25px]',
+          'bg-[radial-gradient(var(--color-text-muted)_1px,transparent_1px)]',
+          className
+        )}
+      />
+
       {children}
     </div>
   )

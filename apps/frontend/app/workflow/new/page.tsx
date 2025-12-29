@@ -15,15 +15,16 @@ import {
   type OnNodeDrag,
   type DefaultEdgeOptions,
   Background,
-  Controls,
   BackgroundVariant,
-  EdgeText,
 } from '@xyflow/react'
 // import { useTheme } from 'next-themes'
 import { ThemeHydrated } from '@/components/ui/theme-wraper'
 import '@xyflow/react/dist/style.css'
 import { TriggerNode } from '@/components/ui/nodes/trigger-node'
 import { ActionNode } from '@/components/ui/nodes/action-node'
+import DottedBackground from '@/components/ui/dotted-background'
+import { Button } from '@/components/ui/button'
+import TriggerSheet from '@/components/ui/trigger/trigger-sheeet'
 
 const nodeTypes = {
   trigger: TriggerNode,
@@ -51,11 +52,6 @@ const initialNodes: Node[] = [
   },
 ]
 
-const initialEdges: Edge[] = [
-  { id: 'e1-2', source: '1', target: '2' },
-  { id: 'e1-2-2', source: '1', target: '2' },
-]
-
 const fitViewOptions: FitViewOptions = {
   padding: 0.2,
 }
@@ -67,9 +63,11 @@ const defaultEdgeOptions: DefaultEdgeOptions = {
 const onNodeDrag: OnNodeDrag = (_, node) => {
   console.log('drag event', node.data)
 }
+
 export default function NewWorkflow() {
-  const [nodes, setNodes] = useState<Node[]>(initialNodes)
-  const [edges, setEdges] = useState<Edge[]>(initialEdges)
+  const [nodes, setNodes] = useState<Node[]>([])
+  const [edges, setEdges] = useState<Edge[]>([])
+  const [triggerSheetOpen, setTriggerSheetOpen] = useState<boolean>(false)
 
   const onNodesChange: OnNodesChange = useCallback(
     changes => setNodes(nds => applyNodeChanges(changes, nds)),
@@ -85,31 +83,38 @@ export default function NewWorkflow() {
   )
 
   return (
-    // <DottedBackground>
-    <div className="w-screen h-[calc(100vh-80px)] z-50 bg-transparent">
-      <ThemeHydrated>
-        <ReactFlow
-          className=""
-          nodes={nodes}
-          edges={edges}
-          onNodesChange={onNodesChange}
-          onEdgesChange={onEdgesChange}
-          onConnect={onConnect}
-          onNodeDrag={onNodeDrag}
-          fitView
-          fitViewOptions={fitViewOptions}
-          defaultEdgeOptions={defaultEdgeOptions}
-          nodeTypes={nodeTypes}
-        >
-          <Background
-            id="1"
-            gap={10}
-            color="var(--color-bg-muted)"
-            variant={BackgroundVariant.Dots}
+    <div className="z-50 bg-transparent w-screen h-[calc(100vh-80px)]">
+      <DottedBackground className="w-full h-full">
+        {nodes.length > 0 ? (
+          <ThemeHydrated>
+            <ReactFlow
+              className=""
+              nodes={nodes}
+              edges={edges}
+              onNodesChange={onNodesChange}
+              onEdgesChange={onEdgesChange}
+              onConnect={onConnect}
+              onNodeDrag={onNodeDrag}
+              fitView
+              fitViewOptions={fitViewOptions}
+              defaultEdgeOptions={defaultEdgeOptions}
+              nodeTypes={nodeTypes}
+            >
+              {/* <Background
+                id="1"
+                gap={10}
+                color="var(--color-bg-muted)"
+                variant={BackgroundVariant.Dots}
+              /> */}
+            </ReactFlow>
+          </ThemeHydrated>
+        ) : (
+          <TriggerSheet
+            isOpen={triggerSheetOpen}
+            setIsOpen={val => setTriggerSheetOpen(val)}
           />
-        </ReactFlow>
-      </ThemeHydrated>
+        )}
+      </DottedBackground>
     </div>
-    // </DottedBackground>
   )
 }
