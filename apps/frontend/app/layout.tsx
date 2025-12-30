@@ -3,6 +3,7 @@ import localFont from 'next/font/local'
 import './globals.css'
 import { ThemeProvider } from 'next-themes'
 import Header from '../components/ui/header'
+import { WorkflowProvider } from '@/contexts/workflow-context'
 
 const geistSans = localFont({
   src: './fonts/GeistVF.woff',
@@ -34,7 +35,9 @@ export default function RootLayout({
           <div className={`fixed top-0 left-0 right-0 z-50`}>
             <Header />
           </div>
-          <main className="pt-20 h-full bg-bg">{children}</main>
+          <WorkflowProvider>
+            <main className="pt-20 h-full bg-bg">{children}</main>
+          </WorkflowProvider>
         </ThemeProvider>
       </body>
     </html>

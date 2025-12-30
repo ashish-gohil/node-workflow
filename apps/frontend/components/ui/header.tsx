@@ -17,6 +17,9 @@ export default function Header() {
           onClick={() => {
             router.push('/workflow/new')
           }}
+          className="relative rounded-none"
+          allowCorners={true}
+          cornerSize="sm"
         >
           Create workflow
         </Button>

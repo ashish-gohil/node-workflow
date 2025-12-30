@@ -1,4 +1,5 @@
-import React, { ReactNode, useState } from 'react'
+'use client'
+import React, { useState } from 'react'
 import {
   Sheet,
   SheetContent,
@@ -9,18 +10,21 @@ import {
 } from '../sheet'
 import { Button } from '../button'
 
-type NodeTypes = {
-  id: string
-  label: string
-  description: string
-  icon?: ReactNode
-}
+import { Trigger, TriggerNodeTypes } from '@/app/types/tirggers'
+import SelectedTriggerConfig from './selected-trigger-config'
+import { TriggerNode } from '../nodes/trigger-node'
+import { ActionNode } from '../nodes/action-node'
+import { ManualTriggerNode } from '../nodes/manual-trigger-node'
+import { useWorkflow } from '@/hooks/use-workflow'
+import { Node } from '@xyflow/react'
 
-const triggerNodes: NodeTypes[] = [
+const triggerNodes: Trigger[] = [
   {
-    id: 'manual-trigger',
+    type: TriggerNodeTypes.ManualTrigger,
+    title: 'Manual trigger',
     label: 'Trigger manually',
     description: 'Runs a workflow when execute button is cliecked.',
+    requireDataFields: false,
     icon: (
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -39,9 +43,11 @@ const triggerNodes: NodeTypes[] = [
     ),
   },
   {
-    id: 'scheduler',
+    type: TriggerNodeTypes.SchedulerTrigger,
+    title: 'Schedule trigger',
     label: 'On a schedule',
     description: 'Runs a workflow every sec, min, hour or day as specified.',
+    requireDataFields: true,
     icon: (
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -60,9 +66,11 @@ const triggerNodes: NodeTypes[] = [
     ),
   },
   {
-    id: 'webhook',
+    type: TriggerNodeTypes.Webhook,
+    title: 'Webhook',
     label: 'On a webhook calls',
     description: 'Runs a workflow when receiving HTTP response.',
+    requireDataFields: true,
     icon: (
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -82,18 +90,24 @@ const triggerNodes: NodeTypes[] = [
   },
 ]
 
-export default function TriggerSheet({
-  isOpen,
-  setIsOpen,
-}: {
-  isOpen: boolean
-  setIsOpen: (val: boolean) => void
-}) {
-  const [selectedNode, setSelectedNode] = useState<string>()
+export const nodeTypes = {
+  [TriggerNodeTypes.ManualTrigger]: ManualTriggerNode,
+  [TriggerNodeTypes.SchedulerTrigger]: ActionNode,
+  [TriggerNodeTypes.Webhook]: TriggerNode,
+}
+
+export default function FirstTriggerSheet() {
+  const { nodes, setNodes } = useWorkflow()
+  const [triggerSheetOpen, setTriggerSheetOpen] = useState<boolean>(false)
+
   return (
-    <Sheet open={isOpen} onOpenChange={setIsOpen}>
+    <Sheet open={triggerSheetOpen} onOpenChange={setTriggerSheetOpen}>
       <SheetTrigger asChild>
-        <Button className="z-60 bg-bg hover:bg-bg p-10  border-2 border-border-strong border-dashed text-text">
+        <Button
+          allowCorners={true}
+          cornerSize="md"
+          className="relative hover:cursor-pointer rounded-none  z-30 bg-bg hover:bg-bg p-10  border border-border-strong border-dashed text-text"
+        >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
@@ -116,27 +130,39 @@ export default function TriggerSheet({
           <SheetDescription>
             Trigger is a step that starts your workflow
           </SheetDescription>
-          {!selectedNode ? (
-            <div className="flex flex-col gap-4 cursor-pointer pt-6 ">
-              {triggerNodes.map(node => (
-                <div
-                  onClick={() => setSelectedNode(node.id)}
-                  key={node.id}
-                  className="w-full flex gap-3 justify-start items-start"
-                >
-                  <div className="w-16 flex justify-center items-start p-2">
-                    {node?.icon}
-                  </div>
-                  <div className="w-full flex flex-col gap-0">
-                    <div className="text-text-primary">{node.label}</div>
-                    <div className="text-text-muted">{node.description}</div>
-                  </div>
+          <div className="flex flex-col gap-4 cursor-pointer pt-6 ">
+            {triggerNodes.map(node => (
+              <div
+                onClick={() => {
+                  setTriggerSheetOpen(false)
+                  // check if requiredFields are false then set node in canvas
+                  // alwase set node in canvas and see if requiredfields is et to true then open modal
+                  const newNode: Node = {
+                    data: {
+                      label: 'new node',
+                      description: 'this is description',
+                    },
+                    position: { x: 20, y: 40 },
+                    id: Math.random().toString(),
+                    type: node.type,
+                  }
+                  setNodes([...nodes, newNode])
+                  if (node.requireDataFields)
+                    SelectedTriggerConfig({ selectedNode: node })
+                }}
+                key={node.type}
+                className="w-full flex gap-3 justify-start items-start"
+              >
+                <div className="w-16 flex justify-center items-start p-2">
+                  {node?.icon}
                 </div>
-              ))}
-            </div>
-          ) : (
-            <div>Selected node is {selectedNode}</div>
-          )}
+                <div className="w-full flex flex-col gap-0">
+                  <div className="text-text-primary">{node.label}</div>
+                  <div className="text-text-muted">{node.description}</div>
+                </div>
+              </div>
+            ))}
+          </div>
         </SheetHeader>
       </SheetContent>
     </Sheet>

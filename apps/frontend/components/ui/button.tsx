@@ -3,14 +3,15 @@ import { Slot } from '@radix-ui/react-slot'
 import { cva, type VariantProps } from 'class-variance-authority'
 
 import { cn } from '@/lib/utils'
+import CornerIcons from './corners'
 
 const buttonVariants = cva(
   [
-    'inline-flex items-center justify-center gap-2 whitespace-nowrap',
-    'rounded-md text-sm font-medium transition-all',
+    'relative inline-flex items-center justify-center gap-2 whitespace-nowrap',
+    'rounded-none text-sm font-medium transition-all',
     'disabled:pointer-events-none disabled:opacity-60',
     'outline-none focus-visible:ring-[3px] focus-visible:ring-state-focus',
-    '[&_svg]:pointer-events-none [&_svg]:shrink-0',
+    '[&_svg]:pointer-events-none [&_svg]:shrink-0 hover:cursor-pointer',
   ].join(' '),
   {
     variants: {
@@ -68,18 +69,40 @@ export interface ButtonProps
     React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
   asChild?: boolean
+  allowCorners?: boolean
+  cornerSize?: 'sm' | 'md' | 'lg'
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, ...props }, ref) => {
+  (
+    {
+      className,
+      variant,
+      size,
+      asChild = false,
+      allowCorners = false,
+      cornerSize = 'md',
+      children,
+      ...props
+    },
+    ref
+  ) => {
     const Comp = asChild ? Slot : 'button'
 
     return (
       <Comp
         ref={ref}
-        className={cn(buttonVariants({ variant, size }), className)}
+        className={cn(
+          buttonVariants({ variant, size }),
+          'relative', // required for corners
+          className
+        )}
         {...props}
-      />
+      >
+        {children}
+
+        {allowCorners && <CornerIcons size={cornerSize} />}
+      </Comp>
     )
   }
 )

@@ -1,21 +1,19 @@
 'use client'
 import React from 'react'
-import { useState, useCallback } from 'react'
+import { useCallback } from 'react'
 import {
   ReactFlow,
   addEdge,
   applyNodeChanges,
   applyEdgeChanges,
-  type Node,
-  type Edge,
   type FitViewOptions,
   type OnConnect,
   type OnNodesChange,
   type OnEdgesChange,
   type OnNodeDrag,
   type DefaultEdgeOptions,
-  Background,
-  BackgroundVariant,
+  Connection,
+  OnConnectEnd,
 } from '@xyflow/react'
 // import { useTheme } from 'next-themes'
 import { ThemeHydrated } from '@/components/ui/theme-wraper'
@@ -23,34 +21,11 @@ import '@xyflow/react/dist/style.css'
 import { TriggerNode } from '@/components/ui/nodes/trigger-node'
 import { ActionNode } from '@/components/ui/nodes/action-node'
 import DottedBackground from '@/components/ui/dotted-background'
-import { Button } from '@/components/ui/button'
-import TriggerSheet from '@/components/ui/trigger/trigger-sheeet'
 
-const nodeTypes = {
-  trigger: TriggerNode,
-  action: ActionNode,
-}
-
-const initialNodes: Node[] = [
-  {
-    id: '1',
-    data: { label: 'Node 1', description: 'this is trigger node' },
-    position: { x: 5, y: 5 },
-    type: 'trigger',
-  },
-  {
-    id: '1-1',
-    data: { label: 'Node 2', description: 'this is trigger node 2' },
-    position: { x: 20, y: 20 },
-    type: 'trigger',
-  },
-  {
-    id: '2',
-    data: { label: 'Node 3' },
-    position: { x: 5, y: 100 },
-    type: 'action',
-  },
-]
+import FirstTriggerSheet, {
+  nodeTypes,
+} from '@/components/ui/triggers/trigger-sheet'
+import { useWorkflow } from '@/hooks/use-workflow'
 
 const fitViewOptions: FitViewOptions = {
   padding: 0.2,
@@ -65,9 +40,7 @@ const onNodeDrag: OnNodeDrag = (_, node) => {
 }
 
 export default function NewWorkflow() {
-  const [nodes, setNodes] = useState<Node[]>([])
-  const [edges, setEdges] = useState<Edge[]>([])
-  const [triggerSheetOpen, setTriggerSheetOpen] = useState<boolean>(false)
+  const { nodes, edges, setNodes, setEdges } = useWorkflow()
 
   const onNodesChange: OnNodesChange = useCallback(
     changes => setNodes(nds => applyNodeChanges(changes, nds)),
@@ -82,8 +55,13 @@ export default function NewWorkflow() {
     [setEdges]
   )
 
+  // When drag stops (either connected or cancelled)
+  const onConnectEnd: OnConnectEnd = useCallback(event => {
+    console.log('Drag ended at:', event?.clientX, event?.clientY)
+  }, [])
+
   return (
-    <div className="z-50 bg-transparent w-screen h-[calc(100vh-80px)]">
+    <div className="z-20 bg-transparent w-screen h-[calc(100vh-80px)]">
       <DottedBackground className="w-full h-full">
         {nodes.length > 0 ? (
           <ThemeHydrated>
@@ -99,6 +77,13 @@ export default function NewWorkflow() {
               fitViewOptions={fitViewOptions}
               defaultEdgeOptions={defaultEdgeOptions}
               nodeTypes={nodeTypes}
+              onConnectEnd={onConnectEnd}
+              // onMove={(e)=> {console.log(e.)}}
+              // onMouseDown={e => {
+              //   console.log(e.clientX)
+              //   console.log(e.clientY)
+              // }}
+              // onMoveEnd={(e)=>{console.log(e?.)}}
             >
               {/* <Background
                 id="1"
@@ -109,10 +94,7 @@ export default function NewWorkflow() {
             </ReactFlow>
           </ThemeHydrated>
         ) : (
-          <TriggerSheet
-            isOpen={triggerSheetOpen}
-            setIsOpen={val => setTriggerSheetOpen(val)}
-          />
+          <FirstTriggerSheet />
         )}
       </DottedBackground>
     </div>

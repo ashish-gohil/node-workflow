@@ -5,6 +5,7 @@ import * as SheetPrimitive from '@radix-ui/react-dialog'
 import { XIcon } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
+import CornerIcons from './corners'
 
 function Sheet({ ...props }: React.ComponentProps<typeof SheetPrimitive.Root>) {
   return <SheetPrimitive.Root data-slot="sheet" {...props} />
@@ -76,6 +77,7 @@ function SheetContent({
           <XIcon className="size-4" />
           <span className="sr-only">Close</span>
         </SheetPrimitive.Close>
+        <CornerIcons size="lg" />
       </SheetPrimitive.Content>
     </SheetPortal>
   )

@@ -1,10 +1,6 @@
 'use client'
 
-import { useTheme } from 'next-themes'
-
 export default function AppLogo() {
-  const { theme } = useTheme()
-
   return (
     <svg
       width="80"
