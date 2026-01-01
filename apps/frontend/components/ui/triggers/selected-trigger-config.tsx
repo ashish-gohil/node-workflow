@@ -1,6 +1,6 @@
 'use clent'
 import { Trigger, TriggerNodeTypes } from '@/app/types/tirggers'
-import SchedulerModal from './sceduler-modal'
+import SchedulerModal from './scheduler-modal'
 import WebhookModal from './webhook-modal'
 
 export default function SelectedTriggerConfig({

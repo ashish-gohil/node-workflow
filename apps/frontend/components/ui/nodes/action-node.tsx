@@ -1,38 +1,48 @@
-import { Handle, Position, NodeProps, Node } from '@xyflow/react'
+import { Handle, Position, NodeProps, Node, useReactFlow } from '@xyflow/react'
+import { CustomHandle } from '../handles/custom-handle'
+import {
+  BaseNode,
+  BaseNodeHeader,
+  BaseNodeHeaderTitle,
+  BaseNodeContent,
+} from '@/components/base-node'
+import { BaseHandle } from '@/components/base-handle'
 
 export type ActionNodeData = Node<{
   label: string
   description?: string
 }>
 
-export function ActionNode({ data, selected }: NodeProps<ActionNodeData>) {
+export function ActionNode({ id, data }: NodeProps<ActionNodeData>) {
+  const { getEdges } = useReactFlow()
+  const edges = getEdges()
+
+  const isHandleConnected = (handleId: string) =>
+    edges.some(edge => edge.source === id && edge.sourceHandle === handleId)
+
   return (
-    <div
-      className={`
-        relative min-w-[160px] rounded-lg border bg-surface-elevated border-border  px-4 py-3 text-text-primarys  transition-colors  ${selected ? 'border-border-strong' : ''} `}
-    >
-      {/* Title */}
-      <div className="text-sm font-medium leading-tight">{data.label}</div>
+    <BaseNode className="min-w-[160px]">
+      {/* Header */}
+      <BaseNodeHeader>
+        <BaseNodeHeaderTitle className="text-sm leading-tight">
+          {data.label}
+        </BaseNodeHeaderTitle>
+      </BaseNodeHeader>
 
-      {/* Optional subtitle */}
-      {data.description && (
-        <div className="mt-1 text-xs text-text-muted">{data.description}</div>
-      )}
+      {/* Content */}
+      <BaseNodeContent>
+        {data.description && (
+          <div className="text-xs text-text-muted">{data.description}</div>
+        )}
+      </BaseNodeContent>
 
-      <Handle
-        id="out-1"
-        type="target"
+      {/* Target Handle */}
+      <BaseHandle
         position={Position.Left}
-        className=" w-2.5 h-2.5 bg-accent-primary border-0 rounded-full "
-        style={{ top: 16 }}
-      />
-      <Handle
-        id="out-2"
         type="target"
-        position={Position.Left}
-        className=" w-2.5 h-2.5 bg-accent-primary border-0 rounded-full "
-        style={{ top: 32 }}
+        id="action-trigger-handle"
+        className="bottom-2"
       />
-    </div>
+    </BaseNode>
   )
 }

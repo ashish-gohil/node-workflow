@@ -25,10 +25,10 @@
   /* -------------------------
      BORDERS
      ------------------------- */
-  --color-border-default: #e5e7eb; /* barely visible */
-  --color-border-muted: #f1f5f9;
-  --color-border-strong: #cbd5e1;
-  --color-border-inverse: #0f172a;
+  --color-border-default: #e2e8f0; /* soft edge, visible on white */
+  --color-border-muted: #f8fafc; /* ultra subtle dividers */
+  --color-border-strong: #94a3b8; /* selected / focus / active */
+  --color-border-inverse: #020617; /* dark border on light-inverse surfaces */
 
   /* -------------------------
      BRAND / ACCENT
@@ -86,10 +86,10 @@
     /* -------------------------
        BORDERS
        ------------------------- */
-    --color-border-default: #1f2937; /* subtle edge */
-    --color-border-muted: #111827;
-    --color-border-strong: #374151;
-    --color-border-inverse: #020617;
+    --color-border-default: #263041; /* visible but subtle edge */
+    --color-border-muted: #0b1220; /* near-background, separators */
+    --color-border-strong: #4b5563; /* selected / focus / active */
+    --color-border-inverse: #e5e7eb; /* light border on dark-inverse surfaces */
 
     /* -------------------------
        BUTTONS
@@ -242,5 +242,9 @@
   }
   body {
     @apply bg-background text-foreground;
+
+    .react-flow__panel {
+      display: none !important;
+    }
   }
 }

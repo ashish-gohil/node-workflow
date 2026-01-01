@@ -70,7 +70,7 @@ export interface ButtonProps
     VariantProps<typeof buttonVariants> {
   asChild?: boolean
   allowCorners?: boolean
-  cornerSize?: 'sm' | 'md' | 'lg'
+  cornerSize?: 'xs' | 'sm' | 'md' | 'lg'
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(

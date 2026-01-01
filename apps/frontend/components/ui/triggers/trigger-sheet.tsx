@@ -15,8 +15,9 @@ import SelectedTriggerConfig from './selected-trigger-config'
 import { TriggerNode } from '../nodes/trigger-node'
 import { ActionNode } from '../nodes/action-node'
 import { ManualTriggerNode } from '../nodes/manual-trigger-node'
-import { useWorkflow } from '@/hooks/use-workflow'
-import { Node } from '@xyflow/react'
+
+import { Node, useReactFlow } from '@xyflow/react'
+import { SchedulerTriggerNode } from '../nodes/schedule-trigger-node'
 
 const triggerNodes: Trigger[] = [
   {
@@ -92,12 +93,13 @@ const triggerNodes: Trigger[] = [
 
 export const nodeTypes = {
   [TriggerNodeTypes.ManualTrigger]: ManualTriggerNode,
-  [TriggerNodeTypes.SchedulerTrigger]: ActionNode,
-  [TriggerNodeTypes.Webhook]: TriggerNode,
+  [TriggerNodeTypes.SchedulerTrigger]: SchedulerTriggerNode,
+  [TriggerNodeTypes.Webhook]: ActionNode,
 }
 
 export default function FirstTriggerSheet() {
-  const { nodes, setNodes } = useWorkflow()
+  const { setNodes } = useReactFlow()
+
   const [triggerSheetOpen, setTriggerSheetOpen] = useState<boolean>(false)
 
   return (
@@ -142,13 +144,17 @@ export default function FirstTriggerSheet() {
                       label: 'new node',
                       description: 'this is description',
                     },
-                    position: { x: 20, y: 40 },
+                    position: { x: 150, y: 150 },
                     id: Math.random().toString(),
                     type: node.type,
                   }
-                  setNodes([...nodes, newNode])
-                  if (node.requireDataFields)
+                  // console.log('new node')
+                  // console.log([...nodes, newNode])
+                  setNodes(nds => [...nds, newNode])
+                  console.log('nodes')
+                  if (node.requireDataFields) {
                     SelectedTriggerConfig({ selectedNode: node })
+                  }
                 }}
                 key={node.type}
                 className="w-full flex gap-3 justify-start items-start"

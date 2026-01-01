@@ -1,5 +1,9 @@
-import { Handle, Position, NodeProps, Node } from '@xyflow/react'
-import { PlusIcon } from 'lucide-react'
+import { Position, NodeProps, Node, useReactFlow } from '@xyflow/react'
+import { MousePointerClick, PlusCircle } from 'lucide-react'
+
+import { ButtonHandle } from '@/components/button-handle'
+import { Button } from '../button'
+import { BaseNode } from '@/components/base-node'
 
 export type ManualTriggerData = Node<{
   label: string
@@ -8,38 +12,53 @@ export type ManualTriggerData = Node<{
 
 export function ManualTriggerNode({
   id,
-  data,
   selected,
 }: NodeProps<ManualTriggerData>) {
+  const { getEdges, getNodes } = useReactFlow()
+
+  const edges = getEdges()
+  const nodes = getNodes()
+
+  console.log(edges)
+  console.log(nodes)
+  console.log(
+    edges[0]?.source === id &&
+      edges[0]?.sourceHandle === 'manual-trigger-handle-1'
+  )
+
+  console.log(
+    edges[0]?.source === id &&
+      edges[0]?.sourceHandle === 'manual-trigger-handle-2'
+  )
+
+  const isHandleConnected = (handleId: string) =>
+    edges.some(edge => edge.source === id && edge.sourceHandle === handleId)
   return (
-    <div
-      key={id}
-      className={`
-        relative min-w-[160px] rounded-lg border-[3px] bg-surface-elevated  border-border  px-4 py-3 text-text-primary  transition-colors  ${selected ? 'border-border-strong' : 'border-border-default'} `}
-    >
-      {/* Title */}
-      <div className="text-sm font-medium leading-tight">{data.label}</div>
-      {/* Optional subtitle */}
-      {data.description && (
-        <div className="mt-1 text-xs text-text-muted">{data.description}</div>
-      )}
-      {/* Single output handle (right side) */}
-      <Handle
-        id="out"
-        type="source"
-        position={Position.Right}
-        className="absolute -right-[7px] top-1/2 -translate-y-1/2 h-3 w-3 bg-accent-primary border-0 rounded-full"
-      />
-      <button
-        onClick={e => {
-          e.stopPropagation()
-          //   data.onAdd?.(id)
-          console.log('open action node sheet')
-        }}
-        className="absolute -right-6 top-1/2 -translate-y-1/2 flex h-6 w-6 items-center justify-center border border-border-strong bg-surface text-text-primary hover:bg-state-hover transition-colors"
+    <div className="group flex gap-2 h-10 justify-between items-center ">
+      <Button
+        allowCorners={true}
+        cornerSize="xs"
+        className="opacity-0 group-hover:opacity-100 h-8"
+        // className="relative rounded-none"
       >
-        <PlusIcon className="h-3.5 w-3.5" />
-      </button>
+        Execute step
+      </Button>
+      <BaseNode className="w-12 rounded-r-xs h-10">
+        <div className="w-full h-full flex justify-center items-center">
+          <MousePointerClick className="text-text-secondary size-5" />
+        </div>
+
+        <ButtonHandle
+          id="manual-trigger-handle"
+          showButton={!isHandleConnected('manual-trigger-handle')}
+          position={Position.Right}
+          type="source"
+        >
+          <div>
+            <PlusCircle className="text-border-strong hover:text-text-secondary" />
+          </div>
+        </ButtonHandle>
+      </BaseNode>
     </div>
   )
 }

@@ -1,34 +1,34 @@
-"use client";
+'use client'
 
-import { useTheme } from "next-themes";
-import { useEffect, useState } from "react";
+import { useTheme } from 'next-themes'
+import { useEffect, useState } from 'react'
 
 export default function ThemeToggle() {
-  const { theme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
+  const { theme, setTheme } = useTheme()
+  const [mounted, setMounted] = useState(false)
 
   // Wait until mounted to avoid hydration mismatch
   useEffect(() => {
-    setMounted(true);
-  }, []);
+    setMounted(true)
+  }, [])
 
   if (!mounted) {
-    return null;
+    return null
   }
 
-  const isDark = theme === "dark";
+  const isDark = theme === 'dark'
 
   return (
     <button
-      onClick={() => setTheme(isDark ? "light" : "dark")}
-      className="p-2 rounded-full bg-surface border border-default hover:bg-muted transition-colors duration-200 flex items-center gap-2"
+      onClick={() => setTheme(isDark ? 'light' : 'dark')}
+      className="p-2 rounded-full bg-surface border border-border-strong hover:bg-muted transition-colors duration-200 flex items-center gap-2 hover:ring-1 hover:ring-border-inverse"
     >
       {/* Sun icon for light mode */}
       <svg
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 20 20"
         fill="currentColor"
-        className={`w-5 h-5 text-yellow-200 transition-opacity ${isDark ? "opacity-100" : "opacity-0"}`}
+        className={`w-5 h-5 text-yellow-200 transition-opacity ${isDark ? 'opacity-100' : 'opacity-0'}`}
       >
         <path
           fillRule="evenodd"
@@ -42,10 +42,10 @@ export default function ThemeToggle() {
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 20 20"
         fill="currentColor"
-        className={`w-5 h-5 text-neutral-700 absolute transition-opacity ${isDark ? "opacity-0" : "opacity-100"}`}
+        className={`w-5 h-5 text-neutral-700 absolute transition-opacity ${isDark ? 'opacity-0' : 'opacity-100'}`}
       >
         <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
       </svg>
     </button>
-  );
+  )
 }

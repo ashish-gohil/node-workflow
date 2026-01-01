@@ -1,8 +1,9 @@
 import { cn } from '@/lib/utils'
 
-type CornerSize = 'sm' | 'md' | 'lg'
+type CornerSize = 'xs' | 'sm' | 'md' | 'lg'
 
 const sizeMap: Record<CornerSize, string> = {
+  xs: 'size-1',
   sm: 'size-2',
   md: 'size-3',
   lg: 'size-4',
