@@ -1,4 +1,4 @@
-@import 'tailwindcss';
+@import "tailwindcss";
 
 /* Optional: Use class-based dark mode for manual toggling (e.g., add 'dark' class to <html>) */
 @custom-variant dark (&:where(.dark, .dark *));

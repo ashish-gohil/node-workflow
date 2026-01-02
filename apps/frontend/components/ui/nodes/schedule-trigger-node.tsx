@@ -1,50 +1,53 @@
-import { Position, NodeProps, Node, useReactFlow } from '@xyflow/react'
-import { Timer } from 'lucide-react'
+"use client";
+import { Position, NodeProps, Node } from "@xyflow/react";
+import { PlusCircle, TimerIcon } from "lucide-react";
 
-import { CustomHandle } from '../handles/custom-handle'
-
-export type SchedulerTriggerData = Node<{
-  label: string
-  description?: string
-}>
+import { ButtonHandle } from "@/components/button-handle";
+import { Button } from "../button";
+import { BaseNode } from "@/components/base-node";
+import { NodeStatusIndicator } from "@/components/node-status-indicator";
+import { SchedulerTriggerNodeType } from "@/app/types/tirggers";
 
 export function SchedulerTriggerNode({
   id,
+  data,
   selected,
-}: NodeProps<SchedulerTriggerData>) {
-  const { getEdges } = useReactFlow()
-
-  const edges = getEdges()
-  console.log(edges)
-  console.log(
-    edges[0]?.source === id &&
-      edges[0]?.sourceHandle === 'manual-trigger-handle-1'
-  )
-
-  console.log(
-    edges[0]?.source === id &&
-      edges[0]?.sourceHandle === 'manual-trigger-handle-2'
-  )
-
-  const isHandleConnected = (handleId: string) =>
-    edges.some(edge => edge.source === id && edge.sourceHandle === handleId)
+}: NodeProps<SchedulerTriggerNodeType>) {
   return (
-    <div
-      key={id}
-      className={`
-        relative w-12 h-10 rounded-l-xl rounded-r-xs border-[3px] bg-surface-elevated  border-border   text-text-primary  transition-colors  ${selected ? 'border-border-strong' : 'border-border-default'} `}
-    >
-      <div className="w-full h-full flex justify-center items-center">
-        <Timer className="text-text-secondary size-5" />
-      </div>
-      <div className="flex flex-col h-10 gap-2">
-        <CustomHandle
-          position={Position.Right}
-          type="source"
-          showPlus={!isHandleConnected('manual-trigger-handle-1')}
-          handleId="manual-trigger-handle-1"
-        />
+    <div className="group flex gap-2 h-10 justify-between items-center ">
+      <Button
+        allowCorners={true}
+        cornerSize="xs"
+        className="opacity-0 group-hover:opacity-100 h-8"
+      >
+        Execute step
+      </Button>
+      <div className="relative">
+        <NodeStatusIndicator
+          status="loading" // success, initial, error
+          variant="border"
+          className="rounded-r-[3px] rounded-l-[11px] w-full"
+        >
+          <BaseNode
+            className={`w-12 rounded-r-xs h-10 ${selected ? "border-border-strong hover:ring-border-default" : ""}`}
+          >
+            <div className="w-full h-full flex justify-center items-center">
+              <TimerIcon className="text-text-secondary size-5" />
+            </div>
+
+            <ButtonHandle
+              id="manual-trigger-handle"
+              nodeId={id}
+              position={Position.Right}
+              type="source"
+            >
+              <div>
+                <PlusCircle className="text-border-strong group-hover:text-text-secondary" />
+              </div>
+            </ButtonHandle>
+          </BaseNode>
+        </NodeStatusIndicator>
       </div>
     </div>
-  )
+  );
 }

@@ -1,19 +1,19 @@
-import { cn } from '@/lib/utils'
-import { Handle, Position } from '@xyflow/react'
-import { Plus } from 'lucide-react'
+import { cn } from "@/lib/utils";
+import { Handle, Position } from "@xyflow/react";
+import { Plus } from "lucide-react";
 
 type CustomHandleProps = {
-  position?: Position
-  type?: 'source' | 'target'
-  showPlus?: boolean
-  label?: string
-  className?: string
-  handleId: string
-}
+  position?: Position;
+  type?: "source" | "target";
+  showPlus?: boolean;
+  label?: string;
+  className?: string;
+  handleId: string;
+};
 
 export function CustomHandle({
   position = Position.Right,
-  type = 'source',
+  type = "source",
   showPlus = true,
   className,
   handleId,
@@ -21,7 +21,7 @@ export function CustomHandle({
   return (
     <div
       className={cn(
-        'absolute w-auto  top-1/2  flex items-center pointer-events-none',
+        "absolute w-auto  top-1/2  flex items-center pointer-events-none",
         className
       )}
     >
@@ -41,5 +41,5 @@ export function CustomHandle({
         )}
       </Handle>
     </div>
-  )
+  );
 }

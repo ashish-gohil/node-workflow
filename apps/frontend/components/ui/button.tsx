@@ -1,76 +1,76 @@
-import * as React from 'react'
-import { Slot } from '@radix-ui/react-slot'
-import { cva, type VariantProps } from 'class-variance-authority'
+import * as React from "react";
+import { Slot } from "@radix-ui/react-slot";
+import { cva, type VariantProps } from "class-variance-authority";
 
-import { cn } from '@/lib/utils'
-import CornerIcons from './corners'
+import { cn } from "@/lib/utils";
+import CornerIcons from "./corners";
 
 const buttonVariants = cva(
   [
-    'relative inline-flex items-center justify-center gap-2 whitespace-nowrap',
-    'rounded-none text-sm font-medium transition-all',
-    'disabled:pointer-events-none disabled:opacity-60',
-    'outline-none focus-visible:ring-[3px] focus-visible:ring-state-focus',
-    '[&_svg]:pointer-events-none [&_svg]:shrink-0 hover:cursor-pointer',
-  ].join(' '),
+    "relative inline-flex items-center justify-center gap-2 whitespace-nowrap",
+    "rounded-none text-sm font-medium transition-all",
+    "disabled:pointer-events-none disabled:opacity-60",
+    "outline-none focus-visible:ring-[3px] focus-visible:ring-state-focus",
+    "[&_svg]:pointer-events-none [&_svg]:shrink-0 hover:cursor-pointer",
+  ].join(" "),
   {
     variants: {
       variant: {
         primary: [
-          'bg-btn-primary-bg',
-          'text-btn-primary-text',
-          'hover:bg-btn-primary-hover',
-        ].join(' '),
+          "bg-btn-primary-bg",
+          "text-btn-primary-text",
+          "hover:bg-btn-primary-hover",
+        ].join(" "),
 
         secondary: [
-          'bg-btn-secondary-bg',
-          'text-btn-secondary-text',
-          'hover:bg-btn-secondary-hover',
-        ].join(' '),
+          "bg-btn-secondary-bg",
+          "text-btn-secondary-text",
+          "hover:bg-btn-secondary-hover",
+        ].join(" "),
 
         outline: [
-          'border border-border-default',
-          'bg-transparent',
-          'text-text-primary',
-          'hover:bg-state-hover',
-        ].join(' '),
+          "border border-border-default",
+          "bg-transparent",
+          "text-text-primary",
+          "hover:bg-state-hover",
+        ].join(" "),
 
         ghost: [
-          'bg-transparent',
-          'text-text-primary',
-          'hover:bg-btn-ghost-hover',
-        ].join(' '),
+          "bg-transparent",
+          "text-text-primary",
+          "hover:bg-btn-ghost-hover",
+        ].join(" "),
 
         link: [
-          'bg-transparent',
-          'text-accent-primary',
-          'underline underline-offset-4',
-          'hover:text-accent-secondary',
-        ].join(' '),
+          "bg-transparent",
+          "text-accent-primary",
+          "underline underline-offset-4",
+          "hover:text-accent-secondary",
+        ].join(" "),
       },
 
       size: {
-        default: 'h-9 px-4 py-2',
-        sm: 'h-8 px-3 text-xs',
-        lg: 'h-10 px-6',
-        icon: 'size-9',
+        default: "h-9 px-4 py-2",
+        sm: "h-8 px-3 text-xs",
+        lg: "h-10 px-6",
+        icon: "size-9",
       },
     },
 
     defaultVariants: {
-      variant: 'primary',
-      size: 'default',
+      variant: "primary",
+      size: "default",
     },
   }
-)
+);
 
 export interface ButtonProps
   extends
     React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
-  asChild?: boolean
-  allowCorners?: boolean
-  cornerSize?: 'xs' | 'sm' | 'md' | 'lg'
+  asChild?: boolean;
+  allowCorners?: boolean;
+  cornerSize?: "xs" | "sm" | "md" | "lg";
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
@@ -81,20 +81,20 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       size,
       asChild = false,
       allowCorners = false,
-      cornerSize = 'md',
+      cornerSize = "md",
       children,
       ...props
     },
     ref
   ) => {
-    const Comp = asChild ? Slot : 'button'
+    const Comp = asChild ? Slot : "button";
 
     return (
       <Comp
         ref={ref}
         className={cn(
           buttonVariants({ variant, size }),
-          'relative', // required for corners
+          "relative", // required for corners
           className
         )}
         {...props}
@@ -103,10 +103,10 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 
         {allowCorners && <CornerIcons size={cornerSize} />}
       </Comp>
-    )
+    );
   }
-)
+);
 
-Button.displayName = 'Button'
+Button.displayName = "Button";
 
-export { Button, buttonVariants }
+export { Button, buttonVariants };

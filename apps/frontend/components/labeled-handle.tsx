@@ -32,7 +32,7 @@ export function LabeledHandle({
       className={cn(
         "relative flex items-center",
         flexDirections[position],
-        className,
+        className
       )}
       ref={ref}
     >

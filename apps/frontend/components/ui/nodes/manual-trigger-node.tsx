@@ -1,64 +1,54 @@
-import { Position, NodeProps, Node, useReactFlow } from '@xyflow/react'
-import { MousePointerClick, PlusCircle } from 'lucide-react'
+"use client";
+import { Position, NodeProps, useReactFlow } from "@xyflow/react";
+import { MousePointerClick, PlusCircle } from "lucide-react";
 
-import { ButtonHandle } from '@/components/button-handle'
-import { Button } from '../button'
-import { BaseNode } from '@/components/base-node'
-
-export type ManualTriggerData = Node<{
-  label: string
-  description?: string
-}>
+import { ButtonHandle } from "@/components/button-handle";
+import { Button } from "../button";
+import { BaseNode } from "@/components/base-node";
+import { NodeStatusIndicator } from "@/components/node-status-indicator";
+import { type ManualTriggerNodeType } from "@/app/types/tirggers";
 
 export function ManualTriggerNode({
   id,
+  data,
   selected,
-}: NodeProps<ManualTriggerData>) {
-  const { getEdges, getNodes } = useReactFlow()
-
-  const edges = getEdges()
-  const nodes = getNodes()
-
-  console.log(edges)
-  console.log(nodes)
-  console.log(
-    edges[0]?.source === id &&
-      edges[0]?.sourceHandle === 'manual-trigger-handle-1'
-  )
-
-  console.log(
-    edges[0]?.source === id &&
-      edges[0]?.sourceHandle === 'manual-trigger-handle-2'
-  )
-
-  const isHandleConnected = (handleId: string) =>
-    edges.some(edge => edge.source === id && edge.sourceHandle === handleId)
+}: NodeProps<ManualTriggerNodeType>) {
   return (
     <div className="group flex gap-2 h-10 justify-between items-center ">
       <Button
         allowCorners={true}
         cornerSize="xs"
         className="opacity-0 group-hover:opacity-100 h-8"
-        // className="relative rounded-none"
       >
         Execute step
       </Button>
-      <BaseNode className="w-12 rounded-r-xs h-10">
-        <div className="w-full h-full flex justify-center items-center">
-          <MousePointerClick className="text-text-secondary size-5" />
-        </div>
 
-        <ButtonHandle
-          id="manual-trigger-handle"
-          showButton={!isHandleConnected('manual-trigger-handle')}
-          position={Position.Right}
-          type="source"
+      <div className="relative">
+        <NodeStatusIndicator
+          status={data.execution} // success, initial, error
+          variant="border"
+          className="rounded-r-[3px] rounded-l-[11px] w-full"
         >
-          <div>
-            <PlusCircle className="text-border-strong hover:text-text-secondary" />
-          </div>
-        </ButtonHandle>
-      </BaseNode>
+          <BaseNode
+            className={`w-12 rounded-r-xs h-10 ${selected ? "border-border-strong hover:ring-border-default" : ""}`}
+          >
+            <div className="w-full h-full flex justify-center items-center">
+              <MousePointerClick className="text-text-secondary size-5" />
+            </div>
+
+            <ButtonHandle
+              id="manual-trigger-handle"
+              nodeId={id}
+              position={Position.Right}
+              type="source"
+            >
+              <div>
+                <PlusCircle className="text-border-strong group-hover:text-text-secondary" />
+              </div>
+            </ButtonHandle>
+          </BaseNode>
+        </NodeStatusIndicator>
+      </div>
     </div>
-  )
+  );
 }

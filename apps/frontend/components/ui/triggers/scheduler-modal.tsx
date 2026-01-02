@@ -1,4 +1,4 @@
-import React from 'react'
+import React from "react";
 import {
   Dialog,
   DialogContent,
@@ -6,7 +6,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '../dialog'
+} from "../dialog";
 
 export default function SchedulerModal() {
   return (
@@ -25,5 +25,5 @@ export default function SchedulerModal() {
         </DialogContent>
       </Dialog>
     </div>
-  )
+  );
 }

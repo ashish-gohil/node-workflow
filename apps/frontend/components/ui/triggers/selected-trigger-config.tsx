@@ -1,21 +1,21 @@
-'use clent'
-import { Trigger, TriggerNodeTypes } from '@/app/types/tirggers'
-import SchedulerModal from './scheduler-modal'
-import WebhookModal from './webhook-modal'
+"use clent";
+import { Trigger, TriggerNodeTypes } from "@/app/types/tirggers";
+import SchedulerModal from "./scheduler-modal";
+import WebhookModal from "./webhook-modal";
 
 export default function SelectedTriggerConfig({
   selectedNode,
 }: {
-  selectedNode: Trigger
+  selectedNode: Trigger;
 }) {
   switch (selectedNode.type) {
     case TriggerNodeTypes.ManualTrigger: // no config needed
-      return
+      return;
     case TriggerNodeTypes.SchedulerTrigger:
-      return SchedulerModal()
+      return SchedulerModal();
     case TriggerNodeTypes.Webhook:
-      return WebhookModal()
+      return WebhookModal();
     default:
-      return
+      return;
   }
 }

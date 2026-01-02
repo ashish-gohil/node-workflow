@@ -5,3 +5,9 @@ build
 out
 coverage
 .turbo
+.gitignore
+.npmrc
+.prettierignore
+bun.lock
+eslint-config.mjs
+package.json

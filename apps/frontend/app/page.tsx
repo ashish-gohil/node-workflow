@@ -1,4 +1,4 @@
-import React from 'react'
+import React from "react";
 
 export default function Home() {
   return (
@@ -6,5 +6,5 @@ export default function Home() {
       <div>Home</div>
       <div>Create home page like react-flow home page.</div>
     </>
-  )
+  );
 }

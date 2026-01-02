@@ -1,5 +1,5 @@
-'use client'
-import React, { useState } from 'react'
+"use client";
+import React, { useState } from "react";
 import {
   Sheet,
   SheetContent,
@@ -7,24 +7,24 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from '../sheet'
-import { Button } from '../button'
+} from "../sheet";
+import { Button } from "../button";
 
-import { Trigger, TriggerNodeTypes } from '@/app/types/tirggers'
-import SelectedTriggerConfig from './selected-trigger-config'
-import { TriggerNode } from '../nodes/trigger-node'
-import { ActionNode } from '../nodes/action-node'
-import { ManualTriggerNode } from '../nodes/manual-trigger-node'
+import { Trigger, TriggerNodeTypes } from "@/app/types/tirggers";
+import SelectedTriggerConfig from "./selected-trigger-config";
+import { TriggerNode } from "../nodes/trigger-node";
+import { ActionNode } from "../nodes/action-node";
+import { ManualTriggerNode } from "../nodes/manual-trigger-node";
 
-import { Node, useReactFlow } from '@xyflow/react'
-import { SchedulerTriggerNode } from '../nodes/schedule-trigger-node'
+import { Node, useReactFlow } from "@xyflow/react";
+import { SchedulerTriggerNode } from "../nodes/schedule-trigger-node";
 
 const triggerNodes: Trigger[] = [
   {
     type: TriggerNodeTypes.ManualTrigger,
-    title: 'Manual trigger',
-    label: 'Trigger manually',
-    description: 'Runs a workflow when execute button is cliecked.',
+    title: "Manual trigger",
+    label: "Trigger manually",
+    description: "Runs a workflow when execute button is cliecked.",
     requireDataFields: false,
     icon: (
       <svg
@@ -45,9 +45,9 @@ const triggerNodes: Trigger[] = [
   },
   {
     type: TriggerNodeTypes.SchedulerTrigger,
-    title: 'Schedule trigger',
-    label: 'On a schedule',
-    description: 'Runs a workflow every sec, min, hour or day as specified.',
+    title: "Schedule trigger",
+    label: "On a schedule",
+    description: "Runs a workflow every sec, min, hour or day as specified.",
     requireDataFields: true,
     icon: (
       <svg
@@ -68,9 +68,9 @@ const triggerNodes: Trigger[] = [
   },
   {
     type: TriggerNodeTypes.Webhook,
-    title: 'Webhook',
-    label: 'On a webhook calls',
-    description: 'Runs a workflow when receiving HTTP response.',
+    title: "Webhook",
+    label: "On a webhook calls",
+    description: "Runs a workflow when receiving HTTP response.",
     requireDataFields: true,
     icon: (
       <svg
@@ -89,18 +89,18 @@ const triggerNodes: Trigger[] = [
       </svg>
     ),
   },
-]
+];
 
 export const nodeTypes = {
   [TriggerNodeTypes.ManualTrigger]: ManualTriggerNode,
   [TriggerNodeTypes.SchedulerTrigger]: SchedulerTriggerNode,
   [TriggerNodeTypes.Webhook]: ActionNode,
-}
+};
 
 export default function FirstTriggerSheet() {
-  const { setNodes } = useReactFlow()
+  const { setNodes } = useReactFlow();
 
-  const [triggerSheetOpen, setTriggerSheetOpen] = useState<boolean>(false)
+  const [triggerSheetOpen, setTriggerSheetOpen] = useState<boolean>(false);
 
   return (
     <Sheet open={triggerSheetOpen} onOpenChange={setTriggerSheetOpen}>
@@ -133,27 +133,27 @@ export default function FirstTriggerSheet() {
             Trigger is a step that starts your workflow
           </SheetDescription>
           <div className="flex flex-col gap-4 cursor-pointer pt-6 ">
-            {triggerNodes.map(node => (
+            {triggerNodes.map((node) => (
               <div
                 onClick={() => {
-                  setTriggerSheetOpen(false)
+                  setTriggerSheetOpen(false);
                   // check if requiredFields are false then set node in canvas
-                  // alwase set node in canvas and see if requiredfields is et to true then open modal
+                  // alwase set node in canvas and see if requiredfields is set to true then open modal
                   const newNode: Node = {
                     data: {
-                      label: 'new node',
-                      description: 'this is description',
+                      label: "new node",
+                      description: "this is description",
                     },
                     position: { x: 150, y: 150 },
                     id: Math.random().toString(),
                     type: node.type,
-                  }
+                  };
                   // console.log('new node')
                   // console.log([...nodes, newNode])
-                  setNodes(nds => [...nds, newNode])
-                  console.log('nodes')
+                  setNodes((nds) => [...nds, newNode]);
+                  console.log("nodes");
                   if (node.requireDataFields) {
-                    SelectedTriggerConfig({ selectedNode: node })
+                    SelectedTriggerConfig({ selectedNode: node });
                   }
                 }}
                 key={node.type}
@@ -172,5 +172,5 @@ export default function FirstTriggerSheet() {
         </SheetHeader>
       </SheetContent>
     </Sheet>
-  )
+  );
 }

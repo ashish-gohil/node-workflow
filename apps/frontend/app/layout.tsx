@@ -1,28 +1,28 @@
-import type { Metadata } from 'next'
-import localFont from 'next/font/local'
-import './globals.css'
-import { ThemeProvider } from 'next-themes'
-import Header from '../components/ui/header'
-import { ReactFlowProvider } from '@xyflow/react'
+import type { Metadata } from "next";
+import localFont from "next/font/local";
+import "./globals.css";
+import { ThemeProvider } from "next-themes";
+import Header from "../components/ui/header";
+import { ReactFlowProvider } from "@xyflow/react";
 
 const geistSans = localFont({
-  src: './fonts/GeistVF.woff',
-  variable: '--font-geist-sans',
-})
+  src: "./fonts/GeistVF.woff",
+  variable: "--font-geist-sans",
+});
 const geistMono = localFont({
-  src: './fonts/GeistMonoVF.woff',
-  variable: '--font-geist-mono',
-})
+  src: "./fonts/GeistMonoVF.woff",
+  variable: "--font-geist-mono",
+});
 
 export const metadata: Metadata = {
-  title: 'N8N',
-  description: 'Automated workflow app',
-}
+  title: "N8N",
+  description: "Automated workflow app",
+};
 
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode
+  children: React.ReactNode;
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
@@ -41,5 +41,5 @@ export default function RootLayout({
         </ThemeProvider>
       </body>
     </html>
-  )
+  );
 }

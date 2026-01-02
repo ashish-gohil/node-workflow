@@ -26,7 +26,7 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 export const ViewportLogger = () => {
   const viewport = useStore(
     (s) =>
-      `x: ${s.transform[0].toFixed(2)}, y: ${s.transform[1].toFixed(2)}, zoom: ${s.transform[2].toFixed(2)}`,
+      `x: ${s.transform[0].toFixed(2)}, y: ${s.transform[1].toFixed(2)}, zoom: ${s.transform[2].toFixed(2)}`
   );
 
   return <div>{viewport}</div>;
@@ -71,10 +71,10 @@ export const ChangeLogger = ({ limit = 20 }: ChangeLoggerProps) => {
   const handleNodeChanges: OnNodesChange = useCallback(
     (newChanges: NodeChange[]) => {
       setChanges((prevChanges) =>
-        [...newChanges, ...prevChanges].slice(0, limit),
+        [...newChanges, ...prevChanges].slice(0, limit)
       );
     },
-    [limit],
+    [limit]
   );
 
   useEffect(() => {
