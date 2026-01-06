@@ -5,8 +5,8 @@ import {
   BaseNodeHeader,
   BaseNodeHeaderTitle,
   BaseNodeContent,
-} from "@/components/base-node";
-import { BaseHandle } from "@/components/base-handle";
+} from "@/components/nodes/base-node";
+import { BaseHandle } from "@/components/handles/base-handle";
 import { NodeStatusIndicator } from "@/components/node-status-indicator";
 
 export type ActionNodeData = Node<{

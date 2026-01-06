@@ -39,7 +39,7 @@ function DialogOverlay({
       className={cn(
         `
         fixed inset-0 z-50
-        bg-[color-mix(in_oklab,var(--color-inverse)_10%,transparent)]
+       bg-bg/50
         data-[state=open]:fade-in-0
         data-[state=closed]:fade-out-0
         `,

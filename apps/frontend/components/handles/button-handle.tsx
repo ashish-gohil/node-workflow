@@ -1,6 +1,6 @@
 "use client";
 import { Position, useReactFlow, type HandleProps } from "@xyflow/react";
-import { BaseHandle } from "@/components/base-handle";
+import { BaseHandle } from "@/components/handles/base-handle";
 
 const wrapperClassNames: Record<Position, string> = {
   [Position.Top]:
@@ -35,7 +35,7 @@ export function ButtonHandle({
           className={`group absolute flex items-center ${wrapperClassName} pointer-events-none`}
         >
           <div
-            className={`bg-border-strong group-hover:bg-text-secondary ${vertical ? "h-10 w-px" : "h-px w-10"}`}
+            className={`bg-border-strong group-hover:bg-text-secondary ${vertical ? "h-8 w-px" : "h-px w-10"}`}
           />
           <div className="nodrag nopan pointer-events-auto">{children}</div>
         </div>

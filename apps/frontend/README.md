@@ -1,36 +1,248 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/create-next-app).
+## 🔔 TRIGGERS (Start the workflow)
 
-## Getting Started
+These are the **most important first nodes**.
 
-First, run the development server:
+### 1️⃣ Manual Trigger
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+> “Run workflow manually”
+
+**Why it’s essential**
+
+* Debugging
+* Testing flows
+* Matches n8n’s *Manual Trigger*
+
+**Use cases**
+
+* Click → Run workflow
+* Test downstream nodes
+
+---
+
+### 2️⃣ Schedule Trigger
+
+> “Run on time / interval”
+
+**Modes to support**
+
+* Every X seconds / minutes / hours
+* Daily at time
+* Weekly
+* Custom cron
+
+**Use cases**
+
+* Cron jobs
+* Polling APIs
+* Scheduled reports
+
+---
+
+### 3️⃣ Webhook Trigger ⭐ (Very important)
+
+> “Run when HTTP request is received”
+
+**Config**
+
+* HTTP Method (GET, POST, PUT, DELETE)
+* Path
+* Authentication (none / header token / basic)
+* Response mode (sync / async)
+
+**Use cases**
+
+* GitHub webhooks
+* Stripe events
+* Form submissions
+
+---
+
+### 4️⃣ App Event Trigger (Later)
+
+> “Trigger from internal system events”
+
+**Examples**
+
+* New user created
+* Order completed
+* Payment failed
+
+(You can add this later once you have internal events.)
+
+---
+
+## ⚙️ ACTION NODES (Do work)
+
+These nodes **process data** or **talk to systems**.
+
+---
+
+### 1️⃣ HTTP Request Node ⭐
+
+> “Call any API”
+
+**Must-have features**
+
+* Method (GET, POST, PUT, DELETE)
+* Headers
+* Query params
+* Body (JSON / form)
+* Auth (API key, Bearer token)
+
+**Why critical**
+
+* Replaces dozens of integrations
+* Core n8n node
+
+---
+
+### 2️⃣ Set / Transform Node ⭐
+
+> “Modify data”
+
+**Capabilities**
+
+* Add fields
+* Remove fields
+* Rename keys
+* Set static values
+
+**Example**
+
+```json
+{
+  "email": "{{$json.user.email}}",
+  "status": "active"
+}
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 3️⃣ IF / Condition Node ⭐
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load Inter, a custom Google Font.
+> “Branch workflow”
 
-## Learn More
+**Conditions**
 
-To learn more about Next.js, take a look at the following resources:
+* Equals
+* Not equals
+* Greater / less
+* Exists
+* Contains
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+**Outputs**
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+* True → path A
+* False → path B
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### 4️⃣ Code Node (JS)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+> “Run JavaScript”
+
+**Why important**
+
+* Escape hatch for advanced users
+* Power users love this
+
+**Example**
+
+```js
+return {
+  fullName: `${input.firstName} ${input.lastName}`
+}
+```
+
+---
+
+### 5️⃣ Delay / Wait Node
+
+> “Pause execution”
+
+**Modes**
+
+* Wait X seconds
+* Wait until timestamp
+
+**Use cases**
+
+* Rate limiting
+* Follow-up emails
+* Retry logic
+
+---
+
+### 6️⃣ Merge Node
+
+> “Combine multiple branches”
+
+**Modes**
+
+* Merge by index
+* Merge by key
+* Append
+
+---
+
+### 7️⃣ Logger / Debug Node
+
+> “Inspect data”
+
+**Features**
+
+* Log input
+* Show output in UI
+* Helpful for debugging
+
+---
+
+## 🌐 INTEGRATION NODES (Phase 2)
+
+Once core is stable, add these:
+
+### Common ones
+
+* Email (SMTP / SendGrid)
+* Slack
+* Discord
+* Notion
+* Google Sheets
+* Webhook Response node
+
+---
+
+## 🧠 Minimal MVP Node Set (Recommended)
+
+If you want **small but powerful**:
+
+### Triggers
+
+* Manual Trigger
+* Schedule Trigger
+* Webhook Trigger
+
+### Actions
+
+* HTTP Request
+* Set
+* IF
+* Code
+* Delay
+
+That alone can already build **real automations**.
+
+---
+
+## 🧩 Node Categories (for UI)
+
+Use this grouping early — very n8n-like:
+
+* **Triggers**
+* **Flow**
+* **Data**
+* **Code**
+* **Network**
+* **Utilities**
+
+

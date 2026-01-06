@@ -11,3 +11,4 @@ coverage
 bun.lock
 eslint-config.mjs
 package.json
+README.md

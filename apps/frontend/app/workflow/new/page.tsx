@@ -1,38 +1,39 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import { useCallback } from "react";
 import {
   ReactFlow,
   addEdge,
-  applyNodeChanges,
-  applyEdgeChanges,
   type FitViewOptions,
   type OnConnect,
-  type OnNodesChange,
-  type OnEdgesChange,
   type OnNodeDrag,
   type DefaultEdgeOptions,
-  Connection,
   OnConnectEnd,
-  ReactFlowProvider,
   Node,
   useReactFlow,
   Background,
   BackgroundVariant,
   useNodesState,
   useEdgesState,
+  Edge,
 } from "@xyflow/react";
 // import { useTheme } from 'next-themes'
 import { ThemeHydrated } from "@/components/ui/theme-wraper";
 import "@xyflow/react/dist/style.css";
 
-import DottedBackground from "@/components/ui/dotted-background";
+import { TriggerNode, TriggerNodeTypes } from "@/app/types/tirggers";
+import { ManualTriggerNode } from "@/components/nodes/manual-trigger-node";
+import { SchedulerTriggerNode } from "@/components/nodes/schedule-trigger-node";
+import { ActionNode } from "@/components/nodes/action-node";
+import TriggerSheet from "@/app/workflow/new/trigger-sheet";
+import WorkflowCanvas from "./workflow-canvas";
+import TriggerConfigDialog from "./trigger-config/trigger-config-dialog";
 
-import FirstTriggerSheet, {
-  nodeTypes,
-} from "@/components/ui/triggers/trigger-sheet";
-import { TriggerNodeTypes } from "@/app/types/tirggers";
-
+export const nodeTypes = {
+  [TriggerNodeTypes.ManualTrigger]: ManualTriggerNode,
+  [TriggerNodeTypes.SchedulerTrigger]: SchedulerTriggerNode,
+  [TriggerNodeTypes.Webhook]: ActionNode,
+};
 const fitViewOptions: FitViewOptions = {
   padding: 0.2,
 };
@@ -41,20 +42,17 @@ const defaultEdgeOptions: DefaultEdgeOptions = {
   animated: true,
 };
 
-const onNodeDrag: OnNodeDrag = (_, node) => {
-  console.log("drag event", node.data);
-};
-
 export default function NewWorkflow() {
   const { screenToFlowPosition } = useReactFlow();
-  const [nodes, setNodes, onNodesChange] = useNodesState([]);
-  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+  const [nodes, setNodes, onNodesChange] = useNodesState<TriggerNode>([]); //  evantually it will also have action nodes as well.
+  const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
+  const [configNodeId, setConfigNodeId] = useState<string | null>(null);
 
   const onConnect: OnConnect = useCallback(
     (connection) => setEdges((eds) => addEdge(connection, eds)),
     [setEdges]
   );
-  console.log("nodes added");
+
   // When drag stops (create create action node if its valid position...)
   const onConnectEnd: OnConnectEnd = useCallback(
     (event, connectionState) => {
@@ -68,37 +66,45 @@ export default function NewWorkflow() {
             : (event as { clientX: number; clientY: number });
         const nodeId = Math.random().toString();
 
-        // open sheet of posible triggers and handle below logic there
+        // open sheet of posible actions and handle below logic there
 
-        const newNode: Node = {
-          id: nodeId,
-          position: screenToFlowPosition({
-            x: clientX,
-            y: clientY,
-          }),
-          data: { label: `Node ${nodeId}` },
-          origin: [0.5, 0.0],
-          type: TriggerNodeTypes.Webhook,
-        };
+        // const newNode: Node = {
+        //   id: nodeId,
+        //   position: screenToFlowPosition({
+        //     x: clientX,
+        //     y: clientY,
+        //   }),
+        //   data: { label: `Node ${nodeId}` },
+        //   origin: [0.5, 0.0],
+        //   type: TriggerNodeTypes.Webhook,
+        // };
 
-        setNodes((nds) => [...nds, newNode]);
-        setEdges((eds) =>
-          eds.concat({
-            id: nodeId,
-            source: connectionState.fromNode!.id,
-            target: nodeId,
-            sourceHandle: connectionState.fromHandle?.id,
-          })
-        );
+        // setNodes((nds) => [...nds, newNode]);
+        // setEdges((eds) =>
+        //   eds.concat({
+        //     id: nodeId,
+        //     source: connectionState.fromNode!.id,
+        //     target: nodeId,
+        //     sourceHandle: connectionState.fromHandle?.id,
+        //   })
+        // );
       }
     },
     [screenToFlowPosition]
   );
 
+  const updateNodeData = (configNodeId: string, data: any) => {
+    const selectedNode = nodes.find((node) => node.id === configNodeId)!;
+    selectedNode.data = data;
+    setNodes((nds) => [
+      ...nds.filter((node) => node.id === configNodeId),
+      selectedNode,
+    ]);
+  };
+
   return (
     <div className="z-20 bg-transparent w-screen h-[calc(100vh-80px)]">
       <div className="w-full h-full">
-        {/* <DottedBackground className="w-full h-full"> */}
         <ThemeHydrated>
           <ReactFlow
             className="w-full h-full bg-red-200"
@@ -107,7 +113,7 @@ export default function NewWorkflow() {
             onNodesChange={onNodesChange}
             onEdgesChange={onEdgesChange}
             onConnect={onConnect}
-            onNodeDrag={onNodeDrag}
+            // onNodeDrag={onNodeDrag}
             fitView
             fitViewOptions={fitViewOptions}
             defaultEdgeOptions={defaultEdgeOptions}
@@ -120,16 +126,26 @@ export default function NewWorkflow() {
               color="var(--color-bg-muted)"
               variant={BackgroundVariant.Dots}
             />
-
             {nodes.length === 0 && (
-              <div className="flex justify-center items-center h-full w-full">
-                <FirstTriggerSheet />
+              <div className="flex justify-center flex-col gap-2 items-center h-full w-full">
+                <TriggerSheet
+                  setNodes={setNodes}
+                  setConfigNodeId={setConfigNodeId}
+                />
+                <div className="text-text-muted text-2xl">Add trigger</div>
               </div>
             )}
           </ReactFlow>
         </ThemeHydrated>
-        {/* </DottedBackground> */}
       </div>
+
+      {configNodeId && (
+        <TriggerConfigDialog
+          node={nodes.find((node) => node.id === configNodeId)!}
+          onSave={(data) => updateNodeData(configNodeId, data)}
+          onClose={() => setConfigNodeId(null)}
+        />
+      )}
     </div>
   );
 }

@@ -9,7 +9,7 @@ export function BaseNode({ className, ...props }: ComponentProps<"div">) {
         "bg-surface-elevated text-text-primary",
         "border-[3px] border-border",
         "transition-colors",
-        "hover:ring-1 hover:ring-border-strong group-hover:ring-1 group-hover:ring-border-strong",
+        "hover:ring-1 hover:ring-border-strong group-hover:ring-1 group-hover:ring-border-strong hover:cursor-pointer",
         className
       )}
       tabIndex={0}

@@ -1,15 +1,6 @@
 import { Node } from "@xyflow/react";
 import { ReactNode } from "react";
 
-export interface Trigger {
-  type: TriggerNodeTypes;
-  title?: string;
-  label: string;
-  description: string;
-  icon?: ReactNode;
-  requireDataFields: boolean;
-}
-
 /* ------------------------------------------------------------------ */
 /*  Trigger Types                                                      */
 /* ------------------------------------------------------------------ */
@@ -27,11 +18,26 @@ export enum TriggerNodeTypes {
 export type ExecutionStatus = "loading" | "success" | "error" | "initial";
 
 /* ------------------------------------------------------------------ */
+/*  Trigger Sheet Element Object                                                    */
+/* ------------------------------------------------------------------ */
+
+export interface TriggerSheetElement {
+  type: TriggerNodeTypes;
+  title?: string;
+  label: string;
+  description: string;
+  icon?: ReactNode;
+  requireDataFields: boolean;
+}
+
+/* ------------------------------------------------------------------ */
 /*  Manual Trigger                                                     */
 /* ------------------------------------------------------------------ */
 
 export type ManualTriggerDataTypes = {
   execution?: ExecutionStatus;
+  onEdit?: (id: string) => void;
+  label: string;
 };
 
 /* ------------------------------------------------------------------ */
@@ -61,7 +67,7 @@ export type IntervalSchedulerConfig = {
 
 export type DailySchedulerConfig = {
   mode: "daily";
-  time: string;
+  time: string; // hour string 00 to 23 at that time it starts job
   startAt?: string;
   endAt?: string;
 };
@@ -93,6 +99,7 @@ export type SchedulerTriggerDataTypes = {
   description?: string;
   enabled?: boolean;
   timezone?: string;
+  onEdit?: (id: string) => void;
 };
 
 /* ------------------------------------------------------------------ */
@@ -138,6 +145,7 @@ export type WebhookTriggerDataTypes = {
   label: string;
   description?: string;
   enabled?: boolean;
+  onEdit?: (id: string) => void;
 };
 
 /* ------------------------------------------------------------------ */
@@ -147,3 +155,13 @@ export type WebhookTriggerDataTypes = {
 export type ManualTriggerNodeType = Node<ManualTriggerDataTypes>;
 export type SchedulerTriggerNodeType = Node<SchedulerTriggerDataTypes>;
 export type WebhookTriggerNodeType = Node<WebhookTriggerDataTypes>;
+
+export type TriggerNodesDataTypes =
+  | ManualTriggerDataTypes
+  | SchedulerTriggerDataTypes
+  | WebhookTriggerDataTypes;
+
+export type TriggerNode =
+  | ManualTriggerNodeType
+  | SchedulerTriggerNodeType
+  | WebhookTriggerNodeType;

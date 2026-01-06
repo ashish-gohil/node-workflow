@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { Dispatch, SetStateAction, useState } from "react";
 import {
   Sheet,
   SheetContent,
@@ -7,19 +7,24 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from "../sheet";
-import { Button } from "../button";
+} from "../../../components/ui/sheet";
+import { Button } from "../../../components/ui/button";
 
-import { Trigger, TriggerNodeTypes } from "@/app/types/tirggers";
-import SelectedTriggerConfig from "./selected-trigger-config";
-import { TriggerNode } from "../nodes/trigger-node";
-import { ActionNode } from "../nodes/action-node";
-import { ManualTriggerNode } from "../nodes/manual-trigger-node";
+import {
+  TriggerNode,
+  TriggerNodeTypes,
+  TriggerSheetElement,
+} from "@/app/types/tirggers";
+import SelectedTriggerConfig from "../../../components/triggers/selected-trigger-config";
 
 import { Node, useReactFlow } from "@xyflow/react";
-import { SchedulerTriggerNode } from "../nodes/schedule-trigger-node";
+import {
+  DEFAULT_MANUAL_TRIGGER_DATA,
+  DEFAULT_SCHEDULER_TRIGGER_DATA,
+  DEFAULT_WEBHOOK_TRIGGER_DATA,
+} from "@/app/default-data/trigger-data";
 
-const triggerNodes: Trigger[] = [
+const triggerNodes: TriggerSheetElement[] = [
   {
     type: TriggerNodeTypes.ManualTrigger,
     title: "Manual trigger",
@@ -91,16 +96,55 @@ const triggerNodes: Trigger[] = [
   },
 ];
 
-export const nodeTypes = {
-  [TriggerNodeTypes.ManualTrigger]: ManualTriggerNode,
-  [TriggerNodeTypes.SchedulerTrigger]: SchedulerTriggerNode,
-  [TriggerNodeTypes.Webhook]: ActionNode,
-};
-
-export default function FirstTriggerSheet() {
-  const { setNodes } = useReactFlow();
-
+export default function TriggerSheet({
+  setConfigNodeId,
+  setNodes,
+}: {
+  setConfigNodeId: (id: string) => void;
+  setNodes: Dispatch<SetStateAction<TriggerNode[]>>;
+}) {
   const [triggerSheetOpen, setTriggerSheetOpen] = useState<boolean>(false);
+  function createTriggerNode(
+    type: TriggerNodeTypes,
+    position = { x: 0, y: 0 }
+  ): TriggerNode {
+    const base = {
+      id: crypto.randomUUID(),
+      position,
+    };
+
+    switch (type) {
+      case TriggerNodeTypes.ManualTrigger:
+        return {
+          ...base,
+          type,
+          data: {
+            ...DEFAULT_MANUAL_TRIGGER_DATA,
+            onEdit: (id: string) => setConfigNodeId(id),
+          },
+        };
+
+      case TriggerNodeTypes.SchedulerTrigger:
+        return {
+          ...base,
+          type,
+          data: {
+            ...DEFAULT_SCHEDULER_TRIGGER_DATA,
+            onEdit: (id: string) => setConfigNodeId(id),
+          },
+        };
+
+      case TriggerNodeTypes.Webhook:
+        return {
+          ...base,
+          type,
+          data: {
+            ...DEFAULT_WEBHOOK_TRIGGER_DATA,
+            onEdit: (id: string) => setConfigNodeId(id),
+          },
+        };
+    }
+  }
 
   return (
     <Sheet open={triggerSheetOpen} onOpenChange={setTriggerSheetOpen}>
@@ -108,7 +152,7 @@ export default function FirstTriggerSheet() {
         <Button
           allowCorners={true}
           cornerSize="md"
-          className="relative hover:cursor-pointer rounded-none  z-30 bg-bg hover:bg-bg p-10  border border-border-strong border-dashed text-text"
+          className="relative hover:cursor-pointer rounded-none  z-30 bg-bg hover:bg-bg p-10  border-2 border-border-strong border-dashed text-text-secondary "
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -137,23 +181,16 @@ export default function FirstTriggerSheet() {
               <div
                 onClick={() => {
                   setTriggerSheetOpen(false);
-                  // check if requiredFields are false then set node in canvas
+
                   // alwase set node in canvas and see if requiredfields is set to true then open modal
-                  const newNode: Node = {
-                    data: {
-                      label: "new node",
-                      description: "this is description",
-                    },
-                    position: { x: 150, y: 150 },
-                    id: Math.random().toString(),
-                    type: node.type,
-                  };
-                  // console.log('new node')
-                  // console.log([...nodes, newNode])
+
+                  const newNode = createTriggerNode(node.type);
+                  console.log(newNode);
                   setNodes((nds) => [...nds, newNode]);
-                  console.log("nodes");
+                  console.log("selected trigger node");
+                  console.log(node);
                   if (node.requireDataFields) {
-                    SelectedTriggerConfig({ selectedNode: node });
+                    setConfigNodeId(newNode.id);
                   }
                 }}
                 key={node.type}
