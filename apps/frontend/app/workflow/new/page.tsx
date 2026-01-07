@@ -33,6 +33,7 @@ import { HttpRequestNode } from "@/components/nodes/actions/http-action-node";
 import { IfNode } from "@/components/nodes/actions/if-condition-action-node";
 import { MergeNode } from "@/components/nodes/actions/merge-action-node";
 import { SetNode } from "@/components/nodes/actions/set-transform-action-node";
+import { DelayNode } from "@/components/nodes/actions/delay-action-node";
 
 export const nodeTypes = {
   [TriggerNodeTypes.ManualTrigger]: ManualTriggerNode,

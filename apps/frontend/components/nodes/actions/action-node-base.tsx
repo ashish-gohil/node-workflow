@@ -5,10 +5,14 @@ import { PlusCircle, CircleDot } from "lucide-react";
 import { BaseNode } from "@/components/nodes/base-node";
 import { NodeStatusIndicator } from "@/components/node-status-indicator";
 import { ButtonHandle } from "@/components/handles/button-handle";
-import { Button } from "@/components/ui/button";
 import { BaseHandle } from "@/components/handles/base-handle";
 
 interface OutputHandle {
+  id: string;
+  label?: string;
+}
+
+interface InputHandle {
   id: string;
   label?: string;
 }
@@ -19,6 +23,7 @@ interface ActionNodeBaseProps {
   icon: React.ReactNode;
   onEdit?: (id: string) => void;
   outputs: OutputHandle[];
+  inputs?: InputHandle[];
 }
 
 export function ActionNodeBase({
@@ -27,28 +32,40 @@ export function ActionNodeBase({
   icon,
   onEdit,
   outputs,
+  inputs,
 }: ActionNodeBaseProps) {
   return (
-    <div className="group flex gap-2 h-10 justify-between items-center">
-      <div className="relative">
+    <div className=" flex gap-2 gap-y-0.5 max-w-[110px]  items-start flex-col">
+      <div className="relative group">
         <NodeStatusIndicator
-          status="initial"
+          status="success"
           variant="border"
-          className="rounded-r-[3px] rounded-l-[11px]"
+          className="rounded-[11px]"
         >
           <BaseNode
             onDoubleClick={() => onEdit?.(id)}
             className={`
-              w-12 h-10 rounded-r-xs
+              w-12 h-10
               ${selected ? "border-border-strong" : ""}
             `}
           >
-            {/* -------- INPUT HANDLE -------- */}
-            <BaseHandle
-              id="input"
-              type="target"
-              position={Position.Left}
-            ></BaseHandle>
+            {/* -------- INPUT HANDLES (LEFT) -------- */}
+            {(inputs || [{ id: 1 }]).map((_, index) => {
+              const top =
+                !inputs || inputs.length === 1
+                  ? "50%"
+                  : `${25 + (index * 50) / (inputs.length - 1)}%`;
+
+              return (
+                <BaseHandle
+                  key={`input-${index}`}
+                  id={`input-${index}`}
+                  type="target"
+                  position={Position.Left}
+                  style={{ top }}
+                />
+              );
+            })}
 
             {/* -------- ICON -------- */}
             <div className="w-full h-full flex items-center justify-center">
@@ -72,6 +89,9 @@ export function ActionNodeBase({
             ))}
           </BaseNode>
         </NodeStatusIndicator>
+      </div>
+      <div className="text-text font-normal leading-4 w-full text-wrap h-auto flex">
+        Hello world
       </div>
     </div>
   );

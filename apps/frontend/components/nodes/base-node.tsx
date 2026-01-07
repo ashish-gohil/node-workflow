@@ -7,9 +7,9 @@ export function BaseNode({ className, ...props }: ComponentProps<"div">) {
       className={cn(
         "relative rounded-lg",
         "bg-surface-elevated text-text-primary",
-        "border-[3px] border-border",
+        "border border-border",
         "transition-colors",
-        "hover:ring-1 hover:ring-border-strong group-hover:ring-1 group-hover:ring-border-strong hover:cursor-pointer",
+        "hover:ring-2 hover:ring-offset-1 hover:ring-offset-muted  hover:ring-border-strong group-hover:ring-2 group-hover:ring-border-strong hover:cursor-pointer",
         className
       )}
       tabIndex={0}

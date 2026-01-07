@@ -1,29 +1,20 @@
 "use client";
 
 import { Position, NodeProps } from "@xyflow/react";
-import { PlusCircle, CircleDot, Layers } from "lucide-react";
+import { PlusCircle, Layers } from "lucide-react";
 
 import { BaseNode } from "@/components/nodes/base-node";
 import { NodeStatusIndicator } from "@/components/node-status-indicator";
 import { ButtonHandle } from "@/components/handles/button-handle";
-import { Button } from "@/components/ui/button";
-import { MergeNodeType } from "@/app/types/actions";
 
+import { MergeNodeType } from "@/app/types/actions";
+import { BaseHandle } from "@/components/handles/base-handle";
 
 export function MergeNode({ id, data, selected }: NodeProps<MergeNodeType>) {
   const inputCount = data.inputs ?? 2;
 
   return (
     <div className="group flex gap-2 h-10 justify-between items-center">
-      {/* Execute button */}
-      <Button
-        allowCorners
-        cornerSize="xs"
-        className="opacity-0 group-hover:opacity-100 h-8 tracking-tight"
-      >
-        Execute step
-      </Button>
-
       <div className="relative">
         <NodeStatusIndicator
           status="initial"
@@ -33,7 +24,7 @@ export function MergeNode({ id, data, selected }: NodeProps<MergeNodeType>) {
           <BaseNode
             onDoubleClick={() => data.onEdit?.(id)}
             className={`
-              w-12 h-10 rounded-r-xs
+              w-12 h-10
               ${selected ? "border-border-strong" : ""}
             `}
           >
@@ -45,16 +36,13 @@ export function MergeNode({ id, data, selected }: NodeProps<MergeNodeType>) {
                   : `${25 + (index * 50) / (inputCount - 1)}%`;
 
               return (
-                <ButtonHandle
+                <BaseHandle
                   key={`input-${index}`}
                   id={`input-${index}`}
-                  nodeId={id}
                   type="target"
                   position={Position.Left}
                   style={{ top }}
-                >
-                  <CircleDot className="size-3 text-border-strong" />
-                </ButtonHandle>
+                />
               );
             })}
 
