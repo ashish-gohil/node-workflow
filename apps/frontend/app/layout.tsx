@@ -4,6 +4,7 @@ import "./globals.css";
 import { ThemeProvider } from "next-themes";
 import Header from "../components/ui/header";
 import { ReactFlowProvider } from "@xyflow/react";
+import { Providers } from "./providers";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -35,8 +36,11 @@ export default function RootLayout({
           <div className={`fixed top-0 left-0 right-0 z-50`}>
             <Header />
           </div>
+
           <ReactFlowProvider>
-            <main className="pt-20 h-full bg-bg">{children}</main>
+            <Providers>
+              <main className="pt-20 h-full bg-bg">{children}</main>
+            </Providers>
           </ReactFlowProvider>
         </ThemeProvider>
       </body>

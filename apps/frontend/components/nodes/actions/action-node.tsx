@@ -1,5 +1,5 @@
 import { Handle, Position, NodeProps, Node, useReactFlow } from "@xyflow/react";
-import { CustomHandle } from "../handles/custom-handle";
+import { CustomHandle } from "../../handles/custom-handle";
 import {
   BaseNode,
   BaseNodeHeader,

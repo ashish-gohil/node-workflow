@@ -15,9 +15,7 @@ import {
   TriggerNodeTypes,
   TriggerSheetElement,
 } from "@/app/types/tirggers";
-import SelectedTriggerConfig from "../../../components/triggers/selected-trigger-config";
 
-import { Node, useReactFlow } from "@xyflow/react";
 import {
   DEFAULT_MANUAL_TRIGGER_DATA,
   DEFAULT_SCHEDULER_TRIGGER_DATA,
@@ -181,8 +179,6 @@ export default function TriggerSheet({
               <div
                 onClick={() => {
                   setTriggerSheetOpen(false);
-
-                  // alwase set node in canvas and see if requiredfields is set to true then open modal
 
                   const newNode = createTriggerNode(node.type);
                   console.log(newNode);

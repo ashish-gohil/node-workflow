@@ -22,20 +22,30 @@ import { ThemeHydrated } from "@/components/ui/theme-wraper";
 import "@xyflow/react/dist/style.css";
 
 import { TriggerNode, TriggerNodeTypes } from "@/app/types/tirggers";
-import { ManualTriggerNode } from "@/components/nodes/manual-trigger-node";
-import { SchedulerTriggerNode } from "@/components/nodes/schedule-trigger-node";
-import { ActionNode } from "@/components/nodes/action-node";
+import { ManualTriggerNode } from "@/components/nodes/triggers/manual-trigger-node";
+import { SchedulerTriggerNode } from "@/components/nodes/triggers/schedule-trigger-node";
+
 import TriggerSheet from "@/app/workflow/new/trigger-sheet";
-import WorkflowCanvas from "./workflow-canvas";
 import TriggerConfigDialog from "./trigger-config/trigger-config-dialog";
+import { WebhookTriggerNode } from "@/components/nodes/triggers/webhook-trigger-node";
+import { ActionNode, ActionNodeTypes } from "@/app/types/actions";
+import { HttpRequestNode } from "@/components/nodes/actions/http-action-node";
+import { IfNode } from "@/components/nodes/actions/if-condition-action-node";
+import { MergeNode } from "@/components/nodes/actions/merge-action-node";
+import { SetNode } from "@/components/nodes/actions/set-transform-action-node";
 
 export const nodeTypes = {
   [TriggerNodeTypes.ManualTrigger]: ManualTriggerNode,
   [TriggerNodeTypes.SchedulerTrigger]: SchedulerTriggerNode,
-  [TriggerNodeTypes.Webhook]: ActionNode,
+  [TriggerNodeTypes.Webhook]: WebhookTriggerNode,
+  [ActionNodeTypes.Delay]: DelayNode,
+  [ActionNodeTypes.HttpRequest]: HttpRequestNode,
+  [ActionNodeTypes.If]: IfNode,
+  [ActionNodeTypes.Merge]: MergeNode,
+  [ActionNodeTypes.Set]: SetNode,
 };
 const fitViewOptions: FitViewOptions = {
-  padding: 0.2,
+  padding: 1,
 };
 
 const defaultEdgeOptions: DefaultEdgeOptions = {
@@ -44,7 +54,9 @@ const defaultEdgeOptions: DefaultEdgeOptions = {
 
 export default function NewWorkflow() {
   const { screenToFlowPosition } = useReactFlow();
-  const [nodes, setNodes, onNodesChange] = useNodesState<TriggerNode>([]); //  evantually it will also have action nodes as well.
+  const [nodes, setNodes, onNodesChange] = useNodesState<
+    TriggerNode | ActionNode
+  >([]); //  evantually it will also have action nodes as well.
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
   const [configNodeId, setConfigNodeId] = useState<string | null>(null);
 
