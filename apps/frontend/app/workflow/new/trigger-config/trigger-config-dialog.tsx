@@ -27,10 +27,11 @@ export interface TriggerConfigProps<T> {
   setConfigData: React.Dispatch<React.SetStateAction<T>>;
 }
 
+//@ts-ignore
 const triggerConfigMap = {
   [TriggerNodeTypes.SchedulerTrigger]: SchedulerTriggerConfig,
   [TriggerNodeTypes.Webhook]: WebhookTriggerConfig,
-  [TriggerNodeTypes.ManualTrigger]: null,
+  // [TriggerNodeTypes.ManualTrigger]: null,
 };
 
 export default function TriggerConfigDialog({
@@ -38,6 +39,7 @@ export default function TriggerConfigDialog({
   onSave,
   onClose,
 }: ITriggerConfigDialog) {
+  //@ts-ignore
   const ConfigComponent = triggerConfigMap[node.type as TriggerNodeTypes];
 
   const [tempConfigData, setTempConfigData] = useState<TriggerNodesDataTypes>(

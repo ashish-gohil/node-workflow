@@ -4,7 +4,6 @@ import "./globals.css";
 import { ThemeProvider } from "next-themes";
 import Header from "../components/ui/header";
 import { ReactFlowProvider } from "@xyflow/react";
-import { Providers } from "./providers";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",

@@ -94,6 +94,7 @@ export const DEFAULT_DELAY_NODE_DATA: DelayNodeData = {
 /* ------------------------------------------------------------------ */
 
 export const DEFAULT_MERGE_NODE_DATA: MergeNodeData = {
+  inputs: 2,
   type: ActionNodeTypes.Merge,
   label: "Merge",
   description: "Merge multiple inputs",

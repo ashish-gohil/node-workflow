@@ -28,7 +28,11 @@ import { useShallow } from "zustand/react/shallow";
 import TriggerSheet from "@/app/workflow/new/trigger-sheet";
 import TriggerConfigDialog from "./trigger-config/trigger-config-dialog";
 import { WebhookTriggerNode } from "@/components/nodes/triggers/webhook-trigger-node";
-import { ActionNode, ActionNodeTypes } from "@/app/types/actions";
+import {
+  ActionNode,
+  ActionNodeTypes,
+  DelayNodeType,
+} from "@/app/types/actions";
 import { HttpRequestNode } from "@/components/nodes/actions/http-action-node";
 import { IfNode } from "@/components/nodes/actions/if-condition-action-node";
 import { MergeNode } from "@/components/nodes/actions/merge-action-node";
@@ -92,13 +96,17 @@ export default function NewWorkflow() {
             ? (event.changedTouches[0] as { clientX: number; clientY: number })
             : (event as { clientX: number; clientY: number });
         const nodeId = crypto.randomUUID();
-        const newNode: FlowNode = {
+        const newNode: DelayNodeType = {
           id: nodeId,
           position: screenToFlowPosition({
             x: clientX,
             y: clientY,
           }),
-          data: { label: `Node ${nodeId}` },
+          data: {
+            type: ActionNodeTypes.Delay,
+            label: "Delay",
+            config: { mode: "seconds", seconds: 20 },
+          },
           origin: [0.5, 0.0],
           type: ActionNodeTypes.Delay,
         };
@@ -169,7 +177,7 @@ export default function NewWorkflow() {
 
       {configNodeId && (
         <TriggerConfigDialog
-          node={nodes.find((node) => node.id === configNodeId)!}
+          node={nodes.find((node) => node.id === configNodeId)! as TriggerNode}
           onSave={(data) => updateNodeData(configNodeId, data)}
           onClose={() => setConfigNodeId(null)}
         />

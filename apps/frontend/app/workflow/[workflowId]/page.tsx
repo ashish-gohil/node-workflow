@@ -1,5 +1,5 @@
 import React from "react";
 
-export const SeeWorkflow = () => {
-  return <div>SeeWorkflow</div>;
-};
+export default function EditFlow() {
+  return <div>EditFlow</div>;
+}

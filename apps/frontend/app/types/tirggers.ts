@@ -38,6 +38,7 @@ export type ManualTriggerDataTypes = {
   execution?: ExecutionStatus;
   onEdit?: (id: string) => void;
   label: string;
+  data: null;
 };
 
 /* ------------------------------------------------------------------ */
