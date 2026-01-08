@@ -38,9 +38,7 @@ export default function RootLayout({
           </div>
 
           <ReactFlowProvider>
-            <Providers>
-              <main className="pt-20 h-full bg-bg">{children}</main>
-            </Providers>
+            <main className="pt-20 h-full bg-bg">{children}</main>
           </ReactFlowProvider>
         </ThemeProvider>
       </body>
