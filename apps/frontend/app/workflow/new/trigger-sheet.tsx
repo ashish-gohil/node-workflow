@@ -1,5 +1,5 @@
 "use client";
-import React, { Dispatch, SetStateAction, useState } from "react";
+import React, { useState } from "react";
 import {
   Sheet,
   SheetContent,
@@ -21,6 +21,8 @@ import {
   DEFAULT_SCHEDULER_TRIGGER_DATA,
   DEFAULT_WEBHOOK_TRIGGER_DATA,
 } from "@/app/default-data/trigger-data";
+import { FlowNode } from "@/app/types/flow";
+import useFlow from "@/app/store/flow-store";
 
 const triggerNodes: TriggerSheetElement[] = [
   {
@@ -96,11 +98,10 @@ const triggerNodes: TriggerSheetElement[] = [
 
 export default function TriggerSheet({
   setConfigNodeId,
-  setNodes,
 }: {
   setConfigNodeId: (id: string) => void;
-  setNodes: Dispatch<SetStateAction<TriggerNode[]>>;
 }) {
+  const { nodes, setNodes } = useFlow();
   const [triggerSheetOpen, setTriggerSheetOpen] = useState<boolean>(false);
   function createTriggerNode(
     type: TriggerNodeTypes,

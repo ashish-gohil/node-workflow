@@ -24,7 +24,7 @@ import "@xyflow/react/dist/style.css";
 import { TriggerNode, TriggerNodeTypes } from "@/app/types/tirggers";
 import { ManualTriggerNode } from "@/components/nodes/triggers/manual-trigger-node";
 import { SchedulerTriggerNode } from "@/components/nodes/triggers/schedule-trigger-node";
-
+import { useShallow } from "zustand/react/shallow";
 import TriggerSheet from "@/app/workflow/new/trigger-sheet";
 import TriggerConfigDialog from "./trigger-config/trigger-config-dialog";
 import { WebhookTriggerNode } from "@/components/nodes/triggers/webhook-trigger-node";
@@ -34,7 +34,19 @@ import { IfNode } from "@/components/nodes/actions/if-condition-action-node";
 import { MergeNode } from "@/components/nodes/actions/merge-action-node";
 import { SetNode } from "@/components/nodes/actions/set-transform-action-node";
 import { DelayNode } from "@/components/nodes/actions/delay-action-node";
+import { FlowEdge, FlowNode } from "@/app/types/flow";
+import { useStore } from "zustand";
+import useFlow, { FlowState } from "@/app/store/flow-store";
 
+const selector = (state: FlowState) => ({
+  nodes: state.nodes,
+  edges: state.edges,
+  onNodesChange: state.onNodesChange,
+  onEdgesChange: state.onEdgesChange,
+  onConnect: state.onConnect,
+  setNodes: state.setNodes,
+  setEdges: state.setEdges,
+});
 export const nodeTypes = {
   [TriggerNodeTypes.ManualTrigger]: ManualTriggerNode,
   [TriggerNodeTypes.SchedulerTrigger]: SchedulerTriggerNode,
@@ -55,16 +67,18 @@ const defaultEdgeOptions: DefaultEdgeOptions = {
 
 export default function NewWorkflow() {
   const { screenToFlowPosition } = useReactFlow();
-  const [nodes, setNodes, onNodesChange] = useNodesState<
-    TriggerNode | ActionNode
-  >([]); //  evantually it will also have action nodes as well.
-  const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
+  const {
+    nodes,
+    edges,
+    onNodesChange,
+    onEdgesChange,
+    onConnect,
+    setNodes,
+    setEdges,
+  } = useFlow(useShallow(selector));
+  // const [nodes, setNodes, onNodesChange] = useNodesState<FlowNode>([]);
+  // const [edges, setEdges, onEdgesChange] = useEdgesState<FlowEdge>([]);
   const [configNodeId, setConfigNodeId] = useState<string | null>(null);
-
-  const onConnect: OnConnect = useCallback(
-    (connection) => setEdges((eds) => addEdge(connection, eds)),
-    [setEdges]
-  );
 
   // When drag stops (create create action node if its valid position...)
   const onConnectEnd: OnConnectEnd = useCallback(
@@ -77,30 +91,29 @@ export default function NewWorkflow() {
           "changedTouches" in event
             ? (event.changedTouches[0] as { clientX: number; clientY: number })
             : (event as { clientX: number; clientY: number });
-        const nodeId = Math.random().toString();
+        const nodeId = crypto.randomUUID();
+        const newNode: FlowNode = {
+          id: nodeId,
+          position: screenToFlowPosition({
+            x: clientX,
+            y: clientY,
+          }),
+          data: { label: `Node ${nodeId}` },
+          origin: [0.5, 0.0],
+          type: ActionNodeTypes.Delay,
+        };
 
-        // open sheet of posible actions and handle below logic there
+        // apply logic to remove custom handle button from previous node.
 
-        // const newNode: Node = {
-        //   id: nodeId,
-        //   position: screenToFlowPosition({
-        //     x: clientX,
-        //     y: clientY,
-        //   }),
-        //   data: { label: `Node ${nodeId}` },
-        //   origin: [0.5, 0.0],
-        //   type: TriggerNodeTypes.Webhook,
-        // };
-
-        // setNodes((nds) => [...nds, newNode]);
-        // setEdges((eds) =>
-        //   eds.concat({
-        //     id: nodeId,
-        //     source: connectionState.fromNode!.id,
-        //     target: nodeId,
-        //     sourceHandle: connectionState.fromHandle?.id,
-        //   })
-        // );
+        setNodes((nds) => [...nds, newNode]);
+        setEdges((eds) =>
+          eds.concat({
+            id: nodeId,
+            source: connectionState.fromNode!.id,
+            target: nodeId,
+            sourceHandle: connectionState.fromHandle?.id,
+          })
+        );
       }
     },
     [screenToFlowPosition]
@@ -114,6 +127,11 @@ export default function NewWorkflow() {
       selectedNode,
     ]);
   };
+
+  console.log("nodes from page.tsx ");
+  console.log(nodes);
+  console.log("edges from page.tsx ");
+  console.log(edges);
 
   return (
     <div className="z-20 bg-transparent w-screen h-[calc(100vh-80px)]">
@@ -141,10 +159,7 @@ export default function NewWorkflow() {
             />
             {nodes.length === 0 && (
               <div className="flex justify-center flex-col gap-2 items-center h-full w-full">
-                <TriggerSheet
-                  setNodes={setNodes}
-                  setConfigNodeId={setConfigNodeId}
-                />
+                <TriggerSheet setConfigNodeId={setConfigNodeId} />
                 <div className="text-text-muted text-2xl">Add trigger</div>
               </div>
             )}
