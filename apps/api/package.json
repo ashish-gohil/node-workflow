@@ -1,0 +1,23 @@
+{
+  "name": "api",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "@repo/auth": "*",
+    "@repo/db": "*",
+    "@types/aws-lambda": "^8.10.159",
+    "@types/express": "^5.0.6",
+    "@types/mongoose": "^5.11.97",
+    "aws-lambda": "^1.0.7",
+    "express": "^5.2.1",
+    "mongoose": "^9.1.2",
+    "serverless-http": "^4.0.0"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "name": "@repo/db",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "bunx tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "mongoose": "^9.1.4",
+    "@types/mongoose": "^5.11.97"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  }
+}
