@@ -1,0 +1,13 @@
+service: trigger-poller
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: ap-south-1
+  timeout: 30
+
+functions:
+  poller:
+    handler: src/handler.handler
+    events:
+      - schedule: rate(1 minute)

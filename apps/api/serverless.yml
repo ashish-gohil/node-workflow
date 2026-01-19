@@ -1,0 +1,34 @@
+service: n8n-api
+
+frameworkVersion: "3"
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: ap-south-1
+  stage: prod
+  memorySize: 512
+  timeout: 15
+  environment:
+    MONGODB_URI: ${ssm:/n8n/prod/mongodb-uri}
+    JWT_SECRET: ${ssm:/n8n/prod/jwt-secret}
+
+plugins:
+  - serverless-esbuild
+
+custom:
+  esbuild:
+    bundle: true
+    minify: true
+    sourcemap: false
+    target: node18
+    platform: node
+    format: esm
+
+functions:
+  api:
+    handler: src/handler.handler
+    events:
+      - httpApi:
+          path: /{proxy+}
+          method: ANY
