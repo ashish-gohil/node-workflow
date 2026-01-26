@@ -267,7 +267,7 @@ cd apps/worker && bun run dev
 
 ## 🧠 Design Principles
 
-* Event-driven, not loop-based
+* Event-driven
 * Serverless-first architecture
 * Strong typing everywhere (TypeScript)
 * Shared logic via packages
@@ -281,15 +281,7 @@ cd apps/worker && bun run dev
 * Visual node execution debugger
 * Retry & DLQ handling
 * Workflow versioning
-* Custom triggers (webhooks, cron, email)
+* Custom triggers (webhooks, cron, email, telegram, gooogle sheet)
 * OAuth providers per workflow
 
 ---
-
-## 🙌 Final Note
-
-This project is designed to scale from **0 to production** with minimal operational overhead, following **real-world backend engineering best practices**.
-
-If you’re building an automation platform, this architecture is **battle-tested, extensible, and cloud-native**.
-
-Happy building 🚀

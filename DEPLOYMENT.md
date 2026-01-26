@@ -274,6 +274,3 @@ You now have:
 * Scheduled trigger polling
 * Zero server maintenance
 
-This setup is **exactly how modern automation platforms are built**.
-
-Happy shipping 🚀
