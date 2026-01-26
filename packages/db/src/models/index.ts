@@ -1,2 +1,2 @@
-export { UserModel, type IUser } from "./User";
-export { WorkflowModel, type IWorkflow } from "./Workflow";
+export * from "./User.js";
+export * from "./Workflow.js";

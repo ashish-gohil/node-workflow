@@ -1,4 +1,4 @@
-import { type APIGatewayProxyHandler } from 'aws-lambda'
-import { server } from './server'
+import type { Handler } from "aws-lambda";
+import { server } from "./server.js";
 
-export const handler: APIGatewayProxyHandler = server
+export const handler: Handler = server;

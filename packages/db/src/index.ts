@@ -1,5 +1,2 @@
-// connect
-export { connectMongo } from "./connect";
-
-// all models
-export * from "./models";
+export { connectMongo } from "./connect.js";
+export * from "./models/index.js";

@@ -1,15 +1,59 @@
-import { Schema, model, Document } from "mongoose";
+import { Schema, model, models, type InferSchemaType, } from "mongoose";
 
-export interface IUser extends Document {
-  email: string;
-  password?: string;
-  name?: string;
-}
+/**
+ * Supported authentication providers
+ */
+export const AuthProviders = ["credentials", "google"] as const;
+export type AuthProvider = (typeof AuthProviders)[number];
 
-const UserSchema = new Schema<IUser>({
-  email: { type: String, required: true, unique: true },
-  password: { type: String },
-  name: { type: String },
-});
+/**
+ * User Schema
+ */
+const UserSchema = new Schema(
+  {
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
+      index: true,
+    },
 
-export const UserModel = model<IUser>("User", UserSchema);
+    passwordHash: {
+      type: String,
+      required: function () {
+        return this.provider === "credentials";
+      },
+    },
+
+    name: {
+      type: String,
+      trim: true,
+    },
+
+    image: {
+      type: String,
+    },
+
+    provider: {
+      type: String,
+      enum: AuthProviders,
+      required: true,
+      default: "credentials"
+    },
+  },
+  {
+    timestamps: true,
+    versionKey: false,
+  }
+);
+
+/**
+ * Strongly typed User document
+ */
+export type IUser = InferSchemaType<typeof UserSchema>;
+
+/**
+ * Safe model export (prevents OverwriteModelError)
+ */
+export const UserModel = models.User ?? model<IUser>("User", UserSchema);

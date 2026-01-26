@@ -10,6 +10,9 @@
     "@repo/auth": "*",
     "@repo/db": "*",
     "@types/aws-lambda": "^8.10.159",
+    "@types/bcryptjs": "^3.0.0",
+    "@types/express": "^5.0.6",
+    "bcryptjs": "^3.0.3",
     "express": "^5.2.1",
     "mongoose": "^9.1.2",
     "serverless-http": "^4.0.0"

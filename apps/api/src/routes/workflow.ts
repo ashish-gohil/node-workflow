@@ -1,8 +1,8 @@
 import { Router } from "express";
 import { connectMongo, WorkflowModel, type IWorkflow } from "@repo/db";
-import { authMiddleware, type AuthenticatedRequest } from "../middlewares/auth";
+import { authMiddleware, type AuthenticatedRequest } from "../middlewares/auth.js";
 
-const router = Router();
+const router: Router = Router();
 
 /**
  * GET all workflows for authenticated user
