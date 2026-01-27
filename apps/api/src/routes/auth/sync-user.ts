@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { connectMongo, UserModel } from "@repo/db";
-import { authMiddleware, type AuthenticatedRequest } from "../../middlewares/auth.js";
+import { authMiddleware, type AuthenticatedRequest } from "../../middlewares/auth";
 
 const router: Router = Router();
 

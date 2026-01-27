@@ -1,17 +1,7 @@
-import express, { type Request, type Response } from 'express'
-import serverless from 'serverless-http'
-import workflowRoutes from './routes/workflow.js'
-import authRoutes from "./routes/auth/index.js";
+import app from './index'
 
-const app = express()
-app.use(express.json())
+const PORT = process.env.PORT || 3000
 
-app.use('/workflows', workflowRoutes)
-app.use("/auth", authRoutes);
-
-app.get("/health", (req: Request, res: Response) => {
-    console.log(req.body);
-    res.status(200).json({ message: "Success" })
+app.listen(PORT, () => {
+    console.log(`Server running on http://localhost:${PORT}`)
 })
-
-export const server = serverless(app)

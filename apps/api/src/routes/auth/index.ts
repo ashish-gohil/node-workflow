@@ -1,8 +1,8 @@
 import { Router } from "express";
-import signup from "./signup.js";
-import credentials from "./credentials.js";
-import oauth from "./oauth.js";
-import syncUser from "./sync-user.js";
+import signup from "./signup";
+import credentials from "./credentials";
+import oauth from "./oauth";
+import syncUser from "./sync-user";
 
 const router: Router = Router();
 

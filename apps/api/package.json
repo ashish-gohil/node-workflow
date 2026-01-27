@@ -1,10 +1,14 @@
 {
   "name": "api",
   "private": true,
-  "type": "module",
   "scripts": {
+    "dev": "bun run src/server.ts",
+    "build": "tsc --noEmit",
     "deploy": "serverless deploy",
-    "remove": "serverless remove"
+    "deploy:prod": "serverless deploy --stage prod",
+    "local": "serverless offline",
+    "remove": "serverless remove",
+    "logs": "serverless logs -f api -t"
   },
   "dependencies": {
     "@repo/auth": "*",
@@ -16,5 +20,9 @@
     "express": "^5.2.1",
     "mongoose": "^9.1.2",
     "serverless-http": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25.0.10",
+    "serverless-offline": "^14.4.0"
   }
 }

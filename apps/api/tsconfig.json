@@ -1,53 +1,9 @@
 {
-  "$schema": "https://json.schemastore.org/tsconfig",
-  "extends": "../../packages/typescript-config/base.json",
+  "extends":  "../../packages/typescript-config/base.json",
   "compilerOptions": {
-    /** -----------------------------
-     * Node ESM & Lambda compatibility
-     * -----------------------------
-     */
-    "module": "NodeNext",                  // Use native ES modules (import/export)
-    "moduleResolution": "NodeNext",        // Node-style resolution for ESM
-    "esModuleInterop": true,               // Allows `import express from "express"` instead of require
-    "allowImportingTsExtensions": true,    // Allow imports like './authMiddleware.ts'
-    "verbatimModuleSyntax": true,          // Preserve import/export as-is
-    "rootDir": "src",                       // Source folder
-    "outDir": "dist",                       // Output JS folder for Lambda
-    "noEmit": false,                        // Emit compiled JS
-    "declaration": true,                    // Generate type definitions for other packages
-    "declarationMap": true,                 // Map types back to TS source
-
-    /** -----------------------------
-     * Turborepo aliases for cross-package imports
-     * -----------------------------
-     */
-    "baseUrl": ".",                        // Base for relative imports
-    "paths": {
-      "@repo/db": ["../../packages/db/src"],
-      "@repo/auth": ["../../packages/auth/src"]
-    },
-
-    /** -----------------------------
-     * Strict type checking for safety
-     * -----------------------------
-     */
-    "strict": true,
-    "noUncheckedIndexedAccess": true,
-    "noImplicitOverride": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "noFallthroughCasesInSwitch": true
+    "rootDir": "./src",
+    "outDir": "./dist"
   },
-
-  /** -----------------------------
-   * Files to include in compilation
-   * -----------------------------
-   */
-  "include": ["src/**/*.ts"],
-
-  /** -----------------------------
-   * Exclude unnecessary folders
-   * -----------------------------
-   */
+  "include": ["src"],
   "exclude": ["node_modules", "dist"]
 }

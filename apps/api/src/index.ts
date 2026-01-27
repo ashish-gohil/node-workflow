@@ -1,4 +1,16 @@
-import type { Handler } from "aws-lambda";
-import { server } from "./server.js";
+import express, { type Request, type Response, type Express } from 'express'
+import workflowRoutes from './routes/workflow'
+import authRoutes from "./routes/auth/index"
 
-export const handler: Handler = server;
+const app: Express = express()
+app.use(express.json())
+
+app.use('/workflows', workflowRoutes)
+app.use("/auth", authRoutes)
+
+app.get("/health", (req: Request, res: Response) => {
+    console.log(req.body)
+    res.status(200).json({ message: "Success" })
+})
+
+export default app
