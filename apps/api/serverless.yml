@@ -4,11 +4,14 @@ provider:
   name: aws
   runtime: nodejs20.x
   stage: ${opt:stage, 'dev'}
-  region: ${opt:region, 'us-east-1'}
+  region: ${opt:region, 'ap-south-1'}
   memorySize: 512
   timeout: 30
   environment:
     NODE_ENV: ${self:provider.stage}
+    JWT_SECRET: ${aws:ssm:n8n/prod/jwt-secret}
+    MONGODB_URI: ${aws:ssm:n8n/prod/mongodb-uri}
+
 
 functions:
   api:
