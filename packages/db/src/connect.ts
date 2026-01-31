@@ -6,17 +6,13 @@ if (!MONGODB_URI) {
   throw new Error('MONGODB_URI is not defined')
 }
 
-/**
- * We store the cached connection on globalThis
- * so it survives hot reloads and lambda re-use
- */
 declare global {
   // eslint-disable-next-line no-var
   var mongooseConn:
     | {
-        conn: Mongoose | null
-        promise: Promise<Mongoose> | null
-      }
+      conn: Mongoose | null
+      promise: Promise<Mongoose> | null
+    }
     | undefined
 }
 
@@ -29,18 +25,18 @@ if (!cached) {
   }
 }
 
-/**
- * Connect to MongoDB using a singleton pattern
- */
 export async function connectMongo(): Promise<Mongoose> {
   if (cached!.conn) {
     return cached!.conn
   }
 
   if (!cached!.promise) {
-    cached!.promise = mongoose.connect(MONGODB_URI, {
-      bufferCommands: false,
-    })
+    cached!.promise = mongoose.connect(
+      MONGODB_URI,
+      {
+        bufferCommands: false,
+      } as mongoose.ConnectOptions
+    )
   }
 
   cached!.conn = await cached!.promise

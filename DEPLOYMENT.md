@@ -1,57 +1,77 @@
-## ☁️ AWS Deployment Guide (Step-by-Step)
+## AWS Deployment Guide (Production Ready)
 
-This section explains **exactly how to deploy the backend services to AWS**, even if you have **never used AWS before**.
-It also covers **best practices for secrets management** and **all required commands**.
+This document describes a **production‑ready deployment strategy** for an n8n‑like backend application on AWS.
 
----
+The guide assumes:
 
-## 🧩 What Gets Deployed to AWS
+* Bun is used for local development and builds
+* AWS Lambda runs on Node.js runtime
+* No Serverless Framework is used
+* Deployment is performed using AWS CLI
 
-| Service        | AWS Service Used                     |
-| -------------- | ------------------------------------ |
-| Main API       | AWS Lambda + API Gateway (HTTP API)  |
-| Trigger Poller | AWS Lambda + EventBridge (Scheduled) |
-| Worker         | AWS Lambda + SQS                     |
-| Secrets        | AWS SSM Parameter Store              |
-| Database       | MongoDB Atlas                        |
+This file is intended to be used directly as `deployment.md`.
 
 ---
 
-## 🔑 STEP 1: Create AWS Account
+## What Gets Deployed to AWS
 
-1. Go to [https://aws.amazon.com](https://aws.amazon.com)
-2. Create an account
-3. Choose **Free Tier**
-4. Add billing details (required, but free-tier usage is enough)
-
----
-
-## 👤 STEP 2: Create IAM User (Best Practice)
-
-Never deploy using the root account.
-
-1. AWS Console → **IAM**
-2. Users → **Create User**
-3. Username: `workflow-deployer`
-4. Enable **Programmatic access**
-5. Attach policy:
-
-   * `AdministratorAccess` (for development)
-6. Save:
-
-   * **Access Key ID**
-   * **Secret Access Key**
+| Service        | AWS Service                               |
+| -------------- | ----------------------------------------- |
+| Main API       | AWS Lambda + API Gateway (HTTP API)       |
+| Trigger Poller | AWS Lambda + EventBridge (Scheduled Rule) |
+| Worker         | AWS Lambda + SQS                          |
+| Secrets        | AWS SSM Parameter Store                   |
+| Database       | MongoDB Atlas                             |
 
 ---
 
-## 💻 STEP 3: Install AWS CLI
+## Key Concept
+
+AWS Lambda **does not support Bun runtime**.
+
+Therefore the following model is used:
+
+* **Bun**: local development, dependency management, TypeScript build
+* **Node.js**: AWS Lambda runtime
+
+All Lambda code is compiled to **plain JavaScript** before deployment.
+
+---
+
+## STEP 1: Create AWS Account
+
+1. Visit [https://aws.amazon.com](https://aws.amazon.com)
+2. Create a new AWS account
+3. Choose the Free Tier plan
+4. Add billing details (required by AWS)
+
+---
+
+## STEP 2: Create IAM User (Required)
+
+Never deploy using the root AWS account.
+
+1. AWS Console → IAM → Users → Create User
+2. Username: `workflow-deployer`
+3. Access type: Programmatic access
+4. Attach policy:
+
+```
+AdministratorAccess
+```
+
+5. Save the generated Access Key ID and Secret Access Key
+
+---
+
+## STEP 3: Install AWS CLI
 
 ### Windows
 
-Download from:
+Download and install AWS CLI v2:
 [https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2-windows.html](https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2-windows.html)
 
-Verify:
+Verify installation:
 
 ```bash
 aws --version
@@ -59,218 +79,275 @@ aws --version
 
 ---
 
-## ⚙️ STEP 4: Configure AWS CLI
+## STEP 4: Configure AWS CLI
 
 ```bash
 aws configure
 ```
 
-Enter:
+Provide the following values:
 
-```text
-AWS Access Key ID:     <your-access-key>
+```
+AWS Access Key ID: <your-access-key>
 AWS Secret Access Key: <your-secret-key>
-Default region:        ap-south-1
+Default region: ap-south-1
 Default output format: json
 ```
 
-✅ AWS CLI is now ready.
-
 ---
 
-## 🔐 STEP 5: Store Secrets Securely (SSM Parameter Store)
+## STEP 5: Store Secrets in SSM Parameter Store
 
-**Never hardcode secrets or commit `.env` files in production.**
+Secrets must never be committed to source control.
 
-### Store MongoDB URI
+### MongoDB URI
 
 ```bash
 aws ssm put-parameter \
-  --name "/workflow/prod/mongodb-uri" \
+  --name "/n8n/prod/mongodb-uri" \
   --value "mongodb+srv://<user>:<password>@cluster.mongodb.net/db" \
   --type SecureString
 ```
 
-### Store JWT Secret
+### JWT Secret
 
 ```bash
 aws ssm put-parameter \
-  --name "/workflow/prod/jwt-secret" \
+  --name "/n8n/prod/jwt-secret" \
   --value "super-secret-jwt-key" \
   --type SecureString
 ```
 
-✅ Secrets are now encrypted and safe.
-
 ---
 
-## 🔌 STEP 6: Use Secrets in Code
+## STEP 6: Access Secrets in Lambda Code
 
-### `serverless.yml`
-
-```yaml
-environment:
-  MONGODB_URI: ${ssm:/workflow/prod/mongodb-uri}
-  JWT_SECRET: ${ssm:/workflow/prod/jwt-secret}
-```
-
-### In TypeScript
+Secrets are injected as environment variables:
 
 ```ts
 process.env.MONGODB_URI
 process.env.JWT_SECRET
 ```
 
-AWS injects these at runtime.
-
 ---
 
-## 🧰 STEP 7: Install Serverless Framework
+## STEP 7: Prepare Lambda Code
 
-From repository root:
+Lambda handlers must be Node‑compatible JavaScript.
 
-```bash
-bun add -d serverless serverless-esbuild
-```
+Example handler:
 
----
-
-## 🚀 STEP 8: Deploy Main API Service
-
-### Go to API app
-
-```bash
-cd apps/api
-```
-
-### Build dependencies
-
-```bash
-bun run build
-```
-
-### Deploy
-
-```bash
-bunx serverless deploy
-```
-
-🎉 Output:
-
-```text
-https://xxxxx.execute-api.ap-south-1.amazonaws.com
+```ts
+export const handler = async () => {
+  return {
+    statusCode: 200,
+    body: JSON.stringify({ message: 'Lambda running' })
+  }
+}
 ```
 
 ---
 
-## ⏱ STEP 9: Deploy Trigger Poller Service
-
-### Go to poller app
+## STEP 8: Build Lambda Using Bun
 
 ```bash
-cd apps/trigger-poller
-```
-
-### Deploy
-
-```bash
-bunx serverless deploy
-```
-
-This creates:
-
-* EventBridge rule (runs every minute)
-* Poller Lambda
-
----
-
-## 📬 STEP 10: Deploy Worker Service
-
-### Go to worker app
-
-```bash
-cd apps/worker
-```
-
-### Deploy
-
-```bash
-bunx serverless deploy
-```
-
-This creates:
-
-* SQS queue
-* Worker Lambda consuming messages
-
----
-
-## 🔄 STEP 11: Deployment Order (Important)
-
-Always deploy in this order:
-
-```bash
-bun run build
-cd apps/api && bunx serverless deploy
-cd ../trigger-poller && bunx serverless deploy
-cd ../worker && bunx serverless deploy
+bun build src/lambda.ts --outdir dist --target=node
 ```
 
 ---
 
-## 🧪 Verify Deployment
+## STEP 9: Install Production Dependencies
 
-### Check Lambda
+```bash
+bun install --production
+```
+
+---
+
+## STEP 10: Create Deployment ZIP
+
+### Windows
+
+```powershell
+Compress-Archive -Path dist,node_modules,package.json -DestinationPath lambda.zip
+```
+
+---
+
+## STEP 11: Create IAM Role for Lambda
+
+### Create trust policy file: `trust-policy.json`
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "lambda.amazonaws.com"
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
+```
+
+### Create IAM role
+
+```bash
+aws iam create-role \
+  --role-name lambda-basic-role \
+  --assume-role-policy-document file://trust-policy.json
+```
+
+### Attach required policies
+
+```bash
+aws iam attach-role-policy \
+  --role-name lambda-basic-role \
+  --policy-arn arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+```
+
+```bash
+aws iam attach-role-policy \
+  --role-name lambda-basic-role \
+  --policy-arn arn:aws:iam::aws:policy/AmazonSSMReadOnlyAccess
+```
+
+---
+
+## STEP 12: Create Lambda Function
+
+```bash
+aws lambda create-function \
+  --function-name n8n-workflow-api-dev \
+  --runtime nodejs20.x \
+  --handler dist/lambda.handler \
+  --zip-file fileb://lambda.zip \
+  --role arn:aws:iam::<ACCOUNT_ID>:role/lambda-basic-role \
+  --environment Variables="{MONGODB_URI=/n8n/prod/mongodb-uri,JWT_SECRET=/n8n/prod/jwt-secret}"
+```
+
+---
+
+## STEP 13: Update Lambda Code
+
+```bash
+aws lambda update-function-code \
+  --function-name n8n-workflow-api-dev \
+  --zip-file fileb://lambda.zip
+```
+
+---
+
+## STEP 14: Create and Attach API Gateway (HTTP API)
+
+### Create HTTP API
+
+```bash
+aws apigatewayv2 create-api \
+  --name n8n-workflow-http-api \
+  --protocol-type HTTP
+```
+
+### Create Lambda integration
+
+```bash
+aws apigatewayv2 create-integration \
+  --api-id <API_ID> \
+  --integration-type AWS_PROXY \
+  --integration-uri arn:aws:lambda:ap-south-1:<ACCOUNT_ID>:function:n8n-workflow-api-dev \
+  --payload-format-version 2.0
+```
+
+### Create route
+
+```bash
+aws apigatewayv2 create-route \
+  --api-id <API_ID> \
+  --route-key "ANY /{proxy+}" \
+  --target integrations/<INTEGRATION_ID>
+```
+
+### Grant API Gateway permission to invoke Lambda
+
+```bash
+aws lambda add-permission \
+  --function-name n8n-workflow-api-dev \
+  --statement-id apigateway-access \
+  --action lambda:InvokeFunction \
+  --principal apigateway.amazonaws.com \
+  --source-arn arn:aws:execute-api:ap-south-1:<ACCOUNT_ID>:<API_ID>/*/*
+```
+
+### Deploy stage
+
+```bash
+aws apigatewayv2 create-stage \
+  --api-id <API_ID> \
+  --stage-name prod \
+  --auto-deploy
+```
+
+---
+
+## STEP 15: Trigger Poller (EventBridge)
+
+```bash
+aws events put-rule \
+  --name n8n-trigger-poller \
+  --schedule-expression "rate(1 minute)"
+```
+
+Attach Lambda as target.
+
+---
+
+## STEP 16: Worker Lambda + SQS
+
+1. Create SQS queue
+2. Create worker Lambda
+3. Configure SQS trigger for worker Lambda
+
+---
+
+## Verification
 
 ```bash
 aws lambda list-functions
-```
-
-### Check SQS
-
-```bash
+aws apigatewayv2 get-apis
 aws sqs list-queues
-```
-
-### Check EventBridge
-
-```bash
 aws events list-rules
 ```
 
 ---
 
-## 💰 AWS Cost (Free Tier Friendly)
+## Cost Considerations
 
-| Service            | Cost                |
-| ------------------ | ------------------- |
-| Lambda             | Free (1M req/month) |
-| API Gateway (HTTP) | Very cheap          |
-| EventBridge        | Free                |
-| SQS                | Free                |
-| SSM                | Free                |
-| MongoDB Atlas      | Free tier           |
+All services used fall within AWS Free Tier for low to moderate usage.
 
 ---
 
-## 🧠 Best Practices Followed
+## Production Best Practices
 
-* No infinite loops in Lambda
-* Event-driven execution
-* Secrets never stored in code
-* Fully serverless backend
-* Horizontal auto-scaling
-* Strong TypeScript typing
+* No secrets stored in code or repository
+* IAM roles scoped per service
+* Event‑driven architecture
+* Stateless Lambdas
+* Bun used only for build and dependency management
+* Node.js runtime used in AWS
 
 ---
 
-## 🔚 Summary
+## Summary
 
-You now have:
+This deployment provides:
 
-* A production-grade backend on AWS
-* Secure secrets management
-* Scalable workers
-* Scheduled trigger polling
-* Zero server maintenance
+* Fully serverless backend architecture
+* Secure secret management
+* Horizontal scalability
+* Clear separation of responsibilities
+* No framework lock‑in
 
+This setup is suitable for both development and production workloads.

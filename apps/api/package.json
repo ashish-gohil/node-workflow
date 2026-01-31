@@ -1,28 +1,20 @@
 {
   "name": "api",
   "private": true,
+  "version": "0.0.1",
   "scripts": {
     "dev": "bun run src/server.ts",
-    "build": "tsc --noEmit",
-    "deploy": "serverless deploy",
-    "deploy:prod": "serverless deploy --stage prod",
-    "local": "serverless offline",
-    "remove": "serverless remove",
-    "logs": "serverless logs -f api -t"
+    "build": "tsc"
   },
   "dependencies": {
     "@repo/auth": "*",
     "@repo/db": "*",
-    "@types/aws-lambda": "^8.10.159",
+    "@types/aws-lambda": "^8.10.160",
     "@types/bcryptjs": "^3.0.0",
     "@types/express": "^5.0.6",
     "bcryptjs": "^3.0.3",
     "express": "^5.2.1",
     "mongoose": "^9.1.2",
     "serverless-http": "^4.0.0"
-  },
-  "devDependencies": {
-    "@types/node": "^25.0.10",
-    "serverless-offline": "^14.4.0"
   }
 }

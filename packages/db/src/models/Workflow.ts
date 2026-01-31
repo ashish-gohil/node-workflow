@@ -2,7 +2,7 @@ import { Schema, model, models } from "mongoose";
 
 /* -------------------- Types -------------------- */
 
-export interface WorkflowDocument {
+export interface IWorkflow {
   name: string;
   userId: string;
   active: boolean;
@@ -32,7 +32,7 @@ export interface WorkflowDocument {
 
 /* -------------------- Schema -------------------- */
 
-const WorkflowSchema = new Schema<WorkflowDocument>(
+const WorkflowSchema = new Schema<IWorkflow>(
   {
     name: { type: String, required: true },
     userId: { type: String, required: true, index: true },

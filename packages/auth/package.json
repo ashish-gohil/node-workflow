@@ -2,21 +2,18 @@
   "name": "@repo/auth",
   "private": true,
   "type": "module",
-
+  "version": "0.0.1",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-
   "exports": {
     ".": {
       "import": "./dist/index.js",
       "types": "./dist/index.d.ts"
     }
   },
-
   "scripts": {
     "build": "bunx tsc -p tsconfig.json"
   },
-
   "dependencies": {
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",

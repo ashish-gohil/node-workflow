@@ -1,6 +1,7 @@
 {
   "name": "@repo/db",
   "private": true,
+  "version": "0.0.1",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -19,5 +20,13 @@
   },
   "peerDependencies": {
     "typescript": "^5"
+  },
+  "compilerOptions": {
+    "types": [
+      "node"
+    ]
+  },
+  "devDependencies": {
+    "@types/node": "^25.1.0"
   }
 }
