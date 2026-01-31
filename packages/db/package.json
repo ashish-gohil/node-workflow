@@ -15,8 +15,9 @@
     "build": "bunx tsc -p tsconfig.json"
   },
   "dependencies": {
-    "mongoose": "^9.1.4",
-    "@types/mongoose": "^5.11.97"
+    "@aws-sdk/client-ssm": "^3.980.0",
+    "@types/mongoose": "^5.11.97",
+    "mongoose": "^9.1.4"
   },
   "peerDependencies": {
     "typescript": "^5"

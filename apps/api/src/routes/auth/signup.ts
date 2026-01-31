@@ -10,12 +10,16 @@ router.post("/signup", async (req, res) => {
         password: string;
         name?: string;
     };
+    console.log("email from body", email)
+    console.log("password from body", password)
+    console.log("name from body", name)
 
     if (!email || !password) {
         return res.status(400).json({ error: "Missing fields" });
     }
-
+    console.log("database connection in progress!")
     await connectMongo();
+    console.log("database connected!")
 
     const exists = await UserModel.findOne({ email });
     if (exists) {

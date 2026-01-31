@@ -1,18 +1,3 @@
-## AWS Deployment Guide (Production Ready)
-
-This document describes a **production‑ready deployment strategy** for an n8n‑like backend application on AWS.
-
-The guide assumes:
-
-* Bun is used for local development and builds
-* AWS Lambda runs on Node.js runtime
-* No Serverless Framework is used
-* Deployment is performed using AWS CLI
-
-This file is intended to be used directly as `deployment.md`.
-
----
-
 ## What Gets Deployed to AWS
 
 | Service        | AWS Service                               |
@@ -62,6 +47,8 @@ AdministratorAccess
 
 5. Save the generated Access Key ID and Secret Access Key
 
+> **Note:** This user will be used with AWS CLI for deployments.
+
 ---
 
 ## STEP 3: Install AWS CLI
@@ -76,6 +63,8 @@ Verify installation:
 ```bash
 aws --version
 ```
+
+> Returns CLI version, e.g. `aws-cli/2.12.14 Python/3.11.6 Windows/10 exe/AMD64`.
 
 ---
 
@@ -94,11 +83,18 @@ Default region: ap-south-1
 Default output format: json
 ```
 
+**Explanation:**
+
+* `AWS Access Key ID` & `AWS Secret Access Key` → allows CLI to authenticate
+* `Default region` → region where your resources (Lambda, SSM, etc.) will be created
+* `Default output format` → how CLI displays responses (`json` is recommended)
+
 ---
 
 ## STEP 5: Store Secrets in SSM Parameter Store
 
 Secrets must never be committed to source control.
+Use **SecureString** type for encryption.
 
 ### MongoDB URI
 
@@ -109,6 +105,13 @@ aws ssm put-parameter \
   --type SecureString
 ```
 
+**Explanation:**
+
+* `put-parameter` → creates a new parameter in SSM
+* `--name` → parameter name (used in Lambda as env var)
+* `--value` → the secret
+* `--type SecureString` → encrypted and safe
+
 ### JWT Secret
 
 ```bash
@@ -118,15 +121,33 @@ aws ssm put-parameter \
   --type SecureString
 ```
 
+> **Note:** In Lambda, you will reference the **parameter names**, not the values.
+
 ---
 
 ## STEP 6: Access Secrets in Lambda Code
 
-Secrets are injected as environment variables:
+Set environment variables to **SSM parameter names**:
+
+```
+MONGODB_URI=/n8n/prod/mongodb-uri
+JWT_SECRET=/n8n/prod/jwt-secret
+```
+
+In your Lambda code, fetch the actual secret using AWS SDK:
 
 ```ts
-process.env.MONGODB_URI
-process.env.JWT_SECRET
+import { SSMClient, GetParameterCommand } from "@aws-sdk/client-ssm";
+
+const ssm = new SSMClient({ region: "ap-south-1" });
+
+async function getSecretValue(paramName: string) {
+  const res = await ssm.send(new GetParameterCommand({
+    Name: paramName,
+    WithDecryption: true
+  }));
+  return res.Parameter!.Value!;
+}
 ```
 
 ---
@@ -135,15 +156,13 @@ process.env.JWT_SECRET
 
 Lambda handlers must be Node‑compatible JavaScript.
 
-Example handler:
-
 ```ts
 export const handler = async () => {
   return {
     statusCode: 200,
     body: JSON.stringify({ message: 'Lambda running' })
-  }
-}
+  };
+};
 ```
 
 ---
@@ -151,8 +170,15 @@ export const handler = async () => {
 ## STEP 8: Build Lambda Using Bun
 
 ```bash
-bun build src/lambda.ts --outdir dist --target=node
+bun build src/lambda.ts --outdir dist --target=node --bundle --minify --format=cjs
 ```
+
+**Explanation:**
+
+* `--target=node` → compile TypeScript to Node.js-compatible JavaScript
+* `--bundle` → include all dependencies in one file
+* `--minify` → reduce file size
+* `--format=cjs` → CommonJS, compatible with Lambda
 
 ---
 
@@ -161,6 +187,8 @@ bun build src/lambda.ts --outdir dist --target=node
 ```bash
 bun install --production
 ```
+
+**Explanation:** installs only production dependencies (no dev dependencies) into `node_modules`.
 
 ---
 
@@ -171,6 +199,13 @@ bun install --production
 ```powershell
 Compress-Archive -Path dist,node_modules,package.json -DestinationPath lambda.zip
 ```
+
+**Explanation:**
+
+* `dist` → compiled Lambda code
+* `node_modules` → dependencies
+* `package.json` → dependency metadata
+* `lambda.zip` → file uploaded to Lambda
 
 ---
 
@@ -184,14 +219,14 @@ Compress-Archive -Path dist,node_modules,package.json -DestinationPath lambda.zi
   "Statement": [
     {
       "Effect": "Allow",
-      "Principal": {
-        "Service": "lambda.amazonaws.com"
-      },
+      "Principal": { "Service": "lambda.amazonaws.com" },
       "Action": "sts:AssumeRole"
     }
   ]
 }
 ```
+
+**Explanation:** Allows Lambda service to assume the role.
 
 ### Create IAM role
 
@@ -201,19 +236,28 @@ aws iam create-role \
   --assume-role-policy-document file://trust-policy.json
 ```
 
+**Explanation:** Creates a role named `lambda-basic-role` with the trust policy above.
+
 ### Attach required policies
 
 ```bash
+# Basic Lambda execution (CloudWatch logging)
 aws iam attach-role-policy \
   --role-name lambda-basic-role \
   --policy-arn arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
-```
 
-```bash
+# Read-only access to SSM parameters
 aws iam attach-role-policy \
   --role-name lambda-basic-role \
   --policy-arn arn:aws:iam::aws:policy/AmazonSSMReadOnlyAccess
 ```
+
+**Explanation:**
+
+* `AWSLambdaBasicExecutionRole` → allows Lambda to write logs
+* `AmazonSSMReadOnlyAccess` → allows Lambda to fetch secrets from SSM
+
+> Optionally, for tighter security, create a **custom policy** granting access only to your parameter paths.
 
 ---
 
@@ -229,6 +273,14 @@ aws lambda create-function \
   --environment Variables="{MONGODB_URI=/n8n/prod/mongodb-uri,JWT_SECRET=/n8n/prod/jwt-secret}"
 ```
 
+**Explanation:**
+
+* `--runtime` → Node.js runtime for Lambda
+* `--handler` → file and exported function
+* `--zip-file` → deployment package
+* `--role` → IAM role Lambda assumes
+* `--environment Variables` → SSM parameter names injected as env vars
+
 ---
 
 ## STEP 13: Update Lambda Code
@@ -238,6 +290,8 @@ aws lambda update-function-code \
   --function-name n8n-workflow-api-dev \
   --zip-file fileb://lambda.zip
 ```
+
+**Explanation:** Uploads new code without recreating Lambda.
 
 ---
 
@@ -251,6 +305,8 @@ aws apigatewayv2 create-api \
   --protocol-type HTTP
 ```
 
+**Explanation:** Creates an HTTP API (API Gateway v2).
+
 ### Create Lambda integration
 
 ```bash
@@ -261,6 +317,12 @@ aws apigatewayv2 create-integration \
   --payload-format-version 2.0
 ```
 
+**Explanation:**
+
+* `AWS_PROXY` → API Gateway passes request directly to Lambda
+* `integration-uri` → ARN of your Lambda
+* `payload-format-version 2.0` → HTTP API payload format
+
 ### Create route
 
 ```bash
@@ -269,6 +331,9 @@ aws apigatewayv2 create-route \
   --route-key "ANY /{proxy+}" \
   --target integrations/<INTEGRATION_ID>
 ```
+
+**Explanation:**
+All paths (`/{proxy+}`) are routed to Lambda.
 
 ### Grant API Gateway permission to invoke Lambda
 
@@ -281,6 +346,8 @@ aws lambda add-permission \
   --source-arn arn:aws:execute-api:ap-south-1:<ACCOUNT_ID>:<API_ID>/*/*
 ```
 
+**Explanation:** Allows API Gateway to call Lambda.
+
 ### Deploy stage
 
 ```bash
@@ -289,6 +356,8 @@ aws apigatewayv2 create-stage \
   --stage-name prod \
   --auto-deploy
 ```
+
+**Explanation:** Creates `prod` stage, deploys routes and integration automatically.
 
 ---
 
@@ -300,7 +369,7 @@ aws events put-rule \
   --schedule-expression "rate(1 minute)"
 ```
 
-Attach Lambda as target.
+**Explanation:** Creates a scheduled EventBridge rule (cron or rate) that can invoke Lambda.
 
 ---
 
@@ -310,16 +379,20 @@ Attach Lambda as target.
 2. Create worker Lambda
 3. Configure SQS trigger for worker Lambda
 
+**Explanation:** Enables asynchronous background jobs.
+
 ---
 
 ## Verification
 
 ```bash
-aws lambda list-functions
-aws apigatewayv2 get-apis
-aws sqs list-queues
-aws events list-rules
+aws lambda list-functions       # Lists all Lambda functions
+aws apigatewayv2 get-apis       # Lists all HTTP APIs
+aws sqs list-queues             # Lists all SQS queues
+aws events list-rules           # Lists EventBridge rules
 ```
+
+**Explanation:** Verifies your resources are created and configured.
 
 ---
 
@@ -337,6 +410,9 @@ All services used fall within AWS Free Tier for low to moderate usage.
 * Stateless Lambdas
 * Bun used only for build and dependency management
 * Node.js runtime used in AWS
+* Fetch secrets from SSM at runtime and cache in memory
+* Avoid dynamic `require()` or `import()` for Lambda bundling
+* MongoDB connections use singleton pattern for cold-start reuse
 
 ---
 
@@ -345,9 +421,8 @@ All services used fall within AWS Free Tier for low to moderate usage.
 This deployment provides:
 
 * Fully serverless backend architecture
-* Secure secret management
+* Secure secret management via SSM Parameter Store
 * Horizontal scalability
 * Clear separation of responsibilities
-* No framework lock‑in
-
-This setup is suitable for both development and production workloads.
+* Environment-agnostic code (works for dev & prod)
+* No Serverless Framework lock-in
