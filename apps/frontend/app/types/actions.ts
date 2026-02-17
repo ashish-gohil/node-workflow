@@ -1,10 +1,5 @@
 import { Node } from "@xyflow/react";
-
-/* ------------------------------------------------------------------ */
-/*  Shared Execution Status (already used by triggers)                 */
-/* ------------------------------------------------------------------ */
-
-export type ExecutionStatus = "loading" | "success" | "error" | "initial";
+import { ExecutionStatus } from "./tirggers";
 
 /* ------------------------------------------------------------------ */
 /*  Action Node Types                                                  */

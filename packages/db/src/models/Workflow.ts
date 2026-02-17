@@ -11,7 +11,7 @@ export interface IWorkflow {
   graph: {
     nodes: Array<{
       id: string;
-      type: string;
+      type: string;  // evantually this should be of triggerType or actionType .....
       position: { x: number; y: number };
       data: {
         label: string;

@@ -2,6 +2,7 @@ import express, { type Request, type Response, type Express } from 'express'
 import workflowRoutes from './routes/workflow'
 import authRoutes from "./routes/auth/index"
 
+console.log("index.ts called")
 const app: Express = express()
 app.use(express.json())
 

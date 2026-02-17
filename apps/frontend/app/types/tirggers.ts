@@ -18,7 +18,7 @@ export enum TriggerNodeTypes {
 export type ExecutionStatus = "loading" | "success" | "error" | "initial";
 
 /* ------------------------------------------------------------------ */
-/*  Trigger Sheet Element Object                                                    */
+/*  Trigger Sheet Element Object                                       */
 /* ------------------------------------------------------------------ */
 
 export interface TriggerSheetElement {
@@ -31,15 +31,22 @@ export interface TriggerSheetElement {
 }
 
 /* ------------------------------------------------------------------ */
+/*  Base Trigger (Generic)                                             */
+/* ------------------------------------------------------------------ */
+
+export type BaseTriggerData<TConfig> = {
+  execution?: ExecutionStatus;
+  label: string;
+  description?: string;
+  onEdit?: (id: string) => void;
+  config: TConfig;
+};
+
+/* ------------------------------------------------------------------ */
 /*  Manual Trigger                                                     */
 /* ------------------------------------------------------------------ */
 
-export type ManualTriggerDataTypes = {
-  execution?: ExecutionStatus;
-  onEdit?: (id: string) => void;
-  label: string;
-  data: null;
-};
+export type ManualTriggerDataTypes = BaseTriggerData<null>;
 
 /* ------------------------------------------------------------------ */
 /*  Scheduler Trigger                                                  */
@@ -68,7 +75,7 @@ export type IntervalSchedulerConfig = {
 
 export type DailySchedulerConfig = {
   mode: "daily";
-  time: string; // hour string 00 to 23 at that time it starts job
+  time: string; // hour string 00–23
   startAt?: string;
   endAt?: string;
 };
@@ -93,15 +100,8 @@ export type SchedulerConfig =
   | WeeklySchedulerConfig
   | CronSchedulerConfig;
 
-export type SchedulerTriggerDataTypes = {
-  execution?: ExecutionStatus;
-  config: SchedulerConfig;
-  label: string;
-  description?: string;
-  enabled?: boolean;
-  timezone?: string;
-  onEdit?: (id: string) => void;
-};
+export type SchedulerTriggerDataTypes =
+  BaseTriggerData<SchedulerConfig>;
 
 /* ------------------------------------------------------------------ */
 /*  Webhook Trigger                                                    */
@@ -140,14 +140,8 @@ export type WebhookTriggerConfig = {
   timeoutMs?: number;
 };
 
-export type WebhookTriggerDataTypes = {
-  execution?: ExecutionStatus;
-  config: WebhookTriggerConfig;
-  label: string;
-  description?: string;
-  enabled?: boolean;
-  onEdit?: (id: string) => void;
-};
+export type WebhookTriggerDataTypes =
+  BaseTriggerData<WebhookTriggerConfig>;
 
 /* ------------------------------------------------------------------ */
 /*  React Flow Node Types                                              */
