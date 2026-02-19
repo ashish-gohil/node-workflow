@@ -87,15 +87,20 @@ export default function NewWorkflow() {
   // When drag stops (create create action node if its valid position...)
   const onConnectEnd: OnConnectEnd = useCallback(
     (event, connectionState) => {
-      // when a connection is dropped on the pane it's not valid
       if (!connectionState.isValid) {
-        // we need to remove the wrapper bounds, in order to get the correct position
+        let clientX = 0;
+        let clientY = 0;
 
-        const { clientX, clientY } =
-          "changedTouches" in event
-            ? (event.changedTouches[0] as { clientX: number; clientY: number })
-            : (event as { clientX: number; clientY: number });
+        if (event instanceof TouchEvent) {
+          clientX = event.changedTouches[0].clientX;
+          clientY = event.changedTouches[0].clientY;
+        } else if (event instanceof MouseEvent) {
+          clientX = event.clientX;
+          clientY = event.clientY;
+        }
+
         const nodeId = crypto.randomUUID();
+
         const newNode: DelayNodeType = {
           id: nodeId,
           position: screenToFlowPosition({
@@ -111,9 +116,8 @@ export default function NewWorkflow() {
           type: ActionNodeTypes.Delay,
         };
 
-        // apply logic to remove custom handle button from previous node.
-
         setNodes((nds) => [...nds, newNode]);
+
         setEdges((eds) =>
           eds.concat({
             id: nodeId,
@@ -124,7 +128,7 @@ export default function NewWorkflow() {
         );
       }
     },
-    [screenToFlowPosition]
+    [screenToFlowPosition, setNodes, setEdges]
   );
 
   const updateNodeData = (configNodeId: string, data: any) => {
