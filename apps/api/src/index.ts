@@ -9,7 +9,7 @@ app.use(express.json())
 
 app.use('/workflows', workflowRoutes)
 app.use("/auth", authRoutes)
-app.use("/execution", executionRoutes)
+app.use("/executions", executionRoutes)
 
 app.get("/health", (req: Request, res: Response) => {
     console.log(req.body)
