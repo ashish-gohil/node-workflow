@@ -14,7 +14,7 @@ export function authMiddleware(
   next: NextFunction
 ) {
   if (process.env.DISABLE_AUTH === 'true' || process.env.DISABLE_AUTH === '1') {
-    req.user = { id: 'test' }
+    req.user = { id: 'user_1' }
     return next()
   }
 

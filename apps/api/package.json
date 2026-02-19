@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.1",
   "scripts": {
-    "dev": "bun run src/server.ts",
+    "dev": "bun run build && bun run src/server.ts",
     "build": "bun build src/lambda.ts --target=node  --outdir dist  --bundle  --minify   --format=cjs"
   },
   "dependencies": {

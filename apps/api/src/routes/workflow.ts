@@ -6,12 +6,10 @@ const router: Router = Router();
 /**
  * GET all workflows for authenticated user
  */
-
-
-console.log("workflow get route called")
 router.get("/", authMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     const userId = req.user?.id;
+    console.log(userId)
     if (!userId) return res.status(401).json({ error: "Unauthorized" });
 
     await connectMongo();
@@ -28,7 +26,6 @@ router.get("/", authMiddleware, async (req: AuthenticatedRequest, res) => {
  * POST create a new workflow
  */
 router.post("/", authMiddleware, async (req: AuthenticatedRequest, res) => {
-  console.log("workflow post route called")
   try {
     const userId = req.user?.id || "test"
     if (!userId) return res.status(401).json({ error: "Unauthorized" });
