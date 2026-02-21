@@ -1,5 +1,7 @@
 import { Router } from "express";
 import { connectMongo, UserModel } from "@repo/db";
+import jwt from 'jsonwebtoken'
+
 
 const router: Router = Router();
 
@@ -29,6 +31,7 @@ router.post("/oauth", async (req, res) => {
         email: user.email,
         name: user.name,
         image: user.image,
+        accessToken: jwt.sign({id:user._id.toString(), email: user.email,}, process.env.JWT_SECRET)
     });
 });
 

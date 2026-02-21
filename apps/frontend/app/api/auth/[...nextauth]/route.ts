@@ -2,23 +2,25 @@ import NextAuth, { type User } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
 
-
 interface BackendUser extends User {
     id: string;
     email: string;
-    name?: string;
-    image?: string;
+    accessToken: string;
 }
 
 const handler = NextAuth({
+
     providers: [
+
         Credentials({
             name: "Credentials",
             credentials: {
                 email: {},
                 password: {},
             },
+
             async authorize(credentials) {
+
                 const res = await fetch(
                     `${process.env.NEXT_PUBLIC_API_URL}/auth/credentials`,
                     {
@@ -29,14 +31,15 @@ const handler = NextAuth({
                 );
 
                 if (!res.ok) return null;
-                const user = await res.json() as (BackendUser | null);
-                console.log(user)
-                if (!user?.id) {
+
+                const user = await res.json();
+
+                if (!user?.id || !user?.accessToken) {
                     return null;
                 }
 
                 return user;
-            },
+            }
         }),
 
         Google({
@@ -46,28 +49,39 @@ const handler = NextAuth({
     ],
 
     callbacks: {
-        async signIn({ user, account }) {
-            if (account?.provider === "google") {
-                await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/oauth`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        email: user.email,
-                        name: user.name,
-                        image: user.image,
-                        provider: "google",
-                    }),
-                });
-            }
-            return true;
-        },
 
-        async jwt({ token, user }) {
+        async jwt({ token, user, account }) {
 
-            // runs on login
-            if (user) {
+            // Credentials login
+            if (user && account?.provider === "credentials") {
+
                 token.sub = user.id;
                 token.email = user.email;
+                token.backendToken = (user as BackendUser).accessToken;
+            }
+
+            // Google OAuth login
+            if (account?.provider === "google") {
+
+                const res = await fetch(
+                    `${process.env.NEXT_PUBLIC_API_URL}/auth/oauth`,
+                    {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            email: user?.email,
+                            name: user?.name,
+                            image: user?.image,
+                            provider: "google",
+                        }),
+                    }
+                );
+
+                const backendUser = await res.json();
+
+                token.sub = backendUser.id;
+                token.email = backendUser.email;
+                token.backendToken = backendUser.accessToken;
             }
 
             return token;
@@ -75,14 +89,19 @@ const handler = NextAuth({
 
         async session({ session, token }) {
 
-            session.user.id = token.sub!;
-            session.user.email = token.email;
+            session.user.id = token.sub as string;
+            session.user.email = token.email as string;
+
+            (session as any).backendToken = token.backendToken;
 
             return session;
         },
     },
 
-    session: { strategy: "jwt" },
+    session: {
+        strategy: "jwt"
+    },
+
     secret: process.env.NEXTAUTH_SECRET,
 });
 

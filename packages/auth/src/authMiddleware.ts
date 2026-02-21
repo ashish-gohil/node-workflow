@@ -19,6 +19,10 @@ export function authMiddleware(
   }
 
   try {
+    
+    console.log("req headerrs from middleware is...")
+    console.log(req.headers);
+    console.log("////////")
     const authHeader = req.headers.authorization
     if (!authHeader) {
       return res.status(401).json({ error: 'Unauthorized' })
@@ -27,6 +31,8 @@ export function authMiddleware(
     const token = authHeader.startsWith('Bearer ')
       ? authHeader.slice('Bearer '.length).trim()
       : authHeader.trim()
+      console.log("token from middleware is ...")
+      console.log(token)
     if (!token) {
       return res.status(401).json({ error: 'Invalid authorization format' })
     }
@@ -38,13 +44,16 @@ export function authMiddleware(
     }
 
     const payload = jwt.verify(token, secret) as {
-      sub: string
+      id?: string
       email?: string
+      sub?: string
     }
+    console.log("payload from middleware is...")
+    console.log(payload)
 
     req.user = {
-      id: payload.sub,
-      email: payload.email,
+      id: (payload?.id || payload?.sub)!,
+      email: payload?.email,
     }
 
     next()

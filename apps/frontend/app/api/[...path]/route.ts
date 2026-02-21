@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
-import { convertServerPatchToFullTree } from "next/dist/client/components/segment-cache/navigation";
 
 const BACKEND_URL = process.env.BACKEND_API_URL!;
 
@@ -16,31 +15,29 @@ export async function handler(
         );
     }
 
-    // get token
-    const rawToken = await getToken({
+    // get decoded token
+    const token = await getToken({
         req,
         secret: process.env.NEXTAUTH_SECRET,
-        raw: true,
     });
 
-    if (!rawToken) {
+    const backendToken = token?.backendToken;
+
+    console.log("backendToken is ....");
+    console.log(token);
+    console.log("/////////////////////////");
+
+    if (!backendToken) {
         return NextResponse.json(
             { error: "Unauthorized" },
             { status: 401 }
         );
     }
 
-    // FIX 1: await params
     const { path } = await context.params;
 
     const pathString = path?.join("/") ?? "";
 
-    console.log("////////////")
-    console.log(path)
-    console.log("////////////")
-
-
-    // FIX 2: ensure proper URL
     const url = `${BACKEND_URL}/${pathString}${req.nextUrl.search}`;
 
     console.log("Proxying to:", url);
@@ -48,7 +45,7 @@ export async function handler(
     const backendRes = await fetch(url, {
         method: req.method,
         headers: {
-            Authorization: `Bearer ${rawToken}`,
+            Authorization: `Bearer ${backendToken}`,
             "Content-Type": "application/json",
         },
         body:

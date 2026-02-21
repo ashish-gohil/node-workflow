@@ -27,7 +27,7 @@ router.get("/", authMiddleware, async (req: AuthenticatedRequest, res) => {
  */
 router.post("/", authMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
-    const userId = req.user?.id || "test"
+    const userId = req.user?.id
     if (!userId) return res.status(401).json({ error: "Unauthorized" });
 
     await connectMongo();
