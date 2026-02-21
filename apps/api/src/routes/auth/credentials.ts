@@ -3,7 +3,7 @@ import bcrypt from "bcryptjs";
 import { connectMongo, UserModel, } from "@repo/db";
 import jwt from "jsonwebtoken"
 
-const router:Router = Router();
+const router: Router = Router();
 
 router.post("/credentials", async (req, res) => {
     const { email, password } = req.body as {
@@ -29,7 +29,7 @@ router.post("/credentials", async (req, res) => {
         id: user._id.toString(),
         email: user.email,
         name: user.name,
-        accessToken: jwt.sign({id:user._id.toString(), email: user.email,}, process.env.JWT_SECRET)
+        accessToken: jwt.sign({ id: user._id.toString(), email: user.email, }, process.env.JWT_SECRET!)
     });
 });
 

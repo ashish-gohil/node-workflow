@@ -9,7 +9,10 @@ const router: Router = Router();
 router.get("/", authMiddleware, async (req: AuthenticatedRequest, res) => {
   try {
     const userId = req.user?.id;
-    console.log(userId)
+    console.log("req from get workflows");
+    console.log(req)
+    console.log("user from get all wokflow api")
+    console.log(req.user)
     if (!userId) return res.status(401).json({ error: "Unauthorized" });
 
     await connectMongo();

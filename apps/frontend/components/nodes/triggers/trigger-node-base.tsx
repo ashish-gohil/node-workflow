@@ -1,7 +1,6 @@
 "use client";
 
 import { Position, useReactFlow } from "@xyflow/react";
-import { PlusCircle } from "lucide-react";
 
 import { BaseNode } from "@/components/nodes/base-node";
 import { NodeStatusIndicator } from "@/components/node-status-indicator";
@@ -25,7 +24,9 @@ export function TriggerNodeBase({
   status,
   onEdit,
 }: TriggerNodeBaseProps) {
-  const { setNodes } = useReactFlow();
+  const { setNodes, setEdges, getNodes } = useReactFlow();
+  const nodes = getNodes();
+  const curNode = nodes.find((node) => node.id === id)!;
   return (
     <div className="group flex gap-2 h-10 justify-between items-center">
       {/* Execute */}
@@ -62,8 +63,14 @@ export function TriggerNodeBase({
               type="source"
               position={Position.Right}
             >
-              <ActionSheet setConfigNodeId={(id) => {}} setNodes={setNodes} />
-              {/* <PlusCircle className="size-3 text-border-strong group-hover:text-text-secondary" /> */}
+              <ActionSheet
+                setNodes={setNodes}
+                setEdges={setEdges}
+                setConfigNodeId={(id) => {}}
+                sourceNodeId={id}
+                sourceHandleId={curNode?.handles?.[0]?.id!}
+                sourcePosition={curNode?.position!}
+              />
             </ButtonHandle>
           </BaseNode>
         </NodeStatusIndicator>

@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { connectMongo, UserModel } from "@repo/db";
 import { authMiddleware, type AuthenticatedRequest } from "../../middlewares/auth";
+import jwt from "jsonwebtoken"
 
 const router: Router = Router();
 
@@ -36,7 +37,7 @@ router.post("/sync-user", authMiddleware, async (req: AuthenticatedRequest, res)
     res.json({
         id: user._id.toString(),
         email: user.email,
-        accessToken: jwt.sign({id:user._id.toString(), email: user.email,}, process.env.JWT_SECRET)
+        accessToken: jwt.sign({ id: user._id.toString(), email: user.email, }, process.env.JWT_SECRET!)
 
     });
 });

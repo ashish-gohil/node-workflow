@@ -1,7 +1,7 @@
 "use client";
 
 import React, { Dispatch, SetStateAction, useState } from "react";
-import { Node } from "@xyflow/react";
+import { Edge, Node } from "@xyflow/react";
 import {
   Sheet,
   SheetContent,
@@ -117,9 +117,18 @@ const actionNodes: ActionSheetElement[] = [
 export default function ActionSheet({
   setConfigNodeId,
   setNodes,
+  setEdges,
+  sourceNodeId,
+  sourceHandleId,
+  sourcePosition,
 }: {
   setConfigNodeId: (id: string) => void;
   setNodes: Dispatch<SetStateAction<Node[]>>;
+  setEdges: (payload: Edge[] | ((edges: Edge[]) => Edge[])) => void;
+
+  sourceNodeId: string;
+  sourceHandleId?: string;
+  sourcePosition: { x: number; y: number };
 }) {
   const [open, setOpen] = useState(false);
 
@@ -168,8 +177,22 @@ export default function ActionSheet({
                 key={node.type}
                 onClick={() => {
                   setOpen(false);
-                  const newNode = createActionNode(node.type);
+
+                  const newNode = createActionNode(node.type, {
+                    x: sourcePosition.x + 250,
+                    y: sourcePosition.y,
+                  });
+
+                  const newEdge: Edge = {
+                    id: `${sourceNodeId}-${newNode.id}`,
+                    source: sourceNodeId,
+                    target: newNode.id,
+                    sourceHandle: sourceHandleId,
+                  };
+
                   setNodes((nds) => [...nds, newNode]);
+
+                  setEdges((eds) => [...eds, newEdge]);
 
                   if (node.requireDataFields) {
                     setConfigNodeId(newNode.id);
