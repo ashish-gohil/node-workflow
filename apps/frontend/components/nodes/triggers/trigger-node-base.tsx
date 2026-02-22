@@ -58,7 +58,7 @@ export function TriggerNodeBase({
 
             {/* -------- OUTPUT HANDLE -------- */}
             <ButtonHandle
-              id="output"
+              id={`${id}-output`}
               nodeId={id}
               type="source"
               position={Position.Right}
@@ -68,7 +68,7 @@ export function TriggerNodeBase({
                 setEdges={setEdges}
                 setConfigNodeId={(id) => {}}
                 sourceNodeId={id}
-                sourceHandleId={curNode?.handles?.[0]?.id!}
+                sourceHandleId={`${id}-output`}
                 sourcePosition={curNode?.position!}
               />
             </ButtonHandle>
