@@ -21,7 +21,6 @@ import {
   DEFAULT_SCHEDULER_TRIGGER_DATA,
   DEFAULT_WEBHOOK_TRIGGER_DATA,
 } from "@/app/default-data/trigger-data";
-import { FlowNode } from "@/app/types/flow";
 import useFlow from "@/app/store/flow-store";
 
 const triggerNodes: TriggerSheetElement[] = [
@@ -101,7 +100,7 @@ export default function TriggerSheet({
 }: {
   setConfigNodeId: (id: string) => void;
 }) {
-  const { nodes, setNodes } = useFlow();
+  const { setNodes } = useFlow();
   const [triggerSheetOpen, setTriggerSheetOpen] = useState<boolean>(false);
   function createTriggerNode(
     type: TriggerNodeTypes,

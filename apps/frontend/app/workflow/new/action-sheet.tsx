@@ -28,6 +28,8 @@ import {
   DEFAULT_MERGE_NODE_DATA,
   DEFAULT_SET_NODE_DATA,
 } from "@/app/default-data/actions-data";
+import useFlow from "@/app/store/flow-store";
+import { FlowNode } from "@/app/types/flow";
 
 /* ------------------------------------------------------------------ */
 /*  Action Node Types                                                  */
@@ -116,26 +118,20 @@ const actionNodes: ActionSheetElement[] = [
 
 export default function ActionSheet({
   setConfigNodeId,
-  setNodes,
-  setEdges,
-  sourceNodeId,
   sourceHandleId,
-  sourcePosition,
+  sourceNode,
 }: {
   setConfigNodeId: (id: string) => void;
-  setNodes: Dispatch<SetStateAction<Node[]>>;
-  setEdges: (payload: Edge[] | ((edges: Edge[]) => Edge[])) => void;
-
-  sourceNodeId: string;
+  sourceNode: FlowNode;
   sourceHandleId?: string;
-  sourcePosition: { x: number; y: number };
 }) {
+  const { setNodes, setEdges } = useFlow();
   const [open, setOpen] = useState(false);
 
   function createActionNode(
     type: ActionNodeTypes,
     position = { x: 0, y: 0 }
-  ): Node {
+  ): FlowNode {
     const base = {
       id: crypto.randomUUID(),
       type,
@@ -179,13 +175,15 @@ export default function ActionSheet({
                   setOpen(false);
 
                   const newNode = createActionNode(node.type, {
-                    x: sourcePosition.x + 250,
-                    y: sourcePosition.y,
+                    x:
+                      sourceNode.position.x +
+                      (sourceNode?.width ? sourceNode.width + 50 : 250),
+                    y: sourceNode.position.y,
                   });
 
                   const newEdge: Edge = {
-                    id: `${sourceNodeId}-${newNode.id}`,
-                    source: sourceNodeId,
+                    id: `${sourceNode.id}-${newNode.id}`,
+                    source: sourceNode.id,
                     target: newNode.id,
                     sourceHandle: sourceHandleId,
                   };

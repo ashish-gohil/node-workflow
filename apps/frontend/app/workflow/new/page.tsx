@@ -3,19 +3,12 @@ import React, { useState } from "react";
 import { useCallback } from "react";
 import {
   ReactFlow,
-  addEdge,
   type FitViewOptions,
-  type OnConnect,
-  type OnNodeDrag,
   type DefaultEdgeOptions,
   OnConnectEnd,
-  Node,
   useReactFlow,
   Background,
   BackgroundVariant,
-  useNodesState,
-  useEdgesState,
-  Edge,
 } from "@xyflow/react";
 // import { useTheme } from 'next-themes'
 import { ThemeHydrated } from "@/components/ui/theme-wraper";
@@ -28,18 +21,12 @@ import { useShallow } from "zustand/react/shallow";
 import TriggerSheet from "@/app/workflow/new/trigger-sheet";
 import TriggerConfigDialog from "./trigger-config/trigger-config-dialog";
 import { WebhookTriggerNode } from "@/components/nodes/triggers/webhook-trigger-node";
-import {
-  ActionNode,
-  ActionNodeTypes,
-  DelayNodeType,
-} from "@/app/types/actions";
+import { ActionNodeTypes, DelayNodeType } from "@/app/types/actions";
 import { HttpRequestNode } from "@/components/nodes/actions/http-action-node";
 import { IfNode } from "@/components/nodes/actions/if-condition-action-node";
 import { MergeNode } from "@/components/nodes/actions/merge-action-node";
 import { SetNode } from "@/components/nodes/actions/set-transform-action-node";
 import { DelayNode } from "@/components/nodes/actions/delay-action-node";
-import { FlowEdge, FlowNode } from "@/app/types/flow";
-import { useStore } from "zustand";
 import useFlow, { FlowState } from "@/app/store/flow-store";
 
 const selector = (state: FlowState) => ({
@@ -80,8 +67,6 @@ export default function NewWorkflow() {
     setNodes,
     setEdges,
   } = useFlow(useShallow(selector));
-  // const [nodes, setNodes, onNodesChange] = useNodesState<FlowNode>([]);
-  // const [edges, setEdges, onEdgesChange] = useEdgesState<FlowEdge>([]);
   const [configNodeId, setConfigNodeId] = useState<string | null>(null);
 
   // When drag stops (create create action node if its valid position...)
@@ -101,6 +86,7 @@ export default function NewWorkflow() {
 
         const nodeId = crypto.randomUUID();
 
+        // this will open new action sheet to select new node...
         const newNode: DelayNodeType = {
           id: nodeId,
           position: screenToFlowPosition({

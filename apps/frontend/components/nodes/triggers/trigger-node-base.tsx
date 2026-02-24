@@ -8,6 +8,7 @@ import { ButtonHandle } from "@/components/handles/button-handle";
 import { Button } from "@/components/ui/button";
 import { ExecutionStatus } from "@/app/types/tirggers";
 import ActionSheet from "@/app/workflow/new/action-sheet";
+import useFlow from "@/app/store/flow-store";
 
 interface TriggerNodeBaseProps {
   id: string;
@@ -24,8 +25,7 @@ export function TriggerNodeBase({
   status,
   onEdit,
 }: TriggerNodeBaseProps) {
-  const { setNodes, setEdges, getNodes } = useReactFlow();
-  const nodes = getNodes();
+  const { nodes } = useFlow();
   const curNode = nodes.find((node) => node.id === id)!;
   return (
     <div className="group flex gap-2 h-10 justify-between items-center">
@@ -42,12 +42,12 @@ export function TriggerNodeBase({
         <NodeStatusIndicator
           status={status}
           variant="border"
-          className="rounded-r-[3px] rounded-l-[11px]"
+          className="-l-[6px]"
         >
           <BaseNode
             onDoubleClick={() => onEdit?.(id)}
             className={`
-              w-12 h-10 rounded-r-xs
+              w-12 h-10 
               ${selected ? "border-border-strong hover:ring-border-default" : ""}
             `}
           >
@@ -64,12 +64,9 @@ export function TriggerNodeBase({
               position={Position.Right}
             >
               <ActionSheet
-                setNodes={setNodes}
-                setEdges={setEdges}
                 setConfigNodeId={(id) => {}}
-                sourceNodeId={id}
                 sourceHandleId={`${id}-output`}
-                sourcePosition={curNode?.position!}
+                sourceNode={curNode}
               />
             </ButtonHandle>
           </BaseNode>

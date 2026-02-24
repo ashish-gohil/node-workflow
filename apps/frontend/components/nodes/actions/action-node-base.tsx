@@ -6,6 +6,8 @@ import { BaseNode } from "@/components/nodes/base-node";
 import { NodeStatusIndicator } from "@/components/node-status-indicator";
 import { ButtonHandle } from "@/components/handles/button-handle";
 import { BaseHandle } from "@/components/handles/base-handle";
+import ActionSheet from "@/app/workflow/new/action-sheet";
+import useFlow from "@/app/store/flow-store";
 
 interface OutputHandle {
   id: string;
@@ -34,13 +36,15 @@ export function ActionNodeBase({
   outputs,
   inputs,
 }: ActionNodeBaseProps) {
+  const { nodes } = useFlow();
+  const curNode = nodes.find((node) => node.id === id)!;
   return (
     <div className=" flex gap-2 gap-y-0.5 max-w-[110px]  items-start flex-col">
       <div className="relative group">
         <NodeStatusIndicator
           status="success"
           variant="border"
-          className="rounded-[11px]"
+          className="rounded-[6px]"
         >
           <BaseNode
             onDoubleClick={() => onEdit?.(id)}
@@ -81,10 +85,14 @@ export function ActionNodeBase({
                 type="source"
                 position={Position.Right}
                 style={{
-                  top: outputs.length === 1 ? "50%" : `${30 + index * 20}%`,
+                  top: outputs.length === 1 ? "50%" : `${30 + index * 40}%`,
                 }}
               >
-                <PlusCircle className="size-3 text-border-strong group-hover:text-text-secondary" />
+                <ActionSheet
+                  setConfigNodeId={(id) => {}}
+                  sourceHandleId={output.id}
+                  sourceNode={curNode}
+                />
               </ButtonHandle>
             ))}
           </BaseNode>

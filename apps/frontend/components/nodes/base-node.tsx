@@ -5,7 +5,7 @@ export function BaseNode({ className, ...props }: ComponentProps<"div">) {
   return (
     <div
       className={cn(
-        "relative rounded-lg",
+        "relative rounded-sm",
         "bg-surface-elevated text-text-primary",
         "border border-border",
         "transition-colors",
