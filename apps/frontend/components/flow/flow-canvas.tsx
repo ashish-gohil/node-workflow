@@ -1,30 +1,75 @@
 "use client";
 
-import { useEffect } from "react";
-import { ReactFlow, Background, Controls, MiniMap } from "@xyflow/react";
+import { useEffect, useMemo, useRef } from "react";
+import {
+  ReactFlow,
+  Background,
+  Controls,
+  MiniMap,
+  BackgroundVariant,
+  type OnConnectEnd,
+  type DefaultEdgeOptions,
+  type FitViewOptions,
+} from "@xyflow/react";
 
 import "@xyflow/react/dist/style.css";
-import useFlow from "@/app/store/flow-store";
 import { FlowEdge, FlowNode } from "@/app/types/flow";
+import useFlow from "@/app/store/flow-store";
+
+import { TriggerNodeTypes } from "@/app/types/tirggers";
+import { ActionNodeTypes } from "@/app/types/actions";
+
+import { ManualTriggerNode } from "../nodes/triggers/manual-trigger-node";
+import { SchedulerTriggerNode } from "../nodes/triggers/schedule-trigger-node";
+import { WebhookTriggerNode } from "../nodes/triggers/webhook-trigger-node";
+
+import { HttpRequestNode } from "../nodes/actions/http-action-node";
+import { IfNode } from "../nodes/actions/if-condition-action-node";
+import { MergeNode } from "../nodes/actions/merge-action-node";
+import { SetNode } from "../nodes/actions/set-transform-action-node";
+import { DelayNode } from "../nodes/actions/delay-action-node";
 
 type Props = {
   initialNodes?: FlowNode[];
   initialEdges?: FlowEdge[];
-
   readOnly?: boolean;
-
+  onConnectEnd?: OnConnectEnd;
+  fitView?: boolean;
   className?: string;
+  children?: React.ReactNode;
+};
 
-  onChange?: (data: { nodes: FlowNode[]; edges: FlowEdge[] }) => void;
+const fitViewOptions: FitViewOptions = {
+  padding: 1,
+};
+
+const defaultEdgeOptions: DefaultEdgeOptions = {
+  animated: true,
+};
+
+export const nodeTypes = {
+  [TriggerNodeTypes.ManualTrigger]: ManualTriggerNode,
+  [TriggerNodeTypes.SchedulerTrigger]: SchedulerTriggerNode,
+  [TriggerNodeTypes.Webhook]: WebhookTriggerNode,
+
+  [ActionNodeTypes.Delay]: DelayNode,
+  [ActionNodeTypes.HttpRequest]: HttpRequestNode,
+  [ActionNodeTypes.If]: IfNode,
+  [ActionNodeTypes.Merge]: MergeNode,
+  [ActionNodeTypes.Set]: SetNode,
 };
 
 export default function FlowCanvas({
-  initialNodes = [],
-  initialEdges = [],
+  initialNodes,
+  initialEdges,
   readOnly = false,
+  onConnectEnd,
+  fitView = true,
   className,
-  onChange,
+  children,
 }: Props) {
+  const initialized = useRef(false);
+
   const {
     nodes,
     edges,
@@ -36,36 +81,52 @@ export default function FlowCanvas({
   } = useFlow();
 
   /**
-   * Initialize store when component mounts
-   * Works for both:
-   * - new workflow
-   * - edit workflow
+   * Initialize ONLY ONCE
    */
   useEffect(() => {
-    setNodes(initialNodes);
-    setEdges(initialEdges);
+    if (initialized.current) return;
+
+    if (initialNodes) setNodes(initialNodes);
+    if (initialEdges) setEdges(initialEdges);
+
+    initialized.current = true;
   }, [initialNodes, initialEdges, setNodes, setEdges]);
 
   /**
-   * Notify parent when nodes/edges change
+   * Attach listeners only if editable
    */
-  useEffect(() => {
-    onChange?.({ nodes, edges });
-  }, [nodes, edges, onChange]);
+  const eventHandlers = useMemo(() => {
+    if (readOnly) return {};
+
+    return {
+      onNodesChange,
+      onEdgesChange,
+      onConnect,
+      onConnectEnd,
+    };
+  }, [readOnly, onNodesChange, onEdgesChange, onConnect, onConnectEnd]);
 
   return (
     <div className={className ?? "w-full h-full"}>
       <ReactFlow
         nodes={nodes}
         edges={edges}
-        onNodesChange={readOnly ? undefined : onNodesChange}
-        onEdgesChange={readOnly ? undefined : onEdgesChange}
-        onConnect={readOnly ? undefined : onConnect}
-        fitView
+        nodeTypes={nodeTypes}
+        fitView={fitView}
+        fitViewOptions={fitViewOptions}
+        defaultEdgeOptions={defaultEdgeOptions}
+        {...eventHandlers}
       >
-        <Background />
-        <Controls />
-        <MiniMap />
+        <Background
+          gap={10}
+          color="var(--color-bg-muted)"
+          variant={BackgroundVariant.Dots}
+        />
+
+        {!readOnly && <MiniMap />}
+        {!readOnly && <Controls />}
+
+        {children}
       </ReactFlow>
     </div>
   );
