@@ -136,7 +136,7 @@ export default function NewWorkflow() {
       <div className="w-full h-full">
         <ThemeHydrated>
           <ReactFlow
-            className="w-full h-full bg-red-200"
+            className="w-full h-full"
             nodes={nodes}
             edges={edges}
             onNodesChange={onNodesChange}

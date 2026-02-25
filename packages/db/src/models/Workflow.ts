@@ -1,6 +1,24 @@
 import { Schema, model, models } from "mongoose";
 
 /* -------------------- Types -------------------- */
+export enum ActionNodeTypes {
+  HttpRequest = "httpRequest",
+  Set = "set",
+  If = "if",
+  Code = "code",
+  Delay = "delay",
+  Merge = "merge",
+}
+
+export enum TriggerNodeTypes {
+  ManualTrigger = "manualTrigger",
+  SchedulerTrigger = "scheduler",
+  Webhook = "webhook",
+}
+
+export type FlowType =
+  | ActionNodeTypes
+  | TriggerNodeTypes;
 
 export interface IWorkflow {
   workflowId: string;
@@ -12,13 +30,9 @@ export interface IWorkflow {
   graph: {
     nodes: Array<{
       id: string;
-      type: string;  // evantually this should be of triggerType or actionType .....
+      type: FlowType;
       position: { x: number; y: number };
-      data: {
-        label: string;
-        description?: string;
-        config: Record<string, unknown>;
-      };
+      config: Record<string, unknown>;
     }>;
 
     edges: Array<{
@@ -31,20 +45,89 @@ export interface IWorkflow {
   };
 }
 
+const FlowTypeValues = [
+  ...Object.values(ActionNodeTypes),
+  ...Object.values(TriggerNodeTypes),
+];
+
 /* -------------------- Schema -------------------- */
+
+const NodeSchema = new Schema(
+  {
+    id: { type: String, required: true },
+
+    type: {
+      type: String,
+      required: true,
+      enum: FlowTypeValues,
+    },
+
+    position: {
+      x: { type: Number, required: true },
+      y: { type: Number, required: true },
+    },
+
+    config: {
+      type: Schema.Types.Mixed,
+      default: {},
+    },
+  },
+  { _id: false }
+);
+
+const EdgeSchema = new Schema(
+  {
+    id: { type: String, required: true },
+
+    source: { type: String, required: true },
+    target: { type: String, required: true },
+
+    sourceHandle: String,
+    targetHandle: String,
+  },
+  { _id: false }
+);
+
 
 const WorkflowSchema = new Schema<IWorkflow>(
   {
-    workflowId: { type: String, required: true, unique: true },
-    name: { type: String, required: true },
-    userId: { type: String, required: true, index: true },
+    workflowId: {
+      type: String,
+      required: true,
+      unique: true,
+    },
 
-    active: { type: Boolean, default: false },
-    version: { type: Number, default: 1 },
+    name: {
+      type: String,
+      required: true,
+    },
+
+    userId: {
+      type: String,
+      required: true,
+      index: true,
+    },
+
+    active: {
+      type: Boolean,
+      default: false,
+    },
+
+    version: {
+      type: Number,
+      default: 1,
+    },
 
     graph: {
-      nodes: { type: [Schema.Types.Mixed], required: true },
-      edges: { type: [Schema.Types.Mixed], required: true },
+      nodes: {
+        type: [NodeSchema],
+        required: true,
+      },
+
+      edges: {
+        type: [EdgeSchema],
+        required: true,
+      },
     },
   },
   {
@@ -56,4 +139,5 @@ const WorkflowSchema = new Schema<IWorkflow>(
 /* -------------------- Singleton Export -------------------- */
 
 export const WorkflowModel =
-  models.Workflow ?? model("Workflow", WorkflowSchema);
+  models.Workflow ??
+  model<IWorkflow>("Workflow", WorkflowSchema);
