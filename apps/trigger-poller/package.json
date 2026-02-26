@@ -1,0 +1,19 @@
+{
+  "name": "trigger-poller",
+  "module": "src/index.ts",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "bun build src/lambda.ts --target=node  --outdir dist  --bundle  --minify   --format=cjs"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "dependencies": {
+    "@repo/auth": "*",
+    "@repo/db": "*"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  }
+}

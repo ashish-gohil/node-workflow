@@ -7,7 +7,7 @@ import { NodeStatusIndicator } from "@/components/node-status-indicator";
 import { ButtonHandle } from "@/components/handles/button-handle";
 import { Button } from "@/components/ui/button";
 import { ExecutionStatus } from "@/app/types/tirggers";
-import ActionSheet from "@/app/workflow/new/action-sheet";
+import ActionSheet from "@/app/workflows/new/action-sheet";
 import useFlow from "@/app/store/flow-store";
 
 interface TriggerNodeBaseProps {

@@ -6,7 +6,7 @@ import { BaseNode } from "@/components/nodes/base-node";
 import { NodeStatusIndicator } from "@/components/node-status-indicator";
 import { ButtonHandle } from "@/components/handles/button-handle";
 import { BaseHandle } from "@/components/handles/base-handle";
-import ActionSheet from "@/app/workflow/new/action-sheet";
+import ActionSheet from "@/app/workflows/new/action-sheet";
 import useFlow from "@/app/store/flow-store";
 
 interface OutputHandle {

@@ -8,7 +8,7 @@ import "@xyflow/react/dist/style.css";
 
 import { TriggerNode } from "@/app/types/tirggers";
 import { useShallow } from "zustand/react/shallow";
-import TriggerSheet from "@/app/workflow/new/trigger-sheet";
+import TriggerSheet from "@/app/workflows/new/trigger-sheet";
 import TriggerConfigDialog from "./trigger-config/trigger-config-dialog";
 import { ActionNodeTypes, DelayNodeType } from "@/app/types/actions";
 import useFlow, { FlowState } from "@/app/store/flow-store";
