@@ -1,4 +1,4 @@
-import { Schema, model, models } from "mongoose";
+import { Model, Schema, model, models } from "mongoose";
 
 /* -------------------- Types -------------------- */
 export enum ActionNodeTypes {
@@ -16,7 +16,7 @@ export enum TriggerNodeTypes {
   Webhook = "webhook",
 }
 
-export type FlowType =
+export type FlowNodeType =
   | ActionNodeTypes
   | TriggerNodeTypes;
 
@@ -26,13 +26,20 @@ export interface IWorkflow {
   userId: string;
   active: boolean;
   version: number;
-
+  lastRunAt: Date;
+  status: "running" | "ideal" | "queued"; // queued is when workflow is already present in queue 
   graph: {
     nodes: Array<{
       id: string;
-      type: FlowType;
+      nodeType: FlowNodeType;
       position: { x: number; y: number };
       config: Record<string, unknown>;
+      type: "trigger" | "action";
+      lastExecutedAt: Date;
+      executionStatus: "executing" | "ideal" | "queued"
+      outputData?: Record<string, unknown>
+      inputData?: Record<string, unknown>
+
     }>;
 
     edges: Array<{
@@ -56,10 +63,16 @@ const NodeSchema = new Schema(
   {
     id: { type: String, required: true },
 
-    type: {
+    nodeType: {
       type: String,
       required: true,
       enum: FlowTypeValues,
+    },
+
+    type: {
+      type: String,
+      required: true,
+      enum: ["trigger", "action"],
     },
 
     position: {
@@ -71,9 +84,31 @@ const NodeSchema = new Schema(
       type: Schema.Types.Mixed,
       default: {},
     },
+
+    lastExecutedAt: {
+      type: Date,
+    },
+
+    executionStatus: {
+      type: String,
+      enum: ["executing", "ideal", "queued"],
+      default: "ideal",
+    },
+
+    outputData: {
+      type: Schema.Types.Mixed,
+      default: null,
+    },
+
+    inputData: {
+      type: Schema.Types.Mixed,
+      default: null,
+    },
   },
   { _id: false }
 );
+
+/* -------------------- Edge Schema -------------------- */
 
 const EdgeSchema = new Schema(
   {
@@ -88,8 +123,9 @@ const EdgeSchema = new Schema(
   { _id: false }
 );
 
+/* -------------------- Workflow Schema -------------------- */
 
-const WorkflowSchema = new Schema<IWorkflow>(
+const WorkflowSchema = new Schema(
   {
     workflowId: {
       type: String,
@@ -118,6 +154,16 @@ const WorkflowSchema = new Schema<IWorkflow>(
       default: 1,
     },
 
+    lastRunAt: {
+      type: Date,
+    },
+
+    status: {
+      type: String,
+      enum: ["running", "ideal", "queued"],
+      default: "ideal",
+    },
+
     graph: {
       nodes: {
         type: [NodeSchema],
@@ -136,8 +182,9 @@ const WorkflowSchema = new Schema<IWorkflow>(
   }
 );
 
+
 /* -------------------- Singleton Export -------------------- */
 
-export const WorkflowModel =
+export const WorkflowModel: Model<IWorkflow> =
   models.Workflow ??
   model<IWorkflow>("Workflow", WorkflowSchema);

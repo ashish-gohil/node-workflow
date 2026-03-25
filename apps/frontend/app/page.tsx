@@ -1,10 +1,12 @@
+import CTA from "@/components/lending-page/cta";
+import Hero from "@/components/lending-page/hero-section";
 import React from "react";
 
 export default function Home() {
   return (
     <>
-      <div>Home</div>
-      <div>Create home page like react-flow home page.</div>
+      <Hero />
+      <CTA />
     </>
   );
 }

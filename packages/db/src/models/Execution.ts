@@ -1,4 +1,4 @@
-import { model, models } from "mongoose";
+import { Model, model, models } from "mongoose";
 import { Schema } from "mongoose";
 
 export interface IExecution {
@@ -21,4 +21,4 @@ const ExecutionSchema = new Schema<IExecution>({
     data: { type: Schema.Types.Mixed },
 }, { timestamps: true });
 
-export const ExecutionModel = models.Execution ?? model('Execution', ExecutionSchema);
+export const ExecutionModel: Model<IExecution> = models.Execution ?? model('Execution', ExecutionSchema);

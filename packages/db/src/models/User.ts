@@ -1,4 +1,4 @@
-import { Schema, model, models, type InferSchemaType, } from "mongoose";
+import { Model, Schema, model, models, type InferSchemaType, } from "mongoose";
 
 /**
  * Supported authentication providers
@@ -56,4 +56,4 @@ export type IUser = InferSchemaType<typeof UserSchema>;
 /**
  * Safe model export (prevents OverwriteModelError)
  */
-export const UserModel = models.User ?? model<IUser>("User", UserSchema);
+export const UserModel: Model<IUser> = models.User ?? model<IUser>("User", UserSchema);

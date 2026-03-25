@@ -1,0 +1,30 @@
+# ===== API =====
+fastapi
+uvicorn[standard]
+
+# ===== ML / DL =====
+torch
+scikit-learn
+
+# ===== Data Processing =====
+pandas
+numpy
+
+# ===== Technical Indicators =====
+ta
+
+# ===== Stock API =====
+kiteconnect
+
+# ===== Env Management =====
+python-dotenv
+
+# ===== HTTP Requests =====
+requests
+
+# ===== Backtesting / Analysis =====
+matplotlib
+
+# ===== Utilities =====
+tqdm
+joblib

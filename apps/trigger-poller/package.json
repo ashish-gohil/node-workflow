@@ -4,16 +4,17 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "build": "bun build src/lambda.ts --target=node  --outdir dist  --bundle  --minify   --format=cjs"
-  },
-  "devDependencies": {
-    "@types/bun": "latest"
+    "build": "bun build src/server.ts --target=node  --outdir dist  --bundle  --minify   --format=cjs"
   },
   "dependencies": {
+    "@aws-sdk/client-sqs": "^3.998.0",
     "@repo/auth": "*",
     "@repo/db": "*"
   },
   "peerDependencies": {
     "typescript": "^5"
+  },
+  "devDependencies": {
+    "@types/node": "^25.3.1"
   }
 }

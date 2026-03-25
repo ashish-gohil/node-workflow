@@ -125,6 +125,13 @@
     --color-border-inverse: #e5e7eb; /* light border on dark-inverse surfaces */
 
     /* -------------------------
+   BRAND / ACCENT (DARK MODE)
+   ------------------------- */
+    --color-accent-primary: #818cf8; /* brighter indigo (glows on dark) */
+    --color-accent-secondary: #94a3b8; /* softer slate */
+    --color-accent-muted: #6366f1; /* deeper indigo for layering */
+
+    /* -------------------------
        BUTTONS
        ------------------------- */
     --color-btn-primary-bg: #818cf8;
