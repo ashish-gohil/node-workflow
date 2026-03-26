@@ -1,7 +1,9 @@
-import { Shuffle } from "lucide-react";
-import { ActionNodeBase } from "./action-node-base";
-import { SetNodeType } from "@/app/types/actions";
 import { NodeProps } from "@xyflow/react";
+import { Shuffle } from "lucide-react";
+
+import { SetNodeType } from "@/app/types/actions";
+
+import { ActionNodeBase } from "./action-node-base";
 
 export function SetNode({ id, data, selected }: NodeProps<SetNodeType>) {
   return (

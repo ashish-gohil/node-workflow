@@ -1,12 +1,12 @@
-import { create } from "zustand";
 import {
   addEdge,
-  applyNodeChanges,
   applyEdgeChanges,
-  OnNodesChange,
-  OnEdgesChange,
+  applyNodeChanges,
   OnConnect,
+  OnEdgesChange,
+  OnNodesChange,
 } from "@xyflow/react";
+import { create } from "zustand";
 
 import { FlowEdge, FlowNode } from "../types/flow";
 
@@ -18,13 +18,9 @@ export type FlowState = {
   onEdgesChange: OnEdgesChange<FlowEdge>;
   onConnect: OnConnect;
 
-  setNodes: (
-    nodes: FlowNode[] | ((nodes: FlowNode[]) => FlowNode[])
-  ) => void;
+  setNodes: (nodes: FlowNode[] | ((nodes: FlowNode[]) => FlowNode[])) => void;
 
-  setEdges: (
-    edges: FlowEdge[] | ((edges: FlowEdge[]) => FlowEdge[])
-  ) => void;
+  setEdges: (edges: FlowEdge[] | ((edges: FlowEdge[]) => FlowEdge[])) => void;
 
   reset: () => void;
 };
@@ -53,19 +49,13 @@ const useFlow = create<FlowState>((set, get) => ({
 
   setNodes: (updater) => {
     set((state) => ({
-      nodes:
-        typeof updater === "function"
-          ? updater(state.nodes)
-          : updater,
+      nodes: typeof updater === "function" ? updater(state.nodes) : updater,
     }));
   },
 
   setEdges: (updater) => {
     set((state) => ({
-      edges:
-        typeof updater === "function"
-          ? updater(state.edges)
-          : updater,
+      edges: typeof updater === "function" ? updater(state.edges) : updater,
     }));
   },
 

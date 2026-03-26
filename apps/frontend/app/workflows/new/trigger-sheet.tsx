@@ -1,5 +1,15 @@
 "use client";
 import React, { useState } from "react";
+
+import {
+  DEFAULT_MANUAL_TRIGGER_DATA,
+  DEFAULT_SCHEDULER_TRIGGER_DATA,
+  DEFAULT_WEBHOOK_TRIGGER_DATA,
+} from "@/app/default-data/trigger-data";
+import useFlow from "@/app/store/flow-store";
+import { TriggerNode, TriggerNodeTypes, TriggerSheetElement } from "@/app/types/tirggers";
+
+import { Button } from "../../../components/ui/button";
 import {
   Sheet,
   SheetContent,
@@ -8,20 +18,6 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "../../../components/ui/sheet";
-import { Button } from "../../../components/ui/button";
-
-import {
-  TriggerNode,
-  TriggerNodeTypes,
-  TriggerSheetElement,
-} from "@/app/types/tirggers";
-
-import {
-  DEFAULT_MANUAL_TRIGGER_DATA,
-  DEFAULT_SCHEDULER_TRIGGER_DATA,
-  DEFAULT_WEBHOOK_TRIGGER_DATA,
-} from "@/app/default-data/trigger-data";
-import useFlow from "@/app/store/flow-store";
 
 const triggerNodes: TriggerSheetElement[] = [
   {
@@ -101,11 +97,10 @@ export default function TriggerSheet({
   setConfigNodeId: (id: string) => void;
 }) {
   const { setNodes } = useFlow();
+
   const [triggerSheetOpen, setTriggerSheetOpen] = useState<boolean>(false);
-  function createTriggerNode(
-    type: TriggerNodeTypes,
-    position = { x: 0, y: 0 }
-  ): TriggerNode {
+
+  function createTriggerNode(type: TriggerNodeTypes, position = { x: 0, y: 0 }): TriggerNode {
     const base = {
       id: crypto.randomUUID(),
       position,
@@ -160,20 +155,14 @@ export default function TriggerSheet({
             stroke="currentColor"
             className="size-10"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M12 4.5v15m7.5-7.5h-15"
-            />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
           </svg>
         </Button>
       </SheetTrigger>
       <SheetContent>
         <SheetHeader>
           <SheetTitle>Select trigger node from the list</SheetTitle>
-          <SheetDescription>
-            Trigger is a step that starts your workflow
-          </SheetDescription>
+          <SheetDescription>Trigger is a step that starts your workflow</SheetDescription>
           <div className="flex flex-col gap-4 cursor-pointer pt-6 ">
             {triggerNodes.map((node) => (
               <div
@@ -181,6 +170,7 @@ export default function TriggerSheet({
                   setTriggerSheetOpen(false);
 
                   const newNode = createTriggerNode(node.type);
+
                   console.log(newNode);
                   setNodes((nds) => [...nds, newNode]);
                   console.log("selected trigger node");
@@ -192,9 +182,7 @@ export default function TriggerSheet({
                 key={node.type}
                 className="w-full flex gap-3 justify-start items-start"
               >
-                <div className="w-16 flex justify-center items-start p-2">
-                  {node?.icon}
-                </div>
+                <div className="w-16 flex justify-center items-start p-2">{node?.icon}</div>
                 <div className="w-full flex flex-col gap-0">
                   <div className="text-text-primary">{node.label}</div>
                   <div className="text-text-muted">{node.description}</div>

@@ -6,6 +6,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { motion } from "motion/react";
 
 import { cn } from "@/lib/utils";
+
 import CornerIcons from "./corners";
 
 const buttonVariants = cva(
@@ -66,6 +67,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     ref
   ) => {
     const Comp = asChild ? Slot : "button";
+
     const [isHovered, setIsHovered] = React.useState(false);
 
     return (
@@ -89,7 +91,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.85 }}
             transition={{
-              type: "springy",
+              type: "spring",
               stiffness: 260,
               damping: 20,
             }}

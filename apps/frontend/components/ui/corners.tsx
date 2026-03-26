@@ -16,11 +16,7 @@ export default function CornerIcons({
   size?: CornerSize;
   className?: string;
 }) {
-  const base = cn(
-    "absolute pointer-events-none border-border-default",
-    sizeMap[size],
-    className
-  );
+  const base = cn("absolute pointer-events-none border-border-default", sizeMap[size], className);
 
   return (
     <>

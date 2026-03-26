@@ -1,15 +1,15 @@
 import { useMemo } from "react";
 import {
   BaseEdge,
+  type Edge,
   EdgeLabelRenderer,
+  type EdgeProps,
   getBezierPath,
   getSmoothStepPath,
   getStraightPath,
+  type Node,
   Position,
   useStore,
-  type Edge,
-  type EdgeProps,
-  type Node,
 } from "@xyflow/react";
 
 export type DataEdge<T extends Node = Node> = Edge<{
@@ -45,6 +45,7 @@ export function DataEdge({
   targetY,
 }: EdgeProps<DataEdge>) {
   const nodeData = useStore((state) => state.nodeLookup.get(source)?.data);
+
   const [edgePath, labelX, labelY] = getPath({
     type: data.path ?? "bezier",
     sourceX,

@@ -1,7 +1,14 @@
 import { nextJsConfig } from "@repo/eslint-config/next-js";
+import prettierPlugin from "eslint-plugin-prettier";
 
-/** @type {import("eslint").Linter.Config} */
 export default [
   ...nextJsConfig,
-  // Other configurations
+  {
+    plugins: {
+      prettier: prettierPlugin,
+    },
+    rules: {
+      "prettier/prettier": "error",
+    },
+  },
 ];

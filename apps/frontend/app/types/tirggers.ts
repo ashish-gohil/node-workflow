@@ -1,5 +1,5 @@
-import { Node } from "@xyflow/react";
 import { ReactNode } from "react";
+import { Node } from "@xyflow/react";
 
 /* ------------------------------------------------------------------ */
 /*  Trigger Types                                                      */
@@ -100,21 +100,13 @@ export type SchedulerConfig =
   | WeeklySchedulerConfig
   | CronSchedulerConfig;
 
-export type SchedulerTriggerDataTypes =
-  BaseTriggerData<SchedulerConfig>;
+export type SchedulerTriggerDataTypes = BaseTriggerData<SchedulerConfig>;
 
 /* ------------------------------------------------------------------ */
 /*  Webhook Trigger                                                    */
 /* ------------------------------------------------------------------ */
 
-export type WebhookHttpMethod =
-  | "GET"
-  | "POST"
-  | "PUT"
-  | "PATCH"
-  | "DELETE"
-  | "HEAD"
-  | "OPTIONS";
+export type WebhookHttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | "HEAD" | "OPTIONS";
 
 export type WebhookAuthConfig =
   | { type: "none" }
@@ -140,8 +132,7 @@ export type WebhookTriggerConfig = {
   timeoutMs?: number;
 };
 
-export type WebhookTriggerDataTypes =
-  BaseTriggerData<WebhookTriggerConfig>;
+export type WebhookTriggerDataTypes = BaseTriggerData<WebhookTriggerConfig>;
 
 /* ------------------------------------------------------------------ */
 /*  React Flow Node Types                                              */
@@ -156,7 +147,4 @@ export type TriggerNodesDataTypes =
   | SchedulerTriggerDataTypes
   | WebhookTriggerDataTypes;
 
-export type TriggerNode =
-  | ManualTriggerNodeType
-  | SchedulerTriggerNodeType
-  | WebhookTriggerNodeType;
+export type TriggerNode = ManualTriggerNodeType | SchedulerTriggerNodeType | WebhookTriggerNodeType;

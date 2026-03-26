@@ -1,14 +1,13 @@
 "use client";
 
-import { Position, NodeProps } from "@xyflow/react";
-import { PlusCircle, Layers } from "lucide-react";
-
-import { BaseNode } from "@/components/nodes/base-node";
-import { NodeStatusIndicator } from "@/components/node-status-indicator";
-import { ButtonHandle } from "@/components/handles/button-handle";
+import { NodeProps, Position } from "@xyflow/react";
+import { Layers, PlusCircle } from "lucide-react";
 
 import { MergeNodeType } from "@/app/types/actions";
 import { BaseHandle } from "@/components/handles/base-handle";
+import { ButtonHandle } from "@/components/handles/button-handle";
+import { NodeStatusIndicator } from "@/components/node-status-indicator";
+import { BaseNode } from "@/components/nodes/base-node";
 
 export function MergeNode({ id, data, selected }: NodeProps<MergeNodeType>) {
   const inputCount = data.inputs ?? 2;
@@ -30,10 +29,7 @@ export function MergeNode({ id, data, selected }: NodeProps<MergeNodeType>) {
           >
             {/* -------- INPUT HANDLES (LEFT) -------- */}
             {Array.from({ length: inputCount }).map((_, index) => {
-              const top =
-                inputCount === 1
-                  ? "50%"
-                  : `${25 + (index * 50) / (inputCount - 1)}%`;
+              const top = inputCount === 1 ? "50%" : `${25 + (index * 50) / (inputCount - 1)}%`;
 
               return (
                 <BaseHandle
@@ -52,12 +48,7 @@ export function MergeNode({ id, data, selected }: NodeProps<MergeNodeType>) {
             </div>
 
             {/* -------- OUTPUT HANDLE (RIGHT) -------- */}
-            <ButtonHandle
-              id="output"
-              nodeId={id}
-              type="source"
-              position={Position.Right}
-            >
+            <ButtonHandle id="output" nodeId={id} type="source" position={Position.Right}>
               <PlusCircle className="size-3 text-border-strong group-hover:text-text-secondary" />
             </ButtonHandle>
           </BaseNode>

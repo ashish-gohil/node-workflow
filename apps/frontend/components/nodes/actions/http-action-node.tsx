@@ -1,13 +1,11 @@
-import { Globe } from "lucide-react";
 import { NodeProps } from "@xyflow/react";
-import { ActionNodeBase } from "./action-node-base";
+import { Globe } from "lucide-react";
+
 import { HttpRequestNodeType } from "@/app/types/actions";
 
-export function HttpRequestNode({
-  id,
-  data,
-  selected,
-}: NodeProps<HttpRequestNodeType>) {
+import { ActionNodeBase } from "./action-node-base";
+
+export function HttpRequestNode({ id, data, selected }: NodeProps<HttpRequestNodeType>) {
   return (
     <ActionNodeBase
       id={id}

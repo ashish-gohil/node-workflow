@@ -1,33 +1,32 @@
 "use client";
 
- import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import {
-  ReactFlow,
   Background,
-  Controls,
-  MiniMap,
   BackgroundVariant,
-  type OnConnectEnd,
+  Controls,
   type DefaultEdgeOptions,
   type FitViewOptions,
+  MiniMap,
+  type OnConnectEnd,
+  ReactFlow,
 } from "@xyflow/react";
 
-import "@xyflow/react/dist/style.css";
-import { FlowEdge, FlowNode } from "@/app/types/flow";
 import useFlow from "@/app/store/flow-store";
-
-import { TriggerNodeTypes } from "@/app/types/tirggers";
 import { ActionNodeTypes } from "@/app/types/actions";
+import { FlowEdge, FlowNode } from "@/app/types/flow";
+import { TriggerNodeTypes } from "@/app/types/tirggers";
 
-import { ManualTriggerNode } from "../nodes/triggers/manual-trigger-node";
-import { SchedulerTriggerNode } from "../nodes/triggers/schedule-trigger-node";
-import { WebhookTriggerNode } from "../nodes/triggers/webhook-trigger-node";
-
+import { DelayNode } from "../nodes/actions/delay-action-node";
 import { HttpRequestNode } from "../nodes/actions/http-action-node";
 import { IfNode } from "../nodes/actions/if-condition-action-node";
 import { MergeNode } from "../nodes/actions/merge-action-node";
 import { SetNode } from "../nodes/actions/set-transform-action-node";
-import { DelayNode } from "../nodes/actions/delay-action-node";
+import { ManualTriggerNode } from "../nodes/triggers/manual-trigger-node";
+import { SchedulerTriggerNode } from "../nodes/triggers/schedule-trigger-node";
+import { WebhookTriggerNode } from "../nodes/triggers/webhook-trigger-node";
+
+import "@xyflow/react/dist/style.css";
 
 type Props = {
   initialNodes?: FlowNode[];
@@ -70,15 +69,7 @@ export default function FlowCanvas({
 }: Props) {
   const initialized = useRef(false);
 
-  const {
-    nodes,
-    edges,
-    setNodes,
-    setEdges,
-    onNodesChange,
-    onEdgesChange,
-    onConnect,
-  } = useFlow();
+  const { nodes, edges, setNodes, setEdges, onNodesChange, onEdgesChange, onConnect } = useFlow();
 
   /**
    * Initialize ONLY ONCE
@@ -117,11 +108,7 @@ export default function FlowCanvas({
         defaultEdgeOptions={defaultEdgeOptions}
         {...eventHandlers}
       >
-        <Background
-          gap={10}
-          color="var(--color-bg-muted)"
-          variant={BackgroundVariant.Dots}
-        />
+        <Background gap={10} color="var(--color-bg-muted)" variant={BackgroundVariant.Dots} />
 
         {!readOnly && <MiniMap />}
         {!readOnly && <Controls />}

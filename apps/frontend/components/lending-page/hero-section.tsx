@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "motion/react";
+
 import { Button } from "../ui/button";
 
 export default function Hero() {
@@ -25,8 +26,8 @@ export default function Hero() {
           transition={{ delay: 0.2 }}
           className="mt-6 text-slate-500 text-2xl"
         >
-          Connect your stack with workflow architect. <br /> Deploy complex
-          logic in seconds without sacrificing technical control.
+          Connect your stack with workflow architect. <br /> Deploy complex logic in seconds without
+          sacrificing technical control.
         </motion.p>
 
         <motion.div

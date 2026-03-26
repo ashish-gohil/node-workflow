@@ -1,4 +1,4 @@
-import { Handle, Position, NodeProps, Node } from "@xyflow/react";
+import { Handle, Node, NodeProps, Position } from "@xyflow/react";
 
 export type TriggerNodeData = Node<{
   label: string;
@@ -15,9 +15,7 @@ export function TriggerNode({ data, selected }: NodeProps<TriggerNodeData>) {
       <div className="text-sm font-medium leading-tight">{data.label}</div>
 
       {/* Optional subtitle */}
-      {data.description && (
-        <div className="mt-1 text-xs text-text-muted">{data.description}</div>
-      )}
+      {data.description && <div className="mt-1 text-xs text-text-muted">{data.description}</div>}
 
       {/* Single output handle (right side) */}
       <Handle

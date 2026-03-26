@@ -1,23 +1,16 @@
 "use client";
 
+import { type Dispatch, type SetStateAction, useCallback, useEffect, useState } from "react";
 import {
-  useEffect,
-  useState,
-  useCallback,
-  type Dispatch,
-  type SetStateAction,
-} from "react";
-
-import {
-  useNodes,
+  type NodeChange,
+  type OnNodesChange,
   Panel,
+  PanelPosition,
+  useNodes,
+  useReactFlow,
   useStore,
   useStoreApi,
   ViewportPortal,
-  useReactFlow,
-  PanelPosition,
-  type OnNodesChange,
-  type NodeChange,
   type XYPosition,
 } from "@xyflow/react";
 
@@ -43,6 +36,7 @@ type ChangeInfoProps = {
 
 const ChangeInfo = ({ change }: ChangeInfoProps) => {
   const id = "id" in change ? change.id : "-";
+
   const { type } = change;
 
   return (
@@ -65,14 +59,13 @@ const ChangeInfo = ({ change }: ChangeInfoProps) => {
 
 export const ChangeLogger = ({ limit = 20 }: ChangeLoggerProps) => {
   const [changes, setChanges] = useState<NodeChange[]>([]);
+
   const store = useStoreApi();
 
   // Memoize the callback for handling node changes
   const handleNodeChanges: OnNodesChange = useCallback(
     (newChanges: NodeChange[]) => {
-      setChanges((prevChanges) =>
-        [...newChanges, ...prevChanges].slice(0, limit)
-      );
+      setChanges((prevChanges) => [...newChanges, ...prevChanges].slice(0, limit));
     },
     [limit]
   );
@@ -90,9 +83,7 @@ export const ChangeLogger = ({ limit = 20 }: ChangeLoggerProps) => {
       {changes.length === 0 ? (
         <NoChanges />
       ) : (
-        changes.map((change, index) => (
-          <ChangeInfo key={index} change={change} />
-        ))
+        changes.map((change, index) => <ChangeInfo key={index} change={change} />)
       )}
     </>
   );
@@ -100,6 +91,7 @@ export const ChangeLogger = ({ limit = 20 }: ChangeLoggerProps) => {
 
 export const NodeInspector = () => {
   const { getInternalNode } = useReactFlow();
+
   const nodes = useNodes();
 
   return (
@@ -107,6 +99,7 @@ export const NodeInspector = () => {
       <div className="text-secondary-foreground">
         {nodes.map((node) => {
           const internalNode = getInternalNode(node.id);
+
           if (!internalNode) {
             return null;
           }
@@ -156,8 +149,11 @@ const NodeInfo = ({
   if (!width || !height) return null;
 
   const absoluteTransform = `translate(${absPosition.x}px, ${absPosition.y + height}px)`;
+
   const formattedPosition = `${position.x.toFixed(1)}, ${position.y.toFixed(1)}`;
+
   const formattedDimensions = `${width} × ${height}`;
+
   const selectionStatus = selected ? "Selected" : "Not Selected";
 
   return (
@@ -217,7 +213,9 @@ type DevToolsProps = {
 
 export const DevTools = ({ position }: DevToolsProps) => {
   const [nodeInspectorActive, setNodeInspectorActive] = useState(false);
+
   const [changeLoggerActive, setChangeLoggerActive] = useState(false);
+
   const [viewportLoggerActive, setViewportLoggerActive] = useState(false);
 
   const tools = [

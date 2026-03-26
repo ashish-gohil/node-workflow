@@ -1,11 +1,11 @@
 import {
   ActionNodeTypes,
-  HttpRequestNodeData,
-  SetNodeData,
-  IfNodeData,
   CodeNodeData,
   DelayNodeData,
+  HttpRequestNodeData,
+  IfNodeData,
   MergeNodeData,
+  SetNodeData,
 } from "../types/actions";
 
 /* ------------------------------------------------------------------ */

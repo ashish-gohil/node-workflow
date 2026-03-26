@@ -1,17 +1,22 @@
 "use client";
 
-import AppLogo from "./app-logo";
-import ThemeToggle from "./theme-toggle";
-import { Button } from "./button";
 import { usePathname, useRouter } from "next/navigation";
+import { motion } from "motion/react";
+
 import useFlow from "@/app/store/flow-store";
 import { api } from "@/lib/api";
-import { motion } from "motion/react";
+
+import AppLogo from "./app-logo";
+import { Button } from "./button";
+import ThemeToggle from "./theme-toggle";
 
 export default function Header() {
   const { nodes, edges } = useFlow();
+
   const router = useRouter();
+
   const pathName = usePathname();
+
   const handleSaveWorkflow = () => {
     api.post("/workflows", {
       workflowId: "test",
@@ -27,6 +32,7 @@ export default function Header() {
       },
     });
   };
+
   return (
     <motion.nav
       style={{

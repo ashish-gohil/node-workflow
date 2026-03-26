@@ -5,6 +5,7 @@ import * as SelectPrimitive from "@radix-ui/react-select";
 import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+
 import CornerIcons from "./corners";
 
 /* ------------------------------------------------------------------ */
@@ -19,9 +20,7 @@ function Select(props: React.ComponentProps<typeof SelectPrimitive.Root>) {
 /* Group                                                              */
 /* ------------------------------------------------------------------ */
 
-function SelectGroup(
-  props: React.ComponentProps<typeof SelectPrimitive.Group>
-) {
+function SelectGroup(props: React.ComponentProps<typeof SelectPrimitive.Group>) {
   return <SelectPrimitive.Group data-slot="select-group" {...props} />;
 }
 
@@ -29,9 +28,7 @@ function SelectGroup(
 /* Value                                                              */
 /* ------------------------------------------------------------------ */
 
-function SelectValue(
-  props: React.ComponentProps<typeof SelectPrimitive.Value>
-) {
+function SelectValue(props: React.ComponentProps<typeof SelectPrimitive.Value>) {
   return <SelectPrimitive.Value data-slot="select-value" {...props} />;
 }
 
@@ -159,9 +156,7 @@ function SelectContent({
           />
         </div>
         <SelectScrollUpButton />
-        <SelectPrimitive.Viewport className="p-2">
-          {children}
-        </SelectPrimitive.Viewport>
+        <SelectPrimitive.Viewport className="p-2">{children}</SelectPrimitive.Viewport>
         <SelectScrollDownButton />
       </SelectPrimitive.Content>
     </SelectPrimitive.Portal>
@@ -172,18 +167,11 @@ function SelectContent({
 /* Label                                                              */
 /* ------------------------------------------------------------------ */
 
-function SelectLabel({
-  className,
-  ...props
-}: React.ComponentProps<typeof SelectPrimitive.Label>) {
+function SelectLabel({ className, ...props }: React.ComponentProps<typeof SelectPrimitive.Label>) {
   return (
     <SelectPrimitive.Label
       data-slot="select-label"
-      className={cn(
-        "px-2 py-1 text-xs font-medium",
-        "text-text-muted",
-        className
-      )}
+      className={cn("px-2 py-1 text-xs font-medium", "text-text-muted", className)}
       {...props}
     />
   );
@@ -259,11 +247,7 @@ function SelectScrollUpButton({
   return (
     <SelectPrimitive.ScrollUpButton
       data-slot="select-scroll-up-button"
-      className={cn(
-        "flex items-center justify-center py-1",
-        "text-text-muted",
-        className
-      )}
+      className={cn("flex items-center justify-center py-1", "text-text-muted", className)}
       {...props}
     >
       <ChevronUpIcon className="size-4" />
@@ -278,11 +262,7 @@ function SelectScrollDownButton({
   return (
     <SelectPrimitive.ScrollDownButton
       data-slot="select-scroll-down-button"
-      className={cn(
-        "flex items-center justify-center py-1",
-        "text-text-muted",
-        className
-      )}
+      className={cn("flex items-center justify-center py-1", "text-text-muted", className)}
       {...props}
     >
       <ChevronDownIcon className="size-4" />
@@ -296,13 +276,13 @@ function SelectScrollDownButton({
 
 export {
   Select,
-  SelectGroup,
-  SelectValue,
-  SelectTrigger,
   SelectContent,
-  SelectLabel,
+  SelectGroup,
   SelectItem,
-  SelectSeparator,
-  SelectScrollUpButton,
+  SelectLabel,
   SelectScrollDownButton,
+  SelectScrollUpButton,
+  SelectSeparator,
+  SelectTrigger,
+  SelectValue,
 };

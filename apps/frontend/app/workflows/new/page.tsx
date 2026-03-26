@@ -2,17 +2,19 @@
 import React, { useState } from "react";
 import { useCallback } from "react";
 import { OnConnectEnd, useReactFlow } from "@xyflow/react";
+import { useShallow } from "zustand/react/shallow";
+
+import useFlow, { FlowState } from "@/app/store/flow-store";
+import { ActionNodeTypes, DelayNodeType } from "@/app/types/actions";
+import { TriggerNode } from "@/app/types/tirggers";
+import TriggerSheet from "@/app/workflows/new/trigger-sheet";
+import FlowCanvas from "@/components/flow/flow-canvas";
 // import { useTheme } from 'next-themes'
 import { ThemeHydrated } from "@/components/ui/theme-wraper";
-import "@xyflow/react/dist/style.css";
 
-import { TriggerNode } from "@/app/types/tirggers";
-import { useShallow } from "zustand/react/shallow";
-import TriggerSheet from "@/app/workflows/new/trigger-sheet";
 import TriggerConfigDialog from "./trigger-config/trigger-config-dialog";
-import { ActionNodeTypes, DelayNodeType } from "@/app/types/actions";
-import useFlow, { FlowState } from "@/app/store/flow-store";
-import FlowCanvas from "@/components/flow/flow-canvas";
+
+import "@xyflow/react/dist/style.css";
 
 const selector = (state: FlowState) => ({
   nodes: state.nodes,
@@ -26,7 +28,9 @@ const selector = (state: FlowState) => ({
 
 export default function NewWorkflow() {
   const { screenToFlowPosition } = useReactFlow();
+
   const { nodes, edges, setNodes, setEdges } = useFlow(useShallow(selector));
+
   const [configNodeId, setConfigNodeId] = useState<string | null>(null);
 
   // When drag stops (create create action node if its valid position...)
@@ -34,6 +38,7 @@ export default function NewWorkflow() {
     (event, connectionState) => {
       if (!connectionState.isValid) {
         let clientX = 0;
+
         let clientY = 0;
 
         if (event instanceof TouchEvent) {
@@ -79,11 +84,9 @@ export default function NewWorkflow() {
 
   const updateNodeData = (configNodeId: string, data: any) => {
     const selectedNode = nodes.find((node) => node.id === configNodeId)!;
+
     selectedNode.data = data;
-    setNodes((nds) => [
-      ...nds.filter((node) => node.id === configNodeId),
-      selectedNode,
-    ]);
+    setNodes((nds) => [...nds.filter((node) => node.id === configNodeId), selectedNode]);
   };
 
   console.log("nodes from page.tsx ");

@@ -1,5 +1,8 @@
 "use client";
 import React, { useState } from "react";
+
+import { TriggerNode, TriggerNodesDataTypes, TriggerNodeTypes } from "@/app/types/tirggers";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -7,14 +10,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  TriggerNode,
-  TriggerNodesDataTypes,
-  TriggerNodeTypes,
-} from "@/app/types/tirggers";
+
 import { SchedulerTriggerConfig } from "./scheduler-trigger-config";
 import { WebhookTriggerConfig } from "./webhook-trigger-config";
-import { Button } from "@/components/ui/button";
 
 interface ITriggerConfigDialog {
   node: TriggerNode;
@@ -34,17 +32,11 @@ const triggerConfigMap = {
   // [TriggerNodeTypes.ManualTrigger]: null,
 };
 
-export default function TriggerConfigDialog({
-  node,
-  onSave,
-  onClose,
-}: ITriggerConfigDialog) {
+export default function TriggerConfigDialog({ node, onSave, onClose }: ITriggerConfigDialog) {
   //@ts-ignore
   const ConfigComponent = triggerConfigMap[node.type as TriggerNodeTypes];
 
-  const [tempConfigData, setTempConfigData] = useState<TriggerNodesDataTypes>(
-    node.data
-  );
+  const [tempConfigData, setTempConfigData] = useState<TriggerNodesDataTypes>(node.data);
 
   if (!ConfigComponent) return null;
 
@@ -55,19 +47,10 @@ export default function TriggerConfigDialog({
           <DialogTitle>{node.data?.label}</DialogTitle>
         </DialogHeader>
         <div className="max-h-[70vh] overflow-auto">
-          <ConfigComponent
-            configData={tempConfigData}
-            setConfigData={setTempConfigData}
-          />
+          <ConfigComponent configData={tempConfigData} setConfigData={setTempConfigData} />
         </div>
         <DialogFooter className="flex gap-6 mt-0 p-0">
-          <Button
-            onClick={onClose}
-            variant="outline"
-            allowCorners
-            cornerSize="sm"
-            className="w-20"
-          >
+          <Button onClick={onClose} variant="outline" allowCorners cornerSize="sm" className="w-20">
             Cancel
           </Button>
           <Button

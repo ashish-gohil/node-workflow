@@ -9,6 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+
 import { TriggerConfigProps } from "./trigger-config-dialog";
 
 const WEEKDAYS: Weekday[] = [
@@ -26,6 +27,7 @@ export function SchedulerTriggerConfig({
   setConfigData,
 }: TriggerConfigProps<SchedulerTriggerDataTypes>) {
   const { config } = configData;
+
   const updateConfig = (newConfig: SchedulerTriggerDataTypes["config"]) => {
     setConfigData({
       ...configData,
@@ -37,9 +39,7 @@ export function SchedulerTriggerConfig({
     <div className="space-y-4 flex flex-col gap-3">
       {/* ---------------- Mode Selector ---------------- */}
       <div className="flex flex-col gap-1">
-        <div className="text-sm font-medium text-text-secondary">
-          Select Mode
-        </div>
+        <div className="text-sm font-medium text-text-secondary">Select Mode</div>
         <Select
           value={config.mode}
           onValueChange={(mode) => {

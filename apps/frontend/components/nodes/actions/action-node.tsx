@@ -1,13 +1,15 @@
-import { Handle, Position, NodeProps, Node, useReactFlow } from "@xyflow/react";
-import { CustomHandle } from "../../handles/custom-handle";
-import {
-  BaseNode,
-  BaseNodeHeader,
-  BaseNodeHeaderTitle,
-  BaseNodeContent,
-} from "@/components/nodes/base-node";
+import { Handle, Node, NodeProps, Position, useReactFlow } from "@xyflow/react";
+
 import { BaseHandle } from "@/components/handles/base-handle";
 import { NodeStatusIndicator } from "@/components/node-status-indicator";
+import {
+  BaseNode,
+  BaseNodeContent,
+  BaseNodeHeader,
+  BaseNodeHeaderTitle,
+} from "@/components/nodes/base-node";
+
+import { CustomHandle } from "../../handles/custom-handle";
 
 export type ActionNodeData = Node<{
   label: string;
@@ -24,16 +26,12 @@ export function ActionNode({ id, data }: NodeProps<ActionNodeData>) {
       <BaseNode className="min-w-[160px]" id={id}>
         {/* Header */}
         <BaseNodeHeader>
-          <BaseNodeHeaderTitle className="text-sm leading-tight">
-            {data.label}
-          </BaseNodeHeaderTitle>
+          <BaseNodeHeaderTitle className="text-sm leading-tight">{data.label}</BaseNodeHeaderTitle>
         </BaseNodeHeader>
 
         {/* Content */}
         <BaseNodeContent>
-          {data.description && (
-            <div className="text-xs text-text-muted">{data.description}</div>
-          )}
+          {data.description && <div className="text-xs text-text-muted">{data.description}</div>}
         </BaseNodeContent>
 
         {/* Target Handle */}

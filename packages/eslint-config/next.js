@@ -7,6 +7,7 @@ import pluginReact from 'eslint-plugin-react'
 import globals from 'globals'
 import pluginNext from '@next/eslint-plugin-next'
 import { config as baseConfig } from './base.js'
+import pluginPrettier from 'eslint-plugin-prettier'
 
 /**
  * A custom ESLint configuration for libraries that use Next.js.
@@ -18,13 +19,9 @@ export const nextJsConfig = [
   js.configs.recommended,
   eslintConfigPrettier,
   ...tseslint.configs.recommended,
-  globalIgnores([
-    // Default ignores of eslint-config-next:
-    '.next/**',
-    'out/**',
-    'build/**',
-    'next-env.d.ts',
-  ]),
+
+  globalIgnores(['.next/**', 'out/**', 'build/**', 'next-env.d.ts']),
+
   {
     ...pluginReact.configs.flat.recommended,
     languageOptions: {
@@ -34,6 +31,7 @@ export const nextJsConfig = [
       },
     },
   },
+
   {
     plugins: {
       '@next/next': pluginNext,
@@ -43,6 +41,7 @@ export const nextJsConfig = [
       ...pluginNext.configs['core-web-vitals'].rules,
     },
   },
+
   {
     plugins: {
       'react-hooks': pluginReactHooks,
@@ -50,8 +49,15 @@ export const nextJsConfig = [
     settings: { react: { version: 'detect' } },
     rules: {
       ...pluginReactHooks.configs.recommended.rules,
-      // React scope no longer necessary with new JSX transform.
       'react/react-in-jsx-scope': 'off',
+    },
+  },
+  {
+    plugins: {
+      prettier: pluginPrettier,
+    },
+    rules: {
+      'prettier/prettier': 'error',
     },
   },
 ]

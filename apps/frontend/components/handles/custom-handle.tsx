@@ -1,6 +1,7 @@
-import { cn } from "@/lib/utils";
 import { Handle, Position } from "@xyflow/react";
 import { Plus } from "lucide-react";
+
+import { cn } from "@/lib/utils";
 
 type CustomHandleProps = {
   position?: Position;
@@ -20,10 +21,7 @@ export function CustomHandle({
 }: CustomHandleProps) {
   return (
     <div
-      className={cn(
-        "absolute w-auto  top-1/2  flex items-center pointer-events-none",
-        className
-      )}
+      className={cn("absolute w-auto  top-1/2  flex items-center pointer-events-none", className)}
     >
       <Handle
         position={position}
