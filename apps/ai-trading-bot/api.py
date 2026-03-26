@@ -1,24 +1,49 @@
 from fastapi import FastAPI
-import torch
-from model import StockTransformer
+from pydantic import BaseModel
+from typing import List
+
+import pandas as pd
+from infer import predict   # ✅ use infer layer
 
 app = FastAPI()
 
-model = StockTransformer(input_dim=INPUT_DIM)
-model.load_state_dict(torch.load("model.pt"))
-model.eval()
+
+# -------------------------------
+# REQUEST SCHEMA (IMPORTANT)
+# -------------------------------
+
+class Candle(BaseModel):
+    open: float
+    high: float
+    low: float
+    close: float
+    volume: float
+
+
+class PredictRequest(BaseModel):
+    candles: List[Candle]
+
+
+# -------------------------------
+# HEALTH CHECK
+# -------------------------------
+
+@app.get("/health")
+def health():
+    return {"status": "ok"}
+
+
+# -------------------------------
+# PREDICT ENDPOINT
+# -------------------------------
 
 @app.post("/predict")
-def predict(data: list):
+def predict_api(req: PredictRequest):
 
-    x = torch.tensor(data, dtype=torch.float32).unsqueeze(0)
+    # Convert structured input → DataFrame
+    df = pd.DataFrame([c.dict() for c in req.candles])
 
-    dir_logits, ret = model(x)
+    # Call inference layer
+    result = predict(df)
 
-    probs = torch.softmax(dir_logits, dim=1)
-
-    return {
-        "direction": "UP" if probs.argmax() == 1 else "DOWN",
-        "confidence": probs.max().item(),
-        "expected_return": ret.item()
-    }
+    return result

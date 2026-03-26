@@ -1,24 +1,31 @@
-# 🚀 Deployment Guide: AI Trading Service (Docker + AWS EC2)
+# 🚀 AI Trading Service – Complete Setup & Deployment Guide
 
-This guide explains **step-by-step deployment** of your AI Trading Service using:
+This guide covers **everything end-to-end**:
 
-- 🐳 Docker (for packaging)
-- ☁️ AWS EC2 (for hosting)
-- 🔗 Integration with Turborepo
-
----
-
-# 📁 1. Turborepo Folder Structure
-
-Place your AI service inside:
-
-```
-/apps/ai-trading-service
-```
+- 🧪 Run locally (dev)
+- 🐳 Run with Docker
+- ☁️ Deploy to AWS EC2 (production)
+- 🔗 Integrate with Turborepo / n8n
 
 ---
 
-## ✅ Final Structure
+# 🧠 1. PROJECT OVERVIEW
+
+Your service:
+
+```text
+AI Trading Microservice (Python + FastAPI)
+```
+
+Flow:
+
+```text
+OHLC Data → Features (Strategies) → Model → Prediction API
+```
+
+---
+
+# 📁 2. FINAL PROJECT STRUCTURE
 
 ```
 apps/
@@ -32,31 +39,100 @@ apps/
     ├── backtest.py
     ├── infer.py
     ├── api.py
+    ├── config.py
+
+    ├── requirements.txt
+    ├── Dockerfile
+    ├── .dockerignore
+    ├── start.sh
+
+    ├── .env
+    ├── .env.example
+
+    ├── models/
+    │   └── model.pt
 ```
 
 ---
 
-# 🐳 2. Build & Test Locally
+# 🧪 3. RUN LOCALLY (WITHOUT DOCKER)
 
 ---
 
-## Step 1: Build Docker Image
+## Step 1: Navigate
 
-```
-docker build -t ai-trading-service .
-```
-
----
-
-## Step 2: Run Container
-
-```
-docker run --env-file .env -p 8000:8000 ai-trading-service
+```bash
+cd apps/ai-trading-service
 ```
 
 ---
 
-## Step 3: Test API
+## Step 2: Create Virtual Environment
+
+```bash
+python -m venv venv
+```
+
+### Activate
+
+**Windows**
+
+```bash
+venv\Scripts\activate
+```
+
+**Mac/Linux**
+
+```bash
+source venv/bin/activate
+```
+
+---
+
+## Step 3: Install Dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+---
+
+## Step 4: Setup Environment Variables
+
+Create `.env`:
+
+```env
+KITE_API_KEY=
+KITE_API_SECRET=
+ACCESS_TOKEN=
+MODEL_PATH=models/model.pt
+```
+
+---
+
+## Step 5: Train Model
+
+```bash
+python train.py
+```
+
+✔ This generates:
+
+```
+models/model.pt
+```
+
+---
+
+## Step 6: Run API
+
+```bash
+uvicorn api:app --reload
+```
+
+---
+
+## Step 7: Test
 
 Open:
 
@@ -66,38 +142,74 @@ http://localhost:8000/docs
 
 ---
 
-# ☁️ 3. AWS EC2 SETUP
+# 🐳 4. RUN LOCALLY USING DOCKER
+
+---
+
+## Step 1: Build Image
+
+```bash
+docker build -t ai-trading-service .
+```
+
+---
+
+## Step 2: Run Container
+
+```bash
+docker run --env-file .env -p 8000:8000 ai-trading-service
+```
+
+---
+
+## Step 3: Access API
+
+```
+http://localhost:8000/docs
+```
+
+---
+
+## 🔥 Dev Mode (Hot Reload)
+
+```bash
+docker run --env-file .env -p 8000:8000 -v $(pwd):/app ai-trading-service
+```
+
+---
+
+# ☁️ 5. DEPLOY TO AWS EC2 (PRODUCTION)
 
 ---
 
 ## Step 1: Launch EC2
 
-- OS: Ubuntu
-- Instance: t2.micro (Free Tier)
+- OS: Ubuntu 22.04
+- Instance: `t2.micro` (Free tier)
 
 ---
 
-## Step 2: Open Port
+## Step 2: Configure Security Group
 
 Allow:
 
 ```
-Port: 8000
+Custom TCP → Port 8000 → 0.0.0.0/0
 ```
 
 ---
 
-## Step 3: SSH
+## Step 3: SSH into EC2
 
-```
+```bash
 ssh -i your-key.pem ubuntu@your-ec2-ip
 ```
 
 ---
 
-# ⚙️ 4. INSTALL DOCKER
+## Step 4: Install Docker
 
-```
+```bash
 sudo apt update
 sudo apt install docker.io -y
 
@@ -107,43 +219,62 @@ sudo systemctl enable docker
 
 ---
 
-## Allow docker without sudo
+## Step 5: Enable Docker Without sudo
 
-```
+```bash
 sudo usermod -aG docker ubuntu
 exit
 ```
 
-Reconnect SSH.
+Reconnect:
+
+```bash
+ssh -i your-key.pem ubuntu@your-ec2-ip
+```
 
 ---
 
-# 📥 5. DEPLOY CODE
+## Step 6: Clone Repository
 
-```
-git clone <your-repo>
+```bash
+git clone <your-repo-url>
 cd apps/ai-trading-service
 ```
 
 ---
 
-# 🐳 6. BUILD IMAGE
+## Step 7: Add Environment Variables
 
+```bash
+nano .env
 ```
+
+Paste your values.
+
+---
+
+## Step 8: Build Docker Image
+
+```bash
 docker build -t ai-trading-service .
 ```
 
 ---
 
-# ▶️ 7. RUN CONTAINER
+## Step 9: Run Container (Production Mode)
 
-```
-docker run -d -p 8000:8000 ai-trading-service
+```bash
+docker run -d \
+  --name ai-service \
+  --restart always \
+  --env-file .env \
+  -p 8000:8000 \
+  ai-trading-service
 ```
 
 ---
 
-# 🌐 8. ACCESS API
+## Step 10: Access API
 
 ```
 http://your-ec2-ip:8000/docs
@@ -151,9 +282,11 @@ http://your-ec2-ip:8000/docs
 
 ---
 
-# 🔗 9. CONNECT n8n
+# 🔗 6. CONNECT WITH N8N / NODE API
 
-Use HTTP node:
+---
+
+## Endpoint
 
 ```
 POST http://your-ec2-ip:8000/predict
@@ -161,94 +294,125 @@ POST http://your-ec2-ip:8000/predict
 
 ---
 
-# 🔄 10. UPDATE DEPLOYMENT
+## Body Example
 
+```json
+{
+  "candles": [
+    {
+      "open": 100,
+      "high": 105,
+      "low": 99,
+      "close": 104,
+      "volume": 1000
+    }
+  ]
+}
 ```
+
+---
+
+# 🔄 7. UPDATE DEPLOYMENT (CI FLOW)
+
+---
+
+```bash
+cd apps/ai-trading-service
+
 git pull
+
 docker build -t ai-trading-service .
-docker stop <container_id>
-docker run -d -p 8000:8000 ai-trading-service
+
+docker stop ai-service
+docker rm ai-service
+
+docker run -d \
+  --name ai-service \
+  --restart always \
+  --env-file .env \
+  -p 8000:8000 \
+  ai-trading-service
 ```
 
 ---
 
-# 📊 11. DEBUGGING
+# 📊 8. DEBUGGING
 
 ---
 
-## Running containers
+## Check Running Containers
 
-```
+```bash
 docker ps
 ```
 
 ---
 
-## Logs
+## View Logs
 
-```
-docker logs <container_id>
-```
-
----
-
-## Stop
-
-```
-docker stop <container_id>
+```bash
+docker logs ai-service
 ```
 
 ---
 
-# ⚠️ 12. PRODUCTION IMPROVEMENTS
+## Stop Container
 
----
-
-## Persistent container
-
-```
-docker run -d -p 8000:8000 --name ai-service ai-trading-service
+```bash
+docker stop ai-service
 ```
 
 ---
 
-## Auto restart
-
-```
-docker run -d --restart always -p 8000:8000 ai-trading-service
-```
+# ⚠️ 9. PRODUCTION BEST PRACTICES
 
 ---
 
-## Use Nginx later for:
+## ✅ Load model once (performance)
 
-- HTTPS
-- Domain
+## ✅ Separate training & inference
+
+## ✅ Use Docker always
+
+## ✅ Use `.env` (never hardcode secrets)
+
+---
+
+## 🔐 Future Improvements
+
+- Nginx (reverse proxy)
+- HTTPS (SSL)
+- Domain mapping
+- AWS ECS / Kubernetes
+- Redis caching
+- Queue-based inference
 
 ---
 
 # 🧠 FINAL FLOW
 
-```
+```text
 Train Model → model.pt
         ↓
-Docker Image
+Docker Build
         ↓
-EC2
+Deploy to EC2
         ↓
-API
+FastAPI Service
         ↓
-n8n → Prediction
+n8n / Backend / Frontend
+        ↓
+Prediction
 ```
 
 ---
 
 # 🎯 FINAL NOTE
 
-- Train locally
-- Deploy only inference
-- Keep model updated
+- Train models locally or via pipeline
+- Deploy only inference service
+- Keep updating models periodically
 
 ---
 
-🚀 Your AI service is now production-ready.
+🚀 Your AI Trading Service is now **fully production-ready + scalable + microservice compatible**

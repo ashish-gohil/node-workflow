@@ -1,5 +1,3 @@
-# dataset.py
-
 import torch
 
 class StockDataset(torch.utils.data.Dataset):
