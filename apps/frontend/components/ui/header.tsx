@@ -44,7 +44,7 @@ export default function Header() {
 
       <div className="flex flex-row gap-6 justify-between">
         <ThemeToggle />
-        {pathName.includes("workflow/new") ? (
+        {pathName.includes("workflows/new") ? (
           <Button
             allowCorners={true}
             cornerSize="sm"
@@ -56,7 +56,7 @@ export default function Header() {
         ) : (
           <Button
             onClick={() => {
-              router.push("/workflow/new");
+              router.push("/workflows/new");
             }}
             className="relative rounded-none"
             allowCorners={true}
