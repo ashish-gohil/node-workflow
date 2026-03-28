@@ -44,7 +44,11 @@ export function ActionNodeBase({
   return (
     <div className=" flex gap-2 gap-y-0.5 max-w-[110px]  items-start flex-col">
       <div className="relative group">
-        <NodeStatusIndicator status="success" variant="border" className="rounded-[6px]">
+        <NodeStatusIndicator
+          status="success"
+          variant="border"
+          className="rounded-[6px]"
+        >
           <BaseNode
             onDoubleClick={() => onEdit?.(id)}
             className={`
@@ -71,7 +75,9 @@ export function ActionNodeBase({
             })}
 
             {/* -------- ICON -------- */}
-            <div className="w-full h-full flex items-center justify-center">{icon}</div>
+            <div className="w-full h-full flex items-center justify-center">
+              {icon}
+            </div>
 
             {/* -------- OUTPUT HANDLES -------- */}
             {outputs.map((output, index) => (

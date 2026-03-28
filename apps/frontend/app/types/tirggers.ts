@@ -106,7 +106,14 @@ export type SchedulerTriggerDataTypes = BaseTriggerData<SchedulerConfig>;
 /*  Webhook Trigger                                                    */
 /* ------------------------------------------------------------------ */
 
-export type WebhookHttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | "HEAD" | "OPTIONS";
+export type WebhookHttpMethod =
+  | "GET"
+  | "POST"
+  | "PUT"
+  | "PATCH"
+  | "DELETE"
+  | "HEAD"
+  | "OPTIONS";
 
 export type WebhookAuthConfig =
   | { type: "none" }
@@ -147,4 +154,7 @@ export type TriggerNodesDataTypes =
   | SchedulerTriggerDataTypes
   | WebhookTriggerDataTypes;
 
-export type TriggerNode = ManualTriggerNodeType | SchedulerTriggerNodeType | WebhookTriggerNodeType;
+export type TriggerNode =
+  | ManualTriggerNodeType
+  | SchedulerTriggerNodeType
+  | WebhookTriggerNodeType;

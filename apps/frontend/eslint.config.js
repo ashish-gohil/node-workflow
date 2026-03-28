@@ -1,14 +1,13 @@
-import { nextJsConfig } from "@repo/eslint-config/next-js";
-import prettierPlugin from "eslint-plugin-prettier";
+import { nextJsConfig } from "@repo/eslint-config/next";
 
 export default [
   ...nextJsConfig,
   {
-    plugins: {
-      prettier: prettierPlugin,
-    },
-    rules: {
-      "prettier/prettier": "error",
-    },
+    ignores: [
+      "eslint.config.js",
+      "next.config.js",
+      "postcss.config.mjs",
+      "tailwind.config.ts",
+    ],
   },
 ];

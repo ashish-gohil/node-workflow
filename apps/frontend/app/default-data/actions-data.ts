@@ -70,7 +70,7 @@ export const DEFAULT_CODE_NODE_DATA: CodeNodeData = {
   description: "Run custom JavaScript",
   execution: "initial",
   config: {
-    code: `return items;`,
+    code: "return items;",
   },
 };
 

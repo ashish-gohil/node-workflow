@@ -1,6 +1,12 @@
 "use client";
 
-import { type Dispatch, type SetStateAction, useCallback, useEffect, useState } from "react";
+import {
+  type Dispatch,
+  type SetStateAction,
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
 import {
   type NodeChange,
   type OnNodesChange,
@@ -65,7 +71,9 @@ export const ChangeLogger = ({ limit = 20 }: ChangeLoggerProps) => {
   // Memoize the callback for handling node changes
   const handleNodeChanges: OnNodesChange = useCallback(
     (newChanges: NodeChange[]) => {
-      setChanges((prevChanges) => [...newChanges, ...prevChanges].slice(0, limit));
+      setChanges((prevChanges) =>
+        [...newChanges, ...prevChanges].slice(0, limit)
+      );
     },
     [limit]
   );
@@ -83,7 +91,9 @@ export const ChangeLogger = ({ limit = 20 }: ChangeLoggerProps) => {
       {changes.length === 0 ? (
         <NoChanges />
       ) : (
-        changes.map((change, index) => <ChangeInfo key={index} change={change} />)
+        changes.map((change, index) => (
+          <ChangeInfo key={index} change={change} />
+        ))
       )}
     </>
   );
@@ -146,7 +156,9 @@ const NodeInfo = ({
   height,
   data,
 }: NodeInfoProps) => {
-  if (!width || !height) return null;
+  if (!width || !height) {
+    return null;
+  }
 
   const absoluteTransform = `translate(${absPosition.x}px, ${absPosition.y + height}px)`;
 

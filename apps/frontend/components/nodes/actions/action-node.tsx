@@ -26,12 +26,16 @@ export function ActionNode({ id, data }: NodeProps<ActionNodeData>) {
       <BaseNode className="min-w-[160px]" id={id}>
         {/* Header */}
         <BaseNodeHeader>
-          <BaseNodeHeaderTitle className="text-sm leading-tight">{data.label}</BaseNodeHeaderTitle>
+          <BaseNodeHeaderTitle className="text-sm leading-tight">
+            {data.label}
+          </BaseNodeHeaderTitle>
         </BaseNodeHeader>
 
         {/* Content */}
         <BaseNodeContent>
-          {data.description && <div className="text-xs text-text-muted">{data.description}</div>}
+          {data.description && (
+            <div className="text-xs text-text-muted">{data.description}</div>
+          )}
         </BaseNodeContent>
 
         {/* Target Handle */}

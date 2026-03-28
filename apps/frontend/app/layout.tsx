@@ -30,8 +30,12 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={true}>
-          <div className={`fixed top-0 left-0 right-0 z-50`}>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="dark"
+          enableSystem={true}
+        >
+          <div className={"fixed top-0 left-0 right-0 z-50"}>
             <Header />
           </div>
 

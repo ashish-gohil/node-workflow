@@ -3,9 +3,15 @@ import { getToken } from "next-auth/jwt";
 
 const BACKEND_URL = process.env.BACKEND_API_URL!;
 
-export async function handler(req: NextRequest, context: { params: Promise<{ path: string[] }> }) {
+export async function handler(
+  req: NextRequest,
+  context: { params: Promise<{ path: string[] }> }
+) {
   if (!BACKEND_URL) {
-    return NextResponse.json({ error: "BACKEND_API_URL not configured" }, { status: 500 });
+    return NextResponse.json(
+      { error: "BACKEND_API_URL not configured" },
+      { status: 500 }
+    );
   }
 
   // get decoded token
@@ -38,13 +44,17 @@ export async function handler(req: NextRequest, context: { params: Promise<{ pat
       Authorization: `Bearer ${backendToken}`,
       "Content-Type": "application/json",
     },
-    body: req.method !== "GET" && req.method !== "HEAD" ? await req.text() : undefined,
+    body:
+      req.method !== "GET" && req.method !== "HEAD"
+        ? await req.text()
+        : undefined,
   });
 
   return new NextResponse(await backendRes.text(), {
     status: backendRes.status,
     headers: {
-      "Content-Type": backendRes.headers.get("Content-Type") || "application/json",
+      "Content-Type":
+        backendRes.headers.get("Content-Type") || "application/json",
     },
   });
 }

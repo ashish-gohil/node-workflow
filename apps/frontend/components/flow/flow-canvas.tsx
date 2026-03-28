@@ -69,16 +69,30 @@ export default function FlowCanvas({
 }: Props) {
   const initialized = useRef(false);
 
-  const { nodes, edges, setNodes, setEdges, onNodesChange, onEdgesChange, onConnect } = useFlow();
+  const {
+    nodes,
+    edges,
+    setNodes,
+    setEdges,
+    onNodesChange,
+    onEdgesChange,
+    onConnect,
+  } = useFlow();
 
   /**
    * Initialize ONLY ONCE
    */
   useEffect(() => {
-    if (initialized.current) return;
+    if (initialized.current) {
+      return;
+    }
 
-    if (initialNodes) setNodes(initialNodes);
-    if (initialEdges) setEdges(initialEdges);
+    if (initialNodes) {
+      setNodes(initialNodes);
+    }
+    if (initialEdges) {
+      setEdges(initialEdges);
+    }
 
     initialized.current = true;
   }, [initialNodes, initialEdges, setNodes, setEdges]);
@@ -87,7 +101,9 @@ export default function FlowCanvas({
    * Attach listeners only if editable
    */
   const eventHandlers = useMemo(() => {
-    if (readOnly) return {};
+    if (readOnly) {
+      return {};
+    }
 
     return {
       onNodesChange,
@@ -108,7 +124,11 @@ export default function FlowCanvas({
         defaultEdgeOptions={defaultEdgeOptions}
         {...eventHandlers}
       >
-        <Background gap={10} color="var(--color-bg-muted)" variant={BackgroundVariant.Dots} />
+        <Background
+          gap={10}
+          color="var(--color-bg-muted)"
+          variant={BackgroundVariant.Dots}
+        />
 
         {!readOnly && <MiniMap />}
         {!readOnly && <Controls />}

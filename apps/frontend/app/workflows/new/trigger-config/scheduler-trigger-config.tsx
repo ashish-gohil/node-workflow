@@ -39,7 +39,9 @@ export function SchedulerTriggerConfig({
     <div className="space-y-4 flex flex-col gap-3">
       {/* ---------------- Mode Selector ---------------- */}
       <div className="flex flex-col gap-1">
-        <div className="text-sm font-medium text-text-secondary">Select Mode</div>
+        <div className="text-sm font-medium text-text-secondary">
+          Select Mode
+        </div>
         <Select
           value={config.mode}
           onValueChange={(mode) => {

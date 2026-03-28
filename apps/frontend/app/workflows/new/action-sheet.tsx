@@ -2,7 +2,15 @@
 
 import React, { Dispatch, SetStateAction, useState } from "react";
 import { Edge, Node } from "@xyflow/react";
-import { Clock, Code2, Filter, GitMerge, Globe, PlusCircle, Wand2 } from "lucide-react";
+import {
+  Clock,
+  Code2,
+  Filter,
+  GitMerge,
+  Globe,
+  PlusCircle,
+  Wand2,
+} from "lucide-react";
 
 import {
   DEFAULT_CODE_NODE_DATA,
@@ -122,7 +130,10 @@ export default function ActionSheet({
 
   const [open, setOpen] = useState(false);
 
-  function createActionNode(type: ActionNodeTypes, position = { x: 0, y: 0 }): FlowNode {
+  function createActionNode(
+    type: ActionNodeTypes,
+    position = { x: 0, y: 0 }
+  ): FlowNode {
     const base = {
       id: crypto.randomUUID(),
       type,
@@ -154,7 +165,9 @@ export default function ActionSheet({
       <SheetContent>
         <SheetHeader>
           <SheetTitle>Select action node</SheetTitle>
-          <SheetDescription>Action nodes perform work inside the workflow</SheetDescription>
+          <SheetDescription>
+            Action nodes perform work inside the workflow
+          </SheetDescription>
 
           <div className="flex flex-col gap-4 pt-6">
             {actionNodes.map((node) => (
@@ -164,7 +177,9 @@ export default function ActionSheet({
                   setOpen(false);
 
                   const newNode = createActionNode(node.type, {
-                    x: sourceNode.position.x + (sourceNode?.width ? sourceNode.width + 50 : 250),
+                    x:
+                      sourceNode.position.x +
+                      (sourceNode?.width ? sourceNode.width + 50 : 250),
                     y: sourceNode.position.y,
                   });
 
@@ -189,7 +204,9 @@ export default function ActionSheet({
 
                 <div className="flex flex-col">
                   <div className="text-text-primary">{node.label}</div>
-                  <div className="text-text-muted text-sm">{node.description}</div>
+                  <div className="text-text-muted text-sm">
+                    {node.description}
+                  </div>
                 </div>
               </div>
             ))}

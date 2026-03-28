@@ -1,11 +1,14 @@
 {
   "compilerOptions": {
-    "target": "ES2020",
+    "target": "ES2022",
     "lib": [
-      "ES2020"
+      "ES2022",
+      "DOM"
     ],
-    "module": "CommonJS",
-    "moduleResolution": "Node",
+    
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+   
     "baseUrl": ".",
     "paths": {
       "@repo/db": [
@@ -15,9 +18,16 @@
         "packages/auth"
       ]
     },
+    
     "strict": true,
     "skipLibCheck": true,
+   
     "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true
+    "allowSyntheticDefaultImports": true,
+   
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+   
+    "noEmit": true
   }
 }

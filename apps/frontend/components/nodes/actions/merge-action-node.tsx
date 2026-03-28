@@ -29,7 +29,10 @@ export function MergeNode({ id, data, selected }: NodeProps<MergeNodeType>) {
           >
             {/* -------- INPUT HANDLES (LEFT) -------- */}
             {Array.from({ length: inputCount }).map((_, index) => {
-              const top = inputCount === 1 ? "50%" : `${25 + (index * 50) / (inputCount - 1)}%`;
+              const top =
+                inputCount === 1
+                  ? "50%"
+                  : `${25 + (index * 50) / (inputCount - 1)}%`;
 
               return (
                 <BaseHandle
@@ -48,7 +51,12 @@ export function MergeNode({ id, data, selected }: NodeProps<MergeNodeType>) {
             </div>
 
             {/* -------- OUTPUT HANDLE (RIGHT) -------- */}
-            <ButtonHandle id="output" nodeId={id} type="source" position={Position.Right}>
+            <ButtonHandle
+              id="output"
+              nodeId={id}
+              type="source"
+              position={Position.Right}
+            >
               <PlusCircle className="size-3 text-border-strong group-hover:text-text-secondary" />
             </ButtonHandle>
           </BaseNode>

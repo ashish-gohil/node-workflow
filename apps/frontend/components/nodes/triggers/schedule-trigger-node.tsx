@@ -7,7 +7,11 @@ import { SchedulerTriggerNodeType } from "@/app/types/tirggers";
 
 import { TriggerNodeBase } from "./trigger-node-base";
 
-export function SchedulerTriggerNode({ id, data, selected }: NodeProps<SchedulerTriggerNodeType>) {
+export function SchedulerTriggerNode({
+  id,
+  data,
+  selected,
+}: NodeProps<SchedulerTriggerNodeType>) {
   return (
     <TriggerNodeBase
       id={id}

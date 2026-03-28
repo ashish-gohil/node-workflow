@@ -18,13 +18,18 @@ const handler = NextAuth({
       },
 
       async authorize(credentials) {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/credentials`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(credentials),
-        });
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/auth/credentials`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(credentials),
+          }
+        );
 
-        if (!res.ok) return null;
+        if (!res.ok) {
+          return null;
+        }
 
         const user = await res.json();
 
@@ -53,16 +58,19 @@ const handler = NextAuth({
 
       // Google OAuth login
       if (account?.provider === "google") {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/oauth`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email: user?.email,
-            name: user?.name,
-            image: user?.image,
-            provider: "google",
-          }),
-        });
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/auth/oauth`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              email: user?.email,
+              name: user?.name,
+              image: user?.image,
+              provider: "google",
+            }),
+          }
+        );
 
         const backendUser = await res.json();
 

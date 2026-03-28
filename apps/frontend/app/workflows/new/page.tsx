@@ -86,7 +86,10 @@ export default function NewWorkflow() {
     const selectedNode = nodes.find((node) => node.id === configNodeId)!;
 
     selectedNode.data = data;
-    setNodes((nds) => [...nds.filter((node) => node.id === configNodeId), selectedNode]);
+    setNodes((nds) => [
+      ...nds.filter((node) => node.id === configNodeId),
+      selectedNode,
+    ]);
   };
 
   console.log("nodes from page.tsx ");

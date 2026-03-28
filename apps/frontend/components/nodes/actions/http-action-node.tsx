@@ -5,7 +5,11 @@ import { HttpRequestNodeType } from "@/app/types/actions";
 
 import { ActionNodeBase } from "./action-node-base";
 
-export function HttpRequestNode({ id, data, selected }: NodeProps<HttpRequestNodeType>) {
+export function HttpRequestNode({
+  id,
+  data,
+  selected,
+}: NodeProps<HttpRequestNodeType>) {
   return (
     <ActionNodeBase
       id={id}

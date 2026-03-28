@@ -18,7 +18,13 @@ interface TriggerNodeBaseProps {
   onEdit?: (id: string) => void;
 }
 
-export function TriggerNodeBase({ id, selected, icon, status, onEdit }: TriggerNodeBaseProps) {
+export function TriggerNodeBase({
+  id,
+  selected,
+  icon,
+  status,
+  onEdit,
+}: TriggerNodeBaseProps) {
   const { nodes } = useFlow();
 
   const curNode = nodes.find((node) => node.id === id)!;
@@ -35,7 +41,11 @@ export function TriggerNodeBase({ id, selected, icon, status, onEdit }: TriggerN
       </Button>
 
       <div className="relative">
-        <NodeStatusIndicator status={status} variant="border" className="-l-[6px]">
+        <NodeStatusIndicator
+          status={status}
+          variant="border"
+          className="-l-[6px]"
+        >
           <BaseNode
             onDoubleClick={() => onEdit?.(id)}
             className={`
@@ -44,10 +54,17 @@ export function TriggerNodeBase({ id, selected, icon, status, onEdit }: TriggerN
             `}
           >
             {/* -------- ICON -------- */}
-            <div className="w-full h-full flex items-center justify-center">{icon}</div>
+            <div className="w-full h-full flex items-center justify-center">
+              {icon}
+            </div>
 
             {/* -------- OUTPUT HANDLE -------- */}
-            <ButtonHandle id={`${id}-output`} nodeId={id} type="source" position={Position.Right}>
+            <ButtonHandle
+              id={`${id}-output`}
+              nodeId={id}
+              type="source"
+              position={Position.Right}
+            >
               <ActionSheet
                 setConfigNodeId={(id) => {}}
                 sourceHandleId={`${id}-output`}

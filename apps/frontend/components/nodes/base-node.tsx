@@ -20,12 +20,23 @@ export function BaseNode({ className, ...props }: ComponentProps<"div">) {
 }
 
 /* ---------- Header ---------- */
-export function BaseNodeHeader({ className, ...props }: ComponentProps<"header">) {
-  return <header {...props} className={cn("flex items-center gap-2 px-4 py-3", className)} />;
+export function BaseNodeHeader({
+  className,
+  ...props
+}: ComponentProps<"header">) {
+  return (
+    <header
+      {...props}
+      className={cn("flex items-center gap-2 px-4 py-3", className)}
+    />
+  );
 }
 
 /* ---------- Title ---------- */
-export function BaseNodeHeaderTitle({ className, ...props }: ComponentProps<"h3">) {
+export function BaseNodeHeaderTitle({
+  className,
+  ...props
+}: ComponentProps<"h3">) {
   return (
     <h3
       data-slot="base-node-title"
@@ -36,8 +47,17 @@ export function BaseNodeHeaderTitle({ className, ...props }: ComponentProps<"h3"
 }
 
 /* ---------- Content ---------- */
-export function BaseNodeContent({ className, ...props }: ComponentProps<"div">) {
-  return <div data-slot="base-node-content" className={cn("px-4 pb-3", className)} {...props} />;
+export function BaseNodeContent({
+  className,
+  ...props
+}: ComponentProps<"div">) {
+  return (
+    <div
+      data-slot="base-node-content"
+      className={cn("px-4 pb-3", className)}
+      {...props}
+    />
+  );
 }
 
 /* ---------- Footer (optional) ---------- */

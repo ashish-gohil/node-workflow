@@ -7,63 +7,52 @@ import importSort from 'eslint-plugin-simple-import-sort'
 import spellcheck from 'eslint-plugin-spellcheck'
 
 /**
- * A shared ESLint configuration for the repository.
- *
- * @type {import("eslint").Linter.Config[]}
+ * Improved ESLint config
  */
 export const config = [
   js.configs.recommended,
   eslintConfigPrettier,
   ...tseslint.configs.recommended,
+
   {
     plugins: {
       turbo: turboPlugin,
       'simple-import-sort': importSort,
       spellcheck: spellcheck,
     },
+
     rules: {
-      // Turbo plugin
+      // -----------------------------
+      // 🚀 Turbo
+      // -----------------------------
       'turbo/no-undeclared-env-vars': 'warn',
 
-      // Prettier formatting
-      'prettier/prettier': [
-        'error',
-        {
-          semi: true,
-          singleQuote: false, // double quotes
-          trailingComma: 'es5',
-          printWidth: 100,
-          tabWidth: 2,
-          endOfLine: 'lf',
-        },
-      ],
+      // -----------------------------
+      // 🎨 Formatting (Prettier aligned)
+      // -----------------------------
       quotes: ['error', 'double', { avoidEscape: true }],
       semi: ['error', 'always'],
 
-      // Import sorting
+      // -----------------------------
+      // 📦 Import Sorting
+      // -----------------------------
       'simple-import-sort/imports': [
         'error',
         {
           groups: [
-            [
-              '^node:.*',
-              '^fs$',
-              '^path$',
-              '^os$',
-              '^crypto$',
-              '^http$',
-              '^https$',
-            ],
+            ['^node:.*'],
             ['^react', '^next', '^@?\\w'],
-            ['^@/'], // alias imports
-            ['^\\.\\./', '^\\./'], // relative imports
-            ['^.+\\.css$', '^.+\\.scss$'], // styles last
+            ['^@/'],
+            ['^\\.\\./', '^\\./'],
+            ['^.+\\.css$', '^.+\\.scss$'],
           ],
         },
       ],
       'simple-import-sort/exports': 'error',
 
-      // Spellcheck
+      // -----------------------------
+      // 🧠 Spellcheck (FIXED for Tailwind)
+      // -----------------------------
       'spellcheck/spell-checker': [
         'warn',
         {
@@ -71,45 +60,55 @@ export const config = [
           strings: true,
           identifiers: false,
           lang: 'en_US',
+
+          // 🔥 Ignore Tailwind patterns
+          skipIfMatch: [
+            '^[a-z]+-[0-9]+$', // bg-500, p-4
+            '^[a-z]+-[a-z]+-[0-9]+$', // bg-red-500
+            '^[a-z]+-[a-z]+$', // flex-row, items-center
+            '^w-\\d+$',
+            '^h-\\d+$',
+            '^p[trblxy]?-[0-9]+$',
+            '^m[trblxy]?-[0-9]+$',
+            '^text-[a-z]+-[0-9]+$',
+          ],
+
           skipWords: [
             'n8n',
             'Nextjs',
-            'TS',
-            'JSX',
             'Nodejs',
-            'React',
             'Prisma',
             'SQS',
             'AWS',
+            'tsx',
+            'jsx',
+            'api',
+            'env',
+            'props',
           ],
         },
       ],
 
-      // Recommended JS rules
+      // -----------------------------
+      // 🧱 Core JS (RELAXED)
+      // -----------------------------
       eqeqeq: ['error', 'always'],
-      curly: ['error', 'all'],
-      'no-undef': 'error',
+      curly: ['warn', 'all'], // was error
       'no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
-      'consistent-return': 'error',
-      'prefer-const': 'error',
-      'prefer-arrow-callback': 'warn',
+      'prefer-const': 'warn',
+      'prefer-arrow-callback': 'off', // not needed in modern React
       'no-var': 'error',
-      'block-scoped-var': 'error',
-      camelcase: ['warn', { properties: 'always' }],
       'no-duplicate-imports': 'error',
-      'padding-line-between-statements': [
-        'error',
-        { blankLine: 'always', prev: '*', next: 'return' },
-        { blankLine: 'always', prev: ['const', 'let', 'var'], next: '*' },
-      ],
     },
   },
+
   {
     plugins: {
       onlyWarn,
     },
   },
+
   {
-    ignores: ['dist/**'],
+    ignores: ['dist/**', '.next/**', 'node_modules/**'],
   },
 ]

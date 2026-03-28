@@ -57,7 +57,9 @@ export function WebhookTriggerConfig({
 
       {/* ---------------- HTTP Method ---------------- */}
       <div className="flex flex-col gap-1">
-        <div className="text-sm font-medium text-text-secondary">HTTP Method</div>
+        <div className="text-sm font-medium text-text-secondary">
+          HTTP Method
+        </div>
         <Select
           value={config.methods[0]}
           onValueChange={(method) =>
@@ -82,7 +84,9 @@ export function WebhookTriggerConfig({
 
       {/* ---------------- Authentication ---------------- */}
       <div className="flex flex-col gap-1">
-        <div className="text-sm font-medium text-text-secondary">Authentication</div>
+        <div className="text-sm font-medium text-text-secondary">
+          Authentication
+        </div>
         <Select
           value={config.auth?.type ?? "none"}
           onValueChange={(type) => {
@@ -217,13 +221,16 @@ export function WebhookTriggerConfig({
 
       {/* ---------------- Response Mode ---------------- */}
       <div className="flex flex-col gap-1">
-        <div className="text-sm font-medium text-text-secondary">Response Mode</div>
+        <div className="text-sm font-medium text-text-secondary">
+          Response Mode
+        </div>
         <Select
           value={config.responseMode ?? "onReceived"}
           onValueChange={(mode) =>
             updateConfig({
               ...config,
-              responseMode: mode as WebhookTriggerDataTypes["config"]["responseMode"],
+              responseMode:
+                mode as WebhookTriggerDataTypes["config"]["responseMode"],
             })
           }
         >

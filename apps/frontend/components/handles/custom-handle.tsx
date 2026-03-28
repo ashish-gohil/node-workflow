@@ -21,7 +21,10 @@ export function CustomHandle({
 }: CustomHandleProps) {
   return (
     <div
-      className={cn("absolute w-auto  top-1/2  flex items-center pointer-events-none", className)}
+      className={cn(
+        "absolute w-auto  top-1/2  flex items-center pointer-events-none",
+        className
+      )}
     >
       <Handle
         position={position}
