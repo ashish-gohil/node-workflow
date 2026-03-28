@@ -6,7 +6,7 @@ load_dotenv()
 class Settings:
     KITE_API_KEY = os.getenv("KITE_API_KEY")
     KITE_API_SECRET = os.getenv("KITE_API_SECRET")
-    ACCESS_TOKEN = os.getenv("ACCESS_TOKEN")
+    REQUEST_TOKEN = os.getenv("REQUEST_TOKEN")
 
     MODEL_PATH = os.getenv("MODEL_PATH", "model.pt")
     ENV = os.getenv("ENV", "development")

@@ -1,3 +1,4 @@
+
 def backtest(model, dataset, threshold=0.6):
 
     capital = 100000
@@ -31,3 +32,40 @@ def backtest(model, dataset, threshold=0.6):
 
     print("Final Capital:", capital)
     print("Accuracy:", wins / total if total else 0)
+
+
+
+if __name__ == "__main__":
+
+    import torch
+    from model import StockTransformer
+    from dataset import StockDataset
+
+    # -------------------------------
+    # 🔧 CONFIG
+    # -------------------------------
+    MODEL_PATH = "model.pth"
+    DATA_PATH = "data.csv"
+
+    # -------------------------------
+    # 📊 LOAD DATASET
+    # -------------------------------
+    dataset = StockDataset(DATA_PATH)
+
+    # -------------------------------
+    # 🧠 LOAD MODEL
+    # -------------------------------
+    model = StockTransformer(
+        input_dim=dataset.X.shape[2],
+        d_model=64,
+        n_heads=4,
+        n_layers=2
+    )
+
+    model.load_state_dict(torch.load(MODEL_PATH))
+    model.eval()
+
+    # -------------------------------
+    # 🚀 RUN BACKTEST
+    # -------------------------------
+    backtest(model, dataset, threshold=0.6)

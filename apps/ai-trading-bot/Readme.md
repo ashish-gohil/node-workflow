@@ -1,798 +1,497 @@
-# 🧠 AI Stock Prediction Service (Advanced README)
+# 🧠 AI Stock Prediction Service (V1 + V2 — Advanced Architecture Edition)
 
-A **production-grade, extensible AI microservice** designed to predict:
-
-* 📈 **Direction** (UP / DOWN)
-* 📊 **Expected Return (%)**
-
-using:
-
-* OHLCV market data (Zerodha API)
-* Technical indicators
-* Real-world trading strategies
-* Transformer-based deep learning
+A **production-grade AI trading microservice** evolving from a simple prediction engine into a **Transformer-based decision intelligence system**.
 
 ---
 
-# 🚀 1. WHAT THIS SERVICE ACTUALLY IS
+# 🚀 1. WHAT THIS PROJECT IS
 
-This is NOT just a model.
-
-It is a **complete decision system**:
+This is not just a model — it's a **multi-stage AI decision system**:
 
 ```text
-Raw Market Data
+OHLCV Data
     ↓
-Feature Engineering
+Feature Engineering (Technical + Strategy Signals)
     ↓
-Strategy Signals
+Sequence Encoding
     ↓
-AI Model (Transformer)
+Transformer Model (Attention-Based Learning)
     ↓
-Prediction + Confidence + Expected Return
+Multi-Head Outputs
+    ↓
+Confidence Calibration
+    ↓
+Decision Engine (V2)
+    ↓
+Trading Signal
 ```
 
 ---
 
-# 🎯 2. WHAT YOU GET FROM THIS SERVICE (DETAILED)
-
-This service returns a **structured prediction object** that represents the model’s understanding of the **next market move** based on historical data + strategies.
+# 🧠 2. CORE AI ARCHITECTURE (IMPORTANT)
 
 ---
 
-## 📦 Example Output
-
-```json
-{
-  "direction": "UP",
-  "confidence": 0.63,
-  "expected_return": 0.012
-}
-```
-
----
-
-# 🧠 Deep Meaning of Each Field
-
----
-
-## 🔼 `direction`
+## 🔷 High-Level Design
 
 ```text
-"UP" or "DOWN"
+Input Sequence (T x Features)
+        ↓
+Linear Embedding Layer
+        ↓
+Positional Encoding
+        ↓
+Transformer Encoder Stack
+        ↓
+Feature Aggregation (Pooling / CLS token)
+        ↓
+Shared Dense Layer
+        ↓
+├── Direction Head (Classification)
+└── Return Head (Regression)
 ```
 
-This is the **classification output** of the model.
+---
 
-### How it works internally:
+## 🔬 WHY TRANSFORMER?
 
-* Model outputs probabilities: `[P(DOWN), P(UP)]`
-* The higher one is selected
-
-### Example:
+Unlike LSTM:
 
 ```text
-[0.37, 0.63] → UP
+LSTM → Sequential memory (limited)
+Transformer → Global attention (better pattern detection)
 ```
 
-### Interpretation:
+👉 Captures:
 
-| Value  | Meaning                      |
-| ------ | ---------------------------- |
-| `UP`   | Model expects price increase |
-| `DOWN` | Model expects price decrease |
+* Long-term dependencies
+* Market regimes
+* Multi-indicator interactions
 
 ---
 
-## 🎯 `confidence`
+# 🔄 3. VERSION ARCHITECTURE COMPARISON
+
+---
+
+## 🧪 V1 — Basic Transformer
 
 ```text
-Range: 0 → 1
+Embedding → Transformer (2 layers) → Linear → Output
 ```
 
-This is the **probability of the predicted direction**.
+### Characteristics:
+
+* Limited depth
+* No calibration
+* Direct prediction usage
 
 ---
 
-### Example:
-
-```json
-"confidence": 0.63
-```
-
-Means:
+## 🚀 V2 — Advanced Transformer (Improved)
 
 ```text
-63% probability that prediction is correct
+Embedding
+    ↓
+Positional Encoding
+    ↓
+Transformer Encoder (Multi-layer)
+    ↓
+Layer Normalization
+    ↓
+Dropout Regularization
+    ↓
+Shared Representation
+    ↓
+Dual Heads:
+    • Classification (Direction)
+    • Regression (Return)
 ```
 
 ---
 
-### 🔥 Important Insight
+## 🔥 Architectural Improvements in V2
 
-Confidence is NOT accuracy.
-
-| Concept    | Meaning                |
-| ---------- | ---------------------- |
-| Confidence | Model belief           |
-| Accuracy   | Real-world correctness |
-
----
-
-### Practical Interpretation
-
-| Confidence  | Action         |
-| ----------- | -------------- |
-| < 0.55      | Ignore (noise) |
-| 0.55 – 0.65 | Weak signal    |
-| 0.65 – 0.75 | Tradable       |
-| > 0.75      | Strong signal  |
+| Component      | Improvement          |
+| -------------- | -------------------- |
+| Attention      | Multi-head attention |
+| Depth          | More encoder layers  |
+| Stability      | LayerNorm            |
+| Regularization | Dropout              |
+| Output         | Multi-task learning  |
+| Calibration    | Label smoothing      |
 
 ---
 
-## 📊 `expected_return`
+# 🧠 4. ATTENTION MECHANISM (KEY INNOVATION)
+
+---
+
+## 📌 Self-Attention Concept
 
 ```text
-Continuous value (can be +ve or -ve)
+Each timestep attends to ALL other timesteps
 ```
-
-This is the **regression output** of the model.
 
 ---
 
-### Example:
+## 📊 Mathematical Form
 
-```json
-"expected_return": 0.012
-```
+Attention(Q,K,V)=\mathrm{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V
 
-Means:
+---
+
+## 🧠 Interpretation in Trading
+
+* Model learns:
+
+  * “Which past candles matter?”
+  * “Which indicators influence future move?”
+
+---
+
+# 🏗️ 5. DETAILED MODEL DESIGN (V2)
+
+---
+
+## 🔢 Input
 
 ```text
-Expected +1.2% price move
+Shape: (batch_size, sequence_length, feature_dim)
 ```
 
 ---
 
-### Negative Example:
+## 🧱 Layers Breakdown
 
-```json
-"expected_return": -0.008
-```
+---
 
-Means:
+### 1. Embedding Layer
 
 ```text
-Expected -0.8% drop
+Feature_dim → d_model (e.g., 64 / 128)
+```
+
+* Projects raw features into latent space
+
+---
+
+### 2. Positional Encoding
+
+```text
+Adds time-awareness
+```
+
+Without this:
+
+```text
+Transformer = order-agnostic ❌
 ```
 
 ---
 
-## 🧠 How Direction & Return Work Together
+### 3. Transformer Encoder Stack
 
----
+Recommended:
 
-### Case 1:
-
-```json
-{
-  "direction": "UP",
-  "confidence": 0.70,
-  "expected_return": 0.015
-}
+```text
+Layers: 2–4
+Heads: 4–8
 ```
 
-👉 Strong bullish signal
-👉 High probability + good upside
+Each layer contains:
+
+* Multi-head attention
+* Feedforward network
+* Residual connections
+* Layer normalization
 
 ---
 
-### Case 2:
+### 4. Feedforward Network (MLP)
 
-```json
-{
-  "direction": "UP",
-  "confidence": 0.58,
-  "expected_return": 0.002
-}
+```text
+d_model → 4*d_model → d_model
 ```
 
-👉 Weak signal
-👉 Very small move → usually skip
-
 ---
 
-### Case 3:
+### 5. Output Heads
 
-```json
-{
-  "direction": "DOWN",
-  "confidence": 0.66,
-  "expected_return": -0.012
-}
+#### 📈 Direction Head
+
+```text
+Softmax → Classification
 ```
 
-👉 Good short opportunity
+#### 📊 Return Head
 
----
-
-### Case 4 (Important):
-
-```json
-{
-  "direction": "UP",
-  "confidence": 0.62,
-  "expected_return": -0.003
-}
+```text
+Linear → Regression
 ```
 
-⚠️ Conflict case:
+---
 
-* Direction says UP
-* Return says DOWN
-
-👉 This means model uncertainty → **avoid trade**
+# 🧠 6. ACTIVATION FUNCTIONS (BEST PRACTICES)
 
 ---
 
-# ⚠️ Reality Check (VERY IMPORTANT)
+## Recommended for Time Series:
+
+| Layer                   | Activation |
+| ----------------------- | ---------- |
+| Transformer FFN         | GELU ✅     |
+| Output (classification) | Softmax    |
+| Output (regression)     | Linear     |
 
 ---
 
-## 📉 Why You Cannot Get 90% Accuracy
+## Why GELU?
+
+```text
+Smoother than ReLU → better gradient flow
+```
+
+---
+
+# 🏋️ 7. TRAINING ARCHITECTURE
+
+---
+
+## Multi-Task Learning
+
+```text
+Loss = Classification Loss + Regression Loss
+```
+
+---
+
+## 🔥 Label Smoothing (CRITICAL)
+
+```python
+F.cross_entropy(..., label_smoothing=0.1)
+```
+
+---
+
+## Why?
+
+```text
+Prevents overconfidence → improves trading decisions
+```
+
+---
+
+# 📊 8. BACKTESTING ARCHITECTURE
+
+---
+
+## V1
+
+```text
+Prediction → Confidence Filter → Trade
+```
+
+---
+
+## V2
+
+```text
+Prediction
+    ↓
+Confidence Filter
+    ↓
+Expected Return Check
+    ↓
+Signal Engine (BUY/SELL/HOLD)
+    ↓
+Execution Logic
+    ↓
+Performance Tracking
+```
+
+---
+
+## 🧠 Key Upgrade
+
+```text
+V1 → Model decides
+V2 → System decides
+```
+
+---
+
+# 🔌 9. TRADING ENGINE (DECISION LAYER)
+
+---
+
+## 📁 `generate_signal_v2`
+
+Inputs:
+
+```text
+direction + confidence + expected_return
+```
+
+---
+
+## Output:
+
+```text
+BUY / SELL / HOLD + strength
+```
+
+---
+
+## Role:
+
+```text
+Separates ML from Trading Logic
+```
+
+---
+
+# 📈 10. PERFORMANCE OPTIMIZATION STRATEGIES
+
+---
+
+## 🔥 Improve Accuracy
+
+* Add more features (MACD, VWAP, ATR)
+* Increase sequence length
+* Tune attention heads
+
+---
+
+## 🔥 Improve Stability
+
+* Dropout (0.1–0.3)
+* LayerNorm
+* Gradient clipping
+
+---
+
+## 🔥 Improve Profitability
+
+* Confidence thresholds
+* Strong signal filtering
+* Position sizing (future)
+
+---
+
+# ⚙️ 11. RECOMMENDED MODEL CONFIG
+
+---
+
+```python
+d_model = 64 or 128
+n_heads = 4 or 8
+n_layers = 2–4
+dropout = 0.1
+sequence_length = 30–100
+```
+
+---
+
+# 📊 12. EXPECTED PERFORMANCE
+
+---
+
+| Metric             | V1    | V2       |
+| ------------------ | ----- | -------- |
+| Accuracy           | ~55%  | 60–68%   |
+| Confidence Quality | Poor  | Strong   |
+| Trade Quality      | Noisy | Filtered |
+| Profit Stability   | Low   | High     |
+
+---
+
+# ⚠️ 13. LIMITATIONS
+
+---
 
 Markets are:
 
+* Non-stationary
+* News-driven
 * Partially random
-* Influenced by news, events, institutions
-* Non-stationary (patterns change)
 
 ---
 
-## ✅ Realistic Benchmarks
-
-| Metric          | Value  |
-| --------------- | ------ |
-| Random guessing | 50%    |
-| Good model      | 55–60% |
-| Strong model    | 60–65% |
-| Exceptional     | 65–70% |
-
----
-
-## 💡 Key Insight
+## Truth
 
 ```text
-Even 60% accuracy can be highly profitable
-```
-
-IF:
-
-* Losses are small
-* Wins are bigger
-* Risk is controlled
-
----
-
-# 🧠 How You Should USE This Output
-
----
-
-## 🎯 Decision Rule (Basic)
-
-```text
-IF confidence > 0.6 AND expected_return > 0:
-    BUY
-
-IF confidence > 0.6 AND expected_return < 0:
-    SELL
-
-ELSE:
-    DO NOTHING
+Even 60–65% accuracy = excellent
 ```
 
 ---
 
-## 🛑 Risk Management Layer (IMPORTANT)
-
-Never rely only on model:
-
-Add:
-
-* Stop loss (e.g. -1%)
-* Target profit (e.g. +2%)
-* Position sizing
+# 🚀 14. FUTURE ARCHITECTURE UPGRADES
 
 ---
 
-# 🔥 Advanced Usage (REAL PRODUCT LEVEL)
+## 🔥 Next-Level Models
+
+* Temporal Fusion Transformer (TFT)
+* Informer (efficient long sequences)
+* Time Series Foundation Models
 
 ---
 
-## 📊 Combine Signals
+## 🧠 Advanced Ideas
+
+* Multi-timeframe attention
+* Cross-asset learning
+* Reinforcement learning for execution
+
+---
+
+# 🔄 15. COMPLETE PIPELINE
+
+---
 
 ```text
-Final Score = confidence × expected_return
+Data → Features → Dataset → Model → Train → Backtest → API → Trading
 ```
 
 ---
 
-## Example:
-
-```text
-0.65 × 0.02 = 0.013 → strong
-0.70 × 0.005 = 0.0035 → weak
-```
+# 🧠 16. FINAL PHILOSOPHY
 
 ---
 
-## 🧠 Portfolio Filtering
+## ❌ Not:
 
-Use model to:
-
-* Rank stocks
-* Pick top 5 signals
-* Ignore weak ones
+* Perfect predictor
+* Guaranteed profit system
 
 ---
 
-# 🎯 FINAL UNDERSTANDING
+## ✅ Yes:
 
----
-
-This output is NOT:
-
-❌ Exact future price
-
----
-
-This output IS:
-
-✅ Probability-based decision signal
-✅ AI-assisted trading insight
+* Decision support system
+* AI trading assistant
+* Strategy optimizer
 
 ---
 
 # 💬 FINAL TAKEAWAY
 
 ```text
-Model tells you:
-"What is likely"
+Edge in trading comes from:
 
-You decide:
-"What to do"
+Better Data
++ Better Model
++ Better Filtering (V2)
++ Better Risk Management
 ```
 
 ---
 
-# 🏗️ 3. COMPLETE SYSTEM ARCHITECTURE
+# 🚀 FINAL LINE
 
 ```text
-Zerodha API
-    ↓
-data_fetch.py
-    ↓
-features.py (STRATEGIES LIVE HERE)
-    ↓
-dataset.py (windowing)
-    ↓
-model.py (Transformer)
-    ↓
-train.py (training pipeline)
-    ↓
-backtest.py (simulation)
-    ↓
-infer.py (prediction logic)
-    ↓
-api.py (FastAPI service)
+V1 → Learns patterns  
+V2 → Makes decisions  
+Future → Learns + Adapts + Executes
 ```
-
----
-
-# 📁 4. PROJECT STRUCTURE (INSIDE TURBOREPO)
-
-```
-apps/
-└── ai-trading-service/
-    ├── strategies/
-    ├── data_fetch.py
-    ├── features.py
-    ├── dataset.py
-    ├── model.py
-    ├── train.py
-    ├── backtest.py
-    ├── infer.py
-    ├── api.py
-    ├── config.py
-    ├── models/
-    ├── requirements.txt
-    ├── Dockerfile
-```
-
----
-
-# 🔌 5. STRATEGY SYSTEM (CORE POWER)
-
-This is what makes your system **real-world ready**.
-
----
-
-## 🧠 Concept
-
-Instead of:
-
-```text
-Model learns only price ❌
-```
-
-You do:
-
-```text
-Model learns:
-- RSI behavior
-- Trend signals
-- Breakouts
-- Volatility
-```
-
----
-
-## 📦 Strategy Example
-
-```python
-class RSIStrategy:
-    def apply(self, df):
-        df["rsi"] = compute_rsi(df["close"])
-        df["rsi_buy"] = (df["rsi"] < 30).astype(int)
-        df["rsi_sell"] = (df["rsi"] > 70).astype(int)
-        return df
-```
-
----
-
-## ➕ Add New Strategy
-
-1. Create new file in `strategies/`
-2. Implement `.apply()`
-3. Register in `features.py`
-
-✅ Model automatically starts learning it
-
----
-
-# 📊 6. DATA PIPELINE
-
----
-
-## 📥 Data Source
-
-Zerodha API:
-
-* Open
-* High
-* Low
-* Close
-* Volume
-
----
-
-## ⚙️ Feature Engineering (`features.py`)
-
-Includes:
-
-* Returns
-* Volatility
-* Moving averages
-* RSI
-* Breakouts
-* Strategy signals
-
----
-
-## 🔁 Dataset Creation (`dataset.py`)
-
-Sliding window:
-
-```text
-Last 30 days → Predict next day
-```
-
----
-
-# 🤖 7. MODEL ARCHITECTURE
-
----
-
-## Transformer Model
-
-Your model:
-
-* Learns sequences
-* Detects patterns across time
-* Combines multiple strategies
-
----
-
-## Outputs
-
-1. Direction → classification
-2. Return → regression
-
----
-
-# 🏋️ 8. TRAINING PIPELINE
-
----
-
-## Run Training
-
-```bash
-python train.py
-```
-
----
-
-## What Happens Internally
-
-```text
-1. Fetch data
-2. Apply features
-3. Apply strategies
-4. Build dataset
-5. Train transformer
-6. Save model.pt
-```
-
----
-
-## Output
-
-```
-models/model.pt
-```
-
----
-
-# 🧪 9. BACKTESTING (MOST IMPORTANT)
-
----
-
-## Run
-
-```bash
-python backtest.py
-```
-
----
-
-## What It Does
-
-Simulates trading:
-
-```text
-Prediction → Trade → Profit/Loss
-```
-
----
-
-## Metrics
-
-* Win rate
-* Final capital
-* Drawdown
-
----
-
-## Why It Matters
-
-```text
-Training accuracy ≠ real profit
-Backtesting = truth
-```
-
----
-
-# 🔮 10. INFERENCE (PREDICTION)
-
----
-
-## Internal Flow (`infer.py`)
-
-```text
-Input → features → model → output
-```
-
----
-
-## Example Usage
-
-```python
-predict(model, last_30_days_data)
-```
-
----
-
-# 🌐 11. API USAGE
-
----
-
-## Start API
-
-```bash
-uvicorn api:app --reload
-```
-
----
-
-## Endpoint
-
-```
-POST /predict
-```
-
----
-
-## Input Format
-
-```json
-[
-  [feature_day_1],
-  [feature_day_2],
-  ...
-]
-```
-
----
-
-## Output
-
-```json
-{
-  "direction": "UP",
-  "confidence": 0.61,
-  "expected_return": 0.008
-}
-```
-
----
-
-# 🔗 12. HOW TO USE WITH N8N
-
----
-
-## Setup HTTP Node
-
-* Method: POST
-* URL: `/predict`
-
----
-
-## Flow
-
-```text
-Fetch Data → Transform → Call AI → Decision Node
-```
-
----
-
-# 🎯 13. HOW TO USE PREDICTIONS (IMPORTANT)
-
----
-
-## Basic Rule
-
-```text
-If confidence > 0.6 → trade
-Else → skip
-```
-
----
-
-## Better Strategy
-
-Combine with:
-
-* Stop loss
-* Risk management
-* Position sizing
-
----
-
-# 📈 14. HOW TO IMPROVE MODEL
-
----
-
-## ✅ Best Practices
-
-* Train per stock
-* Add more strategies
-* Use longer history
-* Clean data
-* Backtest always
-
----
-
-## ❌ Avoid
-
-* Blind trust in model
-* Overfitting
-* Ignoring volatility
-
----
-
-# 🔄 15. FULL WORKFLOW (REAL WORLD)
-
----
-
-```text
-1. Fetch stock data
-2. Train model (per stock)
-3. Backtest strategy
-4. Deploy model
-5. Call via API (n8n)
-6. Apply trading logic
-```
-
----
-
-# 🧩 16. EXTENSIBILITY
-
-You can easily add:
-
-* New indicators
-* New strategies
-* New models
-* Multi-stock orchestration
-
----
-
-# 🚀 17. FUTURE ROADMAP
-
-* News sentiment (NLP)
-* Multi-model ensemble
-* Reinforcement learning trader
-* Live auto-trading
-* Strategy marketplace (like n8n nodes)
-
----
-
-# 🧠 18. FINAL PHILOSOPHY
-
----
-
-## ❌ This is NOT:
-
-* A magic price predictor
-* Guaranteed profit system
-
----
-
-## ✅ This IS:
-
-* AI-assisted trading brain
-* Decision engine
-* Strategy optimizer
-
----
-
-# 💬 FINAL MESSAGE
-
-```text
-Winning in markets =
-
-Prediction + Risk Management + Discipline
-```
-
----
-
-# 👨‍💻 AUTHOR NOTE
-
-Designed for:
-
-* Scalable AI systems
-* Workflow automation (n8n)
-* Real-world trading applications
-
----
-
-🚀 You now have a **complete AI trading microservice ready for real-world use**

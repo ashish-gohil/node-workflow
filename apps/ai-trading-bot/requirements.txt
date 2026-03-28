@@ -28,3 +28,8 @@ matplotlib
 # ===== Utilities =====
 tqdm
 joblib
+
+
+# ===== lint =====
+black
+ruff
