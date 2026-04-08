@@ -1,38 +1,22 @@
-# ===== API =====
-fastapi
-uvicorn[standard]
+# ── Core ML ───────────────────────────────────────────────────────────────────
+torch>=2.2.0
+numpy>=1.26.0
+scikit-learn>=1.4.0
+pandas>=2.2.0
+joblib>=1.3.0
 
-# ===== ML / DL =====
-torch
-scikit-learn
+# ── API ────────────────────────────────────────────────────────────────────────
+fastapi>=0.110.0
+uvicorn[standard]>=0.29.0
+pydantic>=2.6.0
+pydantic-settings>=2.2.0
 
-# ===== Data Processing =====
-pandas
-numpy
+# ── Upstox data fetch ──────────────────────────────────────────────────────────
+upstox-python-sdk>=2.5.0
+requests>=2.31.0
 
-# ===== Technical Indicators =====
-ta
+# ── Data storage ──────────────────────────────────────────────────────────────
+pyarrow>=15.0.0       # Required for .parquet files
 
-# ===== Stock API =====
-upstox-python-sdk
-
-# ===== Env Management =====
-python-dotenv
-
-# ===== HTTP Requests =====
-requests
-
-# ===== Backtesting / Analysis =====
-matplotlib
-
-# ===== Utilities =====
-tqdm
-joblib
-
-
-# ===== lint =====
-black
-ruff
-
-# =====upstox-python-sdk=====
-pyarrow
+# ── Utilities ─────────────────────────────────────────────────────────────────
+python-dotenv>=1.0.0

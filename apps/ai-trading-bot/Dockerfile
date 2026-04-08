@@ -1,17 +1,28 @@
-# Use lightweight Python image
-FROM python:3.10-slim
+# ─────────────────────────────────────────────────────────────────────────────
+# Dockerfile — AI Trading Service
+# ─────────────────────────────────────────────────────────────────────────────
 
-# Set working directory inside container
+# Use slim Python base (saves ~600MB vs full image)
+FROM python:3.11-slim
+
+# Set working directory inside the container
 WORKDIR /app
 
-# Copy project files into container
-COPY . .
+# Install system dependencies needed by torch + pyarrow
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    g++ \
+    && rm -rf /var/lib/apt/lists/*
 
-# Install dependencies
+# Copy requirements first (Docker layer caching — only re-installs if requirements change)
+COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Expose API port
+# Copy all project files
+COPY . .
+
+# Expose the API port
 EXPOSE 8000
 
-# Start the service
-CMD ["bash", "start.sh"]
+# Default command: start the FastAPI server
+CMD ["uvicorn", "api_v2:app", "--host", "0.0.0.0", "--port", "8000"]
