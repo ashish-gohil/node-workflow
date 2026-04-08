@@ -14,7 +14,7 @@ numpy
 ta
 
 # ===== Stock API =====
-kiteconnect
+upstox-python-sdk
 
 # ===== Env Management =====
 python-dotenv
@@ -33,3 +33,6 @@ joblib
 # ===== lint =====
 black
 ruff
+
+# =====upstox-python-sdk=====
+pyarrow

@@ -10,5 +10,6 @@ class Settings:
 
     MODEL_PATH = os.getenv("MODEL_PATH", "model.pt")
     ENV = os.getenv("ENV", "development")
+    UPSTOX_ACCESS_TOKEN = os.getenv("UPSTOX_ACCESS_TOKEN")
 
 settings = Settings()
