@@ -5,8 +5,8 @@ What Bollinger Bands measure:
     Bollinger Bands draw a "channel" around price based on volatility.
 
     Middle Band  = 20-day moving average
-    Upper Band   = Middle + 2 × standard deviation
-    Lower Band   = Middle - 2 × standard deviation
+    Upper Band   = Middle + 2 x standard deviation
+    Lower Band   = Middle - 2 x standard deviation
 
     Think of it as: "where is price relative to its normal range?"
 

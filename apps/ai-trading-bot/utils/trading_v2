@@ -40,7 +40,7 @@ def generate_signal_v2(
 
     Args:
         direction:       0 = DOWN, 1 = UP
-        confidence:      Softmax probability of predicted class (0–1)
+        confidence:      Softmax probability of predicted class (0-1)
         expected_return: Raw return prediction from the regression head
 
     Returns:

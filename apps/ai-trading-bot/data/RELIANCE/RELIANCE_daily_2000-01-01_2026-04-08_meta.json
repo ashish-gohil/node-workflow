@@ -1,0 +1,11 @@
+{
+  "symbol": "RELIANCE",
+  "unit": "days",
+  "interval": "1",
+  "start_date": "2000-01-01",
+  "end_date": "2026-04-08",
+  "rows": 6531,
+  "timeframe": "daily",
+  "fetched_at": "2026-04-09T15:00:16",
+  "parquet": "data\\RELIANCE\\RELIANCE_daily_2000-01-01_2026-04-08.parquet"
+}

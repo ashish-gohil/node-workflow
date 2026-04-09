@@ -1,49 +1,86 @@
 """
-data_fetch_upstox.py  (improved)
+data_fetch_upstox.py — Fetch and cache historical OHLCV data from Upstox.
 
-Fixes:
-  - Added deduplication after parallel fetch (as_completed returns random order)
-  - find_instrument filters by instrument_type == "EQ" first → no derivative matches
-  - Added drop_duplicates + sort after combining chunks
-  - Rate-limit protection: added small sleep between chunk submissions
+Improvements over original:
+    1. Better file naming:
+       OLD: data/raw/RELIANCE/1d.parquet   ← confusing, what does "1d" mean?
+       NEW: data/raw/RELIANCE/RELIANCE_daily_2015-01-01_2025-01-09.parquet
+            → symbol + timeframe + start + end date. Immediately readable.
+
+    2. end_date parameter:
+       You can now fetch a specific date range:
+           python data_fetch_upstox.py --symbol RELIANCE --start 2018-01-01 --end 2022-12-31
+
+    3. Metadata sidecar file (.json next to .parquet):
+       Stores: symbol, unit, interval, start, end, rows, fetched_at
+       Lets you check data without loading the full parquet.
+
+    4. Incremental update:
+       If cache exists and --end is not specified (fetch up to today),
+       the script loads the cache, checks the last date, and only fetches
+       NEW candles since then. Merges and saves. Fast daily updates.
+
+    5. Better progress output with chunk progress bar.
+
+USAGE:
+    # Fetch all history from 2015 to today (daily)
+    python data_fetch_upstox.py --symbol RELIANCE --start 2015-01-01
+
+    # Fetch specific date range
+    python data_fetch_upstox.py --symbol RELIANCE --start 2018-01-01 --end 2022-12-31
+
+    # Fetch 15-minute candles (last 30 days only — Upstox API limit)
+    python data_fetch_upstox.py --symbol RELIANCE --unit minutes --interval 15
+
+    # Force re-fetch even if cache exists
+    python data_fetch_upstox.py --symbol RELIANCE --start 2015-01-01 --force
+
+    # Incremental update (only fetch new candles since last fetch)
+    python data_fetch_upstox.py --symbol RELIANCE --update
 """
 
-import os
-import json
-import time
 import argparse
-import pandas as pd
+import json
+import os
+import sys
+import time
 from datetime import datetime, timedelta
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-import upstox_client
-from upstox_client.rest import ApiException
+import pandas as pd
+
+# ── Fix imports ────────────────────────────────────────────────────────────────
+_ROOT = os.path.dirname(os.path.abspath(__file__))
+if _ROOT not in sys.path:
+    sys.path.insert(0, _ROOT)
+
 from config import settings
 
 ACCESS_TOKEN    = settings.UPSTOX_ACCESS_TOKEN
 INSTRUMENT_FILE = "instruments_upstox.json"
-
-if not ACCESS_TOKEN:
-    raise Exception("Missing UPSTOX_ACCESS_TOKEN in env")
+DATA_ROOT       = "data"
 
 
-# ── Client ───────────────────────────────────────────────────────────────────
+# ─── Upstox Client ────────────────────────────────────────────────────────────
+
 def get_upstox_client():
+    import upstox_client
     cfg = upstox_client.Configuration()
     cfg.access_token = ACCESS_TOKEN
     return upstox_client.HistoryV3Api(upstox_client.ApiClient(cfg))
 
 
-# ── Instruments ──────────────────────────────────────────────────────────────
+# ─── Instruments ──────────────────────────────────────────────────────────────
+
 def download_instruments():
     import requests
-    print("Downloading instruments...")
+    print("Downloading NSE instruments list (one-time, ~10MB)...")
     url = "https://assets.upstox.com/market-quote/instruments/exchange/NSE.json"
     res = requests.get(url, timeout=30)
     res.raise_for_status()
     with open(INSTRUMENT_FILE, "w") as f:
         json.dump(res.json(), f)
-    print("Instruments saved.")
+    print(f"  Saved → {INSTRUMENT_FILE}")
 
 
 def load_instruments() -> pd.DataFrame:
@@ -53,35 +90,118 @@ def load_instruments() -> pd.DataFrame:
 
 
 def find_instrument(symbol: str) -> str:
-    """
-    FIX: filter by instrument_type == 'EQ' first so RELIANCE doesn't
-    accidentally match RELIANCEETF or RELIANCE-FUT.
-    """
-    df = load_instruments()
+    """Return Upstox instrument_key for an NSE equity symbol."""
+    df  = load_instruments()
+    eq  = df[df.get("instrument_type", pd.Series(dtype=str)) == "EQ"]
 
-    # Prefer exact equity match
-    eq = df[df.get("instrument_type", pd.Series(dtype=str)) == "EQ"]
-    result = eq[eq["name"].str.upper() == symbol.upper()]
+    # Exact match first
+    res = eq[eq["name"].str.upper() == symbol.upper()]
+    if res.empty:
+        # Fallback: contains match
+        res = eq[eq["name"].str.contains(symbol, case=False, regex=False, na=False)]
+    if res.empty:
+        raise ValueError(
+            f"Symbol '{symbol}' not found in NSE instruments.\n"
+            f"Try running: python data_fetch_upstox.py --list-symbols {symbol}"
+        )
 
-    if result.empty:
-        # Fallback: contains search on EQ slice
-        result = eq[eq["name"].str.contains(symbol, case=False, regex=False, na=False)]
-
-    if result.empty:
-        raise Exception(f"Instrument not found for symbol: {symbol}")
-
-    key = result.iloc[0]["instrument_key"]
-    print(f"  {symbol} → {key}")
+    key = res.iloc[0]["instrument_key"]
+    print(f"  {symbol} → instrument_key: {key}")
     return key
 
 
-# ── Date helpers ─────────────────────────────────────────────────────────────
-def get_valid_end_date() -> datetime:
+def search_symbols(query: str):
+    """Helper: search for symbol names containing a string."""
+    df  = load_instruments()
+    eq  = df[df.get("instrument_type", pd.Series(dtype=str)) == "EQ"]
+    res = eq[eq["name"].str.contains(query, case=False, regex=False, na=False)]
+    print(f"\nSymbols matching '{query}':")
+    for _, row in res.iterrows():
+        print(f"  {row.get('name', '?'):30s}  key: {row.get('instrument_key', '?')}")
+
+
+# ─── File naming ──────────────────────────────────────────────────────────────
+
+def _timeframe_label(unit: str, interval: str) -> str:
+    """
+    Human-readable timeframe label for filenames.
+    Examples: interval=1,  unit=days    → daily
+              interval=15, unit=minutes → 15min
+              interval=1,  unit=weeks   → weekly
+    """
+    if unit == "days":
+        return "daily" if interval == "1" else f"{interval}day"
+    if unit == "minutes":
+        return f"{interval}min"
+    if unit == "weeks":
+        return "weekly" if interval == "1" else f"{interval}week"
+    return f"{interval}{unit[0]}"
+
+
+def build_cache_path(symbol: str, unit: str, interval: str,
+                     start: datetime, end: datetime) -> str:
+    """
+    Build a descriptive file path.
+
+    OLD: data/raw/RELIANCE/1d.parquet
+    NEW: data/RELIANCE/RELIANCE_daily_2015-01-01_2025-01-09.parquet
+
+    The filename tells you:
+        Symbol:     RELIANCE
+        Timeframe:  daily / 15min / weekly
+        Date range: 2015-01-01 to 2025-01-09
+    """
+    tf    = _timeframe_label(unit, interval)
+    s_str = start.strftime("%Y-%m-%d")
+    e_str = end.strftime("%Y-%m-%d")
+    folder = os.path.join(DATA_ROOT, symbol.upper())
+    os.makedirs(folder, exist_ok=True)
+    return os.path.join(folder, f"{symbol.upper()}_{tf}_{s_str}_{e_str}.parquet")
+
+
+def _meta_path(parquet_path: str) -> str:
+    return parquet_path.replace(".parquet", "_meta.json")
+
+
+def _save_meta(parquet_path: str, symbol: str, unit: str, interval: str,
+               start: datetime, end: datetime, n_rows: int):
+    meta = {
+        "symbol":     symbol,
+        "unit":       unit,
+        "interval":   interval,
+        "start_date": start.strftime("%Y-%m-%d"),
+        "end_date":   end.strftime("%Y-%m-%d"),
+        "rows":       n_rows,
+        "timeframe":  _timeframe_label(unit, interval),
+        "fetched_at": datetime.now().isoformat(timespec="seconds"),
+        "parquet":    parquet_path,
+    }
+    with open(_meta_path(parquet_path), "w") as f:
+        json.dump(meta, f, indent=2)
+
+
+def find_existing_cache(symbol: str, unit: str, interval: str) -> str | None:
+    """Find any existing parquet file for this symbol+timeframe (any date range)."""
+    folder = os.path.join(DATA_ROOT, symbol.upper())
+    if not os.path.exists(folder):
+        return None
+    tf = _timeframe_label(unit, interval)
+    prefix = f"{symbol.upper()}_{tf}_"
+    matches = [
+        os.path.join(folder, f)
+        for f in os.listdir(folder)
+        if f.startswith(prefix) and f.endswith(".parquet")
+    ]
+    return max(matches, default=None)  # Return most recently modified
+
+
+# ─── Date helpers ─────────────────────────────────────────────────────────────
+
+def get_last_trading_day() -> datetime:
+    """Return the most recent weekday (last completed trading day)."""
     end = datetime.now() - timedelta(days=1)
-    while end.weekday() >= 5:      # skip Saturday/Sunday
+    while end.weekday() >= 5:
         end -= timedelta(days=1)
-        print(f"  Skipping weekend: {end.date()}")
-    print(f"  Valid end date: {end.date()}")
     return end
 
 
@@ -94,119 +214,223 @@ def generate_chunks(start: datetime, end: datetime, chunk_days: int = 365):
     return chunks
 
 
-# ── Fetch with retry ─────────────────────────────────────────────────────────
+# ─── Fetch with retry ─────────────────────────────────────────────────────────
+
 def fetch_chunk(client, instrument_key, unit, interval, start, end, retries=3):
+    from upstox_client.rest import ApiException
     for attempt in range(retries):
         try:
             resp = client.get_historical_candle_data1(
-                instrument_key,
-                unit,
-                interval,
+                instrument_key, unit, interval,
                 start.strftime("%Y-%m-%d"),
                 end.strftime("%Y-%m-%d"),
             )
             return resp.data.candles or []
         except ApiException as e:
-            print(f"  Retry {attempt + 1}/{retries}: {e}")
-            time.sleep(2 ** attempt)
+            wait = 2 ** attempt
+            print(f"  Retry {attempt+1}/{retries} (wait {wait}s): {e.status}")
+            time.sleep(wait)
     return []
 
 
-# ── Main fetch ───────────────────────────────────────────────────────────────
+# ─── Main fetch ───────────────────────────────────────────────────────────────
+
 def fetch_historical_data(
     symbol:        str,
-    unit:          str  = "days",
-    interval:      str  = "1",
-    start_date:    str  = "2000-01-01",
-    max_workers:   int  = 5,
-    use_cache:     bool = True,
-    force_refresh: bool = False,
+    unit:          str      = "days",
+    interval:      str      = "1",
+    start_date:    str      = "2000-01-01",
+    end_date:      str      = None,     # None = fetch up to latest trading day
+    max_workers:   int      = 5,
+    use_cache:     bool     = True,
+    force_refresh: bool     = False,
+    incremental:   bool     = False,    # Only fetch new candles since last cache
 ) -> pd.DataFrame:
+    """
+    Fetch historical OHLCV data from Upstox with smart caching.
 
-    data_dir   = f"data/raw/{symbol.upper()}"
-    os.makedirs(data_dir, exist_ok=True)
-    cache_file = f"{data_dir}/{interval}{unit[0]}.parquet"
+    Args:
+        symbol:        NSE equity symbol (e.g. "RELIANCE", "TCS")
+        unit:          "days", "minutes", "weeks"
+        interval:      "1", "15", "30" etc (number of units per candle)
+        start_date:    Fetch from this date (YYYY-MM-DD)
+        end_date:      Fetch up to this date (YYYY-MM-DD). None = today.
+        max_workers:   Parallel download threads
+        use_cache:     Load from parquet cache if available
+        force_refresh: Ignore cache, always re-fetch
+        incremental:   Only fetch candles newer than the last cached date
 
-    if use_cache and os.path.exists(cache_file) and not force_refresh:
-        print("Loading from cache...")
-        return pd.read_parquet(cache_file)
+    Returns:
+        DataFrame with columns: datetime, open, high, low, close, volume, oi
+    """
+    if not ACCESS_TOKEN:
+        raise EnvironmentError(
+            "UPSTOX_ACCESS_TOKEN not set.\n"
+            "1. Create .env file\n"
+            "2. Add: UPSTOX_ACCESS_TOKEN=your_token\n"
+            "3. Get token from https://upstox.com/developer/"
+        )
 
-    print(f"Fetching {symbol} ({interval}{unit[0]}) from Upstox...")
+    start = datetime.strptime(start_date, "%Y-%m-%d")
+    end   = get_last_trading_day() if end_date is None else datetime.strptime(end_date, "%Y-%m-%d")
+
+    # Minutes data: Upstox limits to last 30 days
+    if unit == "minutes":
+        capped_start = end - timedelta(days=30)
+        if start < capped_start:
+            print(f"  Note: Upstox limits {interval}-minute data to last 30 days.")
+            start = capped_start
+
+    if start > end:
+        raise ValueError(f"start_date ({start.date()}) is after end_date ({end.date()})")
+
+    # ── Try to load from cache ─────────────────────────────────────────────────
+    existing_cache = find_existing_cache(symbol, unit, interval)
+
+    if use_cache and existing_cache and not force_refresh:
+        print(f"Loading from cache: {existing_cache}")
+        cached_df = pd.read_parquet(existing_cache)
+
+        if not incremental:
+            return cached_df
+
+        # Incremental: only fetch rows newer than last cached date
+        last_cached = cached_df["datetime"].max()
+        new_start   = last_cached + timedelta(days=1)
+
+        if new_start > end:
+            print(f"  Cache is up to date (last: {last_cached.date()})")
+            return cached_df
+
+        print(f"  Incremental update: fetching {new_start.date()} → {end.date()}")
+        new_df  = _do_fetch(symbol, unit, interval, new_start, end, max_workers)
+        combined = pd.concat([cached_df, new_df], ignore_index=True)
+        combined = (
+            combined.drop_duplicates(subset=["datetime"])
+                    .sort_values("datetime")
+                    .reset_index(drop=True)
+        )
+        # Save with updated end date in filename
+        new_cache_path = build_cache_path(symbol, unit, interval, start, end)
+        combined.to_parquet(new_cache_path)
+        _save_meta(new_cache_path, symbol, unit, interval, start, end, len(combined))
+
+        # Remove old cache file if filename changed
+        if existing_cache != new_cache_path and os.path.exists(existing_cache):
+            os.remove(existing_cache)
+            meta_old = _meta_path(existing_cache)
+            if os.path.exists(meta_old):
+                os.remove(meta_old)
+
+        print(f"  Updated cache: {new_cache_path}  ({len(combined):,} rows)")
+        return combined
+
+    # ── Fresh fetch ────────────────────────────────────────────────────────────
+    df = _do_fetch(symbol, unit, interval, start, end, max_workers)
+
+    if use_cache:
+        cache_path = build_cache_path(symbol, unit, interval, start, end)
+        df.to_parquet(cache_path)
+        _save_meta(cache_path, symbol, unit, interval, start, end, len(df))
+        print(f"  Cached → {cache_path}")
+        print(f"  Metadata → {_meta_path(cache_path)}")
+
+    return df
+
+
+def _do_fetch(symbol, unit, interval, start, end, max_workers):
+    """Internal: actually call Upstox API in parallel chunks."""
+    print(f"Fetching {symbol} ({_timeframe_label(unit, interval)}) from Upstox...")
     client         = get_upstox_client()
     instrument_key = find_instrument(symbol)
 
-    start = datetime.strptime(start_date, "%Y-%m-%d")
-    end   = get_valid_end_date()
-    print(f"  Start date: {start.date()}")
-    print(f"  End date: {end.date()}")
-
-    if unit == "minutes":
-        start = max(start, end - timedelta(days=30))
-
-    if start > end:
-        raise ValueError(f"Invalid date range: {start.date()} > {end.date()}")
-
     chunk_days = 5 if unit == "minutes" else 365
     chunks     = generate_chunks(start, end, chunk_days)
-    print(chunks)
-    print(f"  {len(chunks)} chunks  ({start.date()} → {end.date()})")
+    print(f"  Date range: {start.date()} → {end.date()}")
+    print(f"  Chunks: {len(chunks)}  |  Workers: {max_workers}")
 
-    all_candles = []
+    all_candles  = []
+    done         = 0
 
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
         futures = {
-            executor.submit(fetch_chunk, client, instrument_key, unit, interval, s, e): (s, e)
+            executor.submit(fetch_chunk, client, instrument_key, unit, interval, e, s): (s, e)
             for s, e in chunks
         }
         for future in as_completed(futures):
+            done += 1
             try:
                 candles = future.result()
                 if candles:
                     all_candles.extend(candles)
+                # Progress bar
+                pct  = done / len(chunks) * 100
+                bar  = "█" * int(pct / 5) + "░" * (20 - int(pct / 5))
+                print(f"\r  [{bar}] {pct:.0f}%  ({done}/{len(chunks)} chunks)  {len(all_candles):,} candles",
+                      end="", flush=True)
             except Exception as e:
-                print(f"  Chunk failed: {e}")
+                print(f"\n  Chunk failed: {e}")
+
+    print()  # newline after progress bar
 
     if not all_candles:
-        raise RuntimeError("No data fetched from Upstox.")
+        raise RuntimeError("No data fetched from Upstox. Check token and symbol.")
 
     df = pd.DataFrame(
         all_candles,
         columns=["datetime", "open", "high", "low", "close", "volume", "oi"],
     )
     df["datetime"] = pd.to_datetime(df["datetime"])
-
-    # FIX: deduplicate + sort (as_completed returns out-of-order, chunks may overlap)
     df = (
         df.drop_duplicates(subset=["datetime"])
           .sort_values("datetime")
           .reset_index(drop=True)
     )
-
-    if use_cache:
-        df.to_parquet(cache_file)
-        print(f"  Cached → {cache_file}")
-
-    print(f"  Done. {len(df)} candles.")
+    print(f"  Done. {len(df):,} candles fetched.")
     return df
 
 
-# ── CLI ───────────────────────────────────────────────────────────────────────
+# ─── CLI ──────────────────────────────────────────────────────────────────────
+
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--symbol",   required=True)
-    parser.add_argument("--unit",     default="days")
-    parser.add_argument("--interval", default="1")
-    parser.add_argument("--start",    default="2000-01-01")
-    parser.add_argument("--workers",  type=int, default=5)
-    parser.add_argument("--force",    action="store_true")
+    parser = argparse.ArgumentParser(
+        description="Fetch NSE historical data from Upstox",
+        formatter_class=argparse.RawTextHelpFormatter,
+    )
+    parser.add_argument("--symbol",   required=False, help="NSE symbol e.g. RELIANCE")
+    parser.add_argument("--unit",     default="days",  help="days / minutes / weeks")
+    parser.add_argument("--interval", default="1",     help="Candle size: 1, 15, 30 ...")
+    parser.add_argument("--start",    default="2015-01-01", help="Start date YYYY-MM-DD")
+    parser.add_argument("--end",      default=None,    help="End date YYYY-MM-DD (default: today)")
+    parser.add_argument("--workers",  type=int, default=5, help="Parallel download threads")
+    parser.add_argument("--force",    action="store_true", help="Re-fetch even if cache exists")
+    parser.add_argument("--update",   action="store_true", help="Incremental update only")
+    parser.add_argument("--list-symbols", metavar="QUERY", help="Search available symbols")
     args = parser.parse_args()
 
+    if args.list_symbols:
+        search_symbols(args.list_symbols)
+        return
+
+    if not args.symbol:
+        parser.error("--symbol is required unless using --list-symbols")
+
     df = fetch_historical_data(
-        symbol=args.symbol, unit=args.unit, interval=args.interval,
-        start_date=args.start, max_workers=args.workers, force_refresh=args.force,
+        symbol=args.symbol,
+        unit=args.unit,
+        interval=args.interval,
+        start_date=args.start,
+        end_date=args.end,
+        max_workers=args.workers,
+        force_refresh=args.force,
+        incremental=args.update,
     )
-    print(df.head())
-    print(df.tail())
+
+    print(f"\nFirst 3 rows:")
+    print(df.head(3).to_string(index=False))
+    print(f"\nLast 3 rows:")
+    print(df.tail(3).to_string(index=False))
+    print(f"\nTotal: {len(df):,} rows  |  From {df['datetime'].min().date()} to {df['datetime'].max().date()}")
 
 
 if __name__ == "__main__":
