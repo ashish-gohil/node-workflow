@@ -12,7 +12,7 @@ export default function Hero() {
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="text-5xl md:text-7xl font-extrabold tracking-tight text-text-primary"
+          className="text-5xl md:text-7xl font-extrabold tracking-tight text-primary/60"
         >
           Automate logic with
           <div className="text-5xl font-extrabold tracking-tight md:text-7xl bg-linear-to-r from-accent-primary to-accent-secondary via-accent-muted bg-clip-text text-transparent">
