@@ -72,7 +72,7 @@ class ATRStrategy(BaseStrategy):
         avg_atr = df["atr"].rolling(self.vol_period).mean().replace(0, np.nan)
         df["atr_ratio"] = df["atr"] / avg_atr
 
-        # Volatility regime: 1 = high volatility (ATR > 1.5× its 20-day average)
+        # Volatility regime: 1 = high volatility (ATR > 1.5x its 20-day average)
         df["high_vol_regime"] = (df["atr_ratio"] > 1.5).astype(float)
 
         # Volatility compression: ATR near its 20-day LOW → squeeze, breakout likely

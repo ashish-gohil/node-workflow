@@ -1,0 +1,11 @@
+{
+  "symbol": "TCS",
+  "unit": "days",
+  "interval": "1",
+  "start_date": "2000-01-01",
+  "end_date": "2026-04-09",
+  "rows": 5346,
+  "timeframe": "daily",
+  "fetched_at": "2026-04-10T18:26:34",
+  "parquet": "data\\TCS\\TCS_daily_2000-01-01_2026-04-09.parquet"
+}

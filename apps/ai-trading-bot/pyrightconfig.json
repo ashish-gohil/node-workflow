@@ -4,5 +4,6 @@
   "venv": "venv",
   "extraPaths": ["."],
   "reportMissingImports": "warning",
-  "reportMissingModuleSource": "none"
+  "reportMissingModuleSource": "none",
+  "include": ["."]
 }

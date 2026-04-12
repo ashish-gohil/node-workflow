@@ -90,34 +90,102 @@ def load_instruments() -> pd.DataFrame:
 
 
 def find_instrument(symbol: str) -> str:
-    """Return Upstox instrument_key for an NSE equity symbol."""
-    df  = load_instruments()
-    eq  = df[df.get("instrument_type", pd.Series(dtype=str)) == "EQ"]
+    """
+    Return Upstox instrument_key for an NSE equity symbol.
 
-    # Exact match first
-    res = eq[eq["name"].str.upper() == symbol.upper()]
-    if res.empty:
-        # Fallback: contains match
+    Search order:
+    1. Exact match on 'trading_symbol' column (e.g. "RELIANCE")
+    2. Exact match on 'name' column (company name)
+    3. Contains match on 'trading_symbol' (partial ticker)
+    4. Contains match on 'name' (partial company name)
+
+    This covers cases where the user passes:
+    - The NSE ticker:   "RELIANCE", "TCS", "HDFCBANK"
+    - Company name:     "Reliance Industries", "HDFC Bank"
+    - Partial name:     "HDFC" (matches HDFCBANK, HDFC, HDFCAMC, ...)
+    """
+    df = load_instruments()
+    eq = df[df.get("instrument_type", pd.Series(dtype=str)) == "EQ"].copy()
+
+    sym_upper = symbol.upper().strip()
+
+    # Try 'trading_symbol' column first (most reliable for NSE tickers)
+    for col in ["trading_symbol", "name"]:
+        if col not in eq.columns:
+            continue
+        # 1. Exact match
+        res = eq[eq[col].str.upper() == sym_upper]
+        if not res.empty:
+            key = res.iloc[0]["instrument_key"]
+            matched_name = res.iloc[0].get("name", res.iloc[0].get("trading_symbol", symbol))
+            print(f"  {symbol} → {matched_name} → {key}")
+            return key
+
+    # 2. Contains match on trading_symbol
+    if "trading_symbol" in eq.columns:
+        res = eq[eq["trading_symbol"].str.contains(sym_upper, case=False, regex=False, na=False)]
+        if not res.empty:
+            key = res.iloc[0]["instrument_key"]
+            ts  = res.iloc[0].get("trading_symbol", symbol)
+            print(f"  {symbol} (partial match: {ts}) → {key}")
+            if len(res) > 1:
+                print(f"  Note: {len(res)} matches found. Using first. "
+                      f"Run --list-symbols {symbol} to see all.")
+            return key
+
+    # 3. Contains match on name
+    if "name" in eq.columns:
         res = eq[eq["name"].str.contains(symbol, case=False, regex=False, na=False)]
-    if res.empty:
-        raise ValueError(
-            f"Symbol '{symbol}' not found in NSE instruments.\n"
-            f"Try running: python data_fetch_upstox.py --list-symbols {symbol}"
-        )
+        if not res.empty:
+            key  = res.iloc[0]["instrument_key"]
+            name = res.iloc[0]["name"]
+            print(f"  {symbol} (name match: {name}) → {key}")
+            return key
 
-    key = res.iloc[0]["instrument_key"]
-    print(f"  {symbol} → instrument_key: {key}")
-    return key
+    raise ValueError(
+        f"Symbol '{symbol}' not found in NSE equity instruments.\n"
+        f"Search tips:\n"
+        f"  • Use the NSE ticker: RELIANCE, TCS, HDFCBANK, INFY\n"
+        f"  • Search partial name: python data_fetch_upstox.py --list-symbols HDFC\n"
+        f"  • If instruments list is old, delete instruments_upstox.json and retry"
+    )
 
 
-def search_symbols(query: str):
-    """Helper: search for symbol names containing a string."""
+def search_symbols(query: str, max_results: int = 20):
+    """
+    Search for NSE equity symbols by ticker or company name.
+
+    Shows: trading_symbol, company name, instrument_key
+    Use to find the right symbol before fetching data.
+
+    Example:
+        python data_fetch_upstox.py --list-symbols HDFC
+        → shows HDFCBANK, HDFC, HDFCAMC, HDFCLIFE, ...
+    """
     df  = load_instruments()
-    eq  = df[df.get("instrument_type", pd.Series(dtype=str)) == "EQ"]
-    res = eq[eq["name"].str.contains(query, case=False, regex=False, na=False)]
-    print(f"\nSymbols matching '{query}':")
+    eq  = df[df.get("instrument_type", pd.Series(dtype=str)) == "EQ"].copy()
+
+    # Search in both trading_symbol and name columns
+    mask = pd.Series([False] * len(eq), index=eq.index)
+    for col in ["trading_symbol", "name"]:
+        if col in eq.columns:
+            mask = mask | eq[col].str.contains(query, case=False, regex=False, na=False)
+
+    res = eq[mask].head(max_results)
+
+    if res.empty:
+        print(f"No symbols found matching '{query}'")
+        return
+
+    print(f"\nSymbols matching '{query}' (showing up to {max_results}):")
+    print(f"  {'TICKER':<20} {'COMPANY NAME':<40} {'INSTRUMENT KEY'}")
+    print(f"  {'-'*20} {'-'*40} {'-'*30}")
     for _, row in res.iterrows():
-        print(f"  {row.get('name', '?'):30s}  key: {row.get('instrument_key', '?')}")
+        ticker  = str(row.get("trading_symbol", "?"))
+        name    = str(row.get("name", "?"))[:38]
+        key     = str(row.get("instrument_key", "?"))
+        print(f"  {ticker:<20} {name:<40} {key}")
+    print()
 
 
 # ─── File naming ──────────────────────────────────────────────────────────────
@@ -354,7 +422,7 @@ def _do_fetch(symbol, unit, interval, start, end, max_workers):
 
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
         futures = {
-            executor.submit(fetch_chunk, client, instrument_key, unit, interval, e, s): (s, e)
+            executor.submit(fetch_chunk, client, instrument_key, unit, interval, s, e): (s, e)
             for s, e in chunks
         }
         for future in as_completed(futures):

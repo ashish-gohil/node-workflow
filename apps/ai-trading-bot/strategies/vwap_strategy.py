@@ -26,7 +26,7 @@ Why the model benefits from this:
 
 Note on daily data:
     True intraday VWAP requires tick or minute-level data. On daily OHLCV data,
-    we approximate using the typical price = (high + low + close) / 3 × volume.
+    we approximate using the typical price = (high + low + close) / 3 x volume.
     This is the standard approach used in daily charts.
 """
 

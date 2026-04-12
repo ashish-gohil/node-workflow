@@ -23,7 +23,7 @@ Why multi-timeframe matters:
     The transformer learns to interpret these combinations.
 
 Rate of Change (ROC):
-    ROC(n) = (close_today - close_n_days_ago) / close_n_days_ago × 100
+    ROC(n) = (close_today - close_n_days_ago) / close_n_days_ago x 100
     Simple but effective. Shows "how much has this stock moved in the last n days?"
 
 Momentum oscillator:
