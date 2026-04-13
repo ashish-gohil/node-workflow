@@ -12,6 +12,16 @@ import { TriggerNodeBase } from "./trigger-node-base";
 
 
 
+
+
+
+
+
+
+
+
+
+
 export function SchedulerTriggerNode({
   id,
   data,

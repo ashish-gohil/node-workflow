@@ -13,6 +13,16 @@ import CornerIcons from "./corners";
 
 
 
+
+
+
+
+
+
+
+
+
+
 function Dialog(props: React.ComponentProps<typeof DialogPrimitive.Root>) {
   return <DialogPrimitive.Root data-slot="dialog" {...props} />;
 }

@@ -3,7 +3,6 @@ import { nextJsConfig } from "@repo/eslint-config/next";
 import js from "@eslint/js";
 import importPlugin from "eslint-plugin-import";
 import unicorn from "eslint-plugin-unicorn";
-import tailwindcss from "eslint-plugin-tailwindcss";
 import tseslint from "typescript-eslint";
 
 const eslintconfig = [
@@ -16,7 +15,7 @@ const eslintconfig = [
     ],
   },
 
-  ...nextJsConfig, // ✅ your custom flat Next config
+  ...nextJsConfig,
 
   js.configs.recommended,
   ...tseslint.configs.recommended,
@@ -25,15 +24,12 @@ const eslintconfig = [
     plugins: {
       import: importPlugin,
       unicorn,
-      tailwindcss,
     },
     rules: {
       ...importPlugin.configs.recommended.rules,
 
       "unicorn/prefer-node-protocol": "error",
       "unicorn/no-array-callback-reference": "error",
-
-      "tailwindcss/classnames-order": "warn",
 
       "@typescript-eslint/no-explicit-any": "warn",
 

@@ -6,6 +6,16 @@ import CTASection from "../components/lending-page/cta";
 import Hero from "@/components/lending-page/hero-section";
 import MacWindow from "@/components/lending-page/mac-window";
 
+
+
+
+
+
+
+
+
+
+
 export function GradientBorderLine({
   position = "top",
 }: {
