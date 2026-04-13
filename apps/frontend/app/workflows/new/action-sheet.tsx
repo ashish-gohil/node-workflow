@@ -159,7 +159,7 @@ export default function ActionSheet({
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <PlusCircle className="size-3 text-border-strong group-hover:text-text-secondary hover:cursor-pointer" />
+        <PlusCircle className="text-border-strong group-hover:text-text-secondary size-3 hover:cursor-pointer" />
       </SheetTrigger>
 
       <SheetContent>
@@ -198,9 +198,9 @@ export default function ActionSheet({
                     setConfigNodeId(newNode.id);
                   }
                 }}
-                className="flex gap-3 cursor-pointer"
+                className="flex cursor-pointer gap-3"
               >
-                <div className="w-16 flex justify-center p-2">{node.icon}</div>
+                <div className="flex w-16 justify-center p-2">{node.icon}</div>
 
                 <div className="flex flex-col">
                   <div className="text-text-primary">{node.label}</div>

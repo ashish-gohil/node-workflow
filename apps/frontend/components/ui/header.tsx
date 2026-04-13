@@ -3,12 +3,12 @@
 import { usePathname, useRouter } from "next/navigation";
 import { motion } from "motion/react";
 
-import useFlow from "@/app/store/flow-store";
 import { api } from "@/lib/api";
 
 import AppLogo from "./app-logo";
 import { Button } from "./button";
 import ThemeToggle from "./theme-toggle";
+import useFlow from "@/app/store/flow-store";
 
 export default function Header() {
   const { nodes, edges } = useFlow();
@@ -38,11 +38,11 @@ export default function Header() {
       style={{
         backdropFilter: "blur(12px)",
       }}
-      className=" h-20 fixed top-0 w-full z-50 bg-surface/60 shadow-md  px-6 py-4 flex justify-between items-center"
+      className=" bg-surface/60 fixed top-0 z-50 flex h-20 w-full  items-center justify-between px-6 py-4 shadow-md"
     >
       <AppLogo />
 
-      <div className="flex flex-row gap-6 justify-between">
+      <div className="flex flex-row justify-between gap-6">
         <ThemeToggle />
         {pathName.includes("workflows/new") ? (
           <Button

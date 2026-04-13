@@ -12,6 +12,11 @@ import {
 
 import { TriggerConfigProps } from "./trigger-config-dialog";
 
+
+
+
+
+
 const WEEKDAYS: Weekday[] = [
   "monday",
   "tuesday",
@@ -36,10 +41,10 @@ export function SchedulerTriggerConfig({
   };
 
   return (
-    <div className="space-y-4 flex flex-col gap-3">
+    <div className="flex flex-col gap-3 space-y-4">
       {/* ---------------- Mode Selector ---------------- */}
       <div className="flex flex-col gap-1">
-        <div className="text-sm font-medium text-text-secondary">
+        <div className="text-text-secondary text-sm font-medium">
           Select Mode
         </div>
         <Select

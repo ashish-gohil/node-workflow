@@ -9,6 +9,11 @@ import { cn } from "@/lib/utils";
 
 import CornerIcons from "./corners";
 
+
+
+
+
+
 const buttonVariants = cva(
   [
     "relative inline-flex items-center justify-center gap-2 whitespace-nowrap",
@@ -25,9 +30,9 @@ const buttonVariants = cva(
         secondary:
           "bg-btn-secondary-bg text-btn-secondary-text hover:bg-btn-secondary-hover",
         outline:
-          "border border-border-default bg-transparent text-text-primary hover:bg-state-hover",
-        ghost: "bg-transparent text-text-primary hover:bg-btn-ghost-hover",
-        link: "bg-transparent text-accent-primary underline underline-offset-4 hover:text-accent-secondary",
+          "border-border-default text-text-primary hover:bg-state-hover border bg-transparent",
+        ghost: "text-text-primary hover:bg-btn-ghost-hover bg-transparent",
+        link: "text-accent-primary hover:text-accent-secondary bg-transparent underline underline-offset-4",
       },
       size: {
         default: "h-9 px-4 py-2",
@@ -95,7 +100,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
               stiffness: 260,
               damping: 20,
             }}
-            className="absolute inset-0 pointer-events-none"
+            className="pointer-events-none absolute inset-0"
           >
             <CornerIcons size={cornerSize} />
           </motion.div>

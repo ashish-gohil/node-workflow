@@ -8,6 +8,11 @@ import { cn } from "@/lib/utils";
 
 import CornerIcons from "./corners";
 
+
+
+
+
+
 /* ------------------------------------------------------------------ */
 /* Root                                                               */
 /* ------------------------------------------------------------------ */
@@ -226,7 +231,7 @@ function SelectItem({
       <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>
 
       <SelectPrimitive.ItemIndicator className="absolute right-2">
-        <CheckIcon className="size-4 text-accent-primary" />
+        <CheckIcon className="text-accent-primary size-4" />
       </SelectPrimitive.ItemIndicator>
     </SelectPrimitive.Item>
   );

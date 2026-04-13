@@ -40,7 +40,7 @@ const collaborators = [
 
 export default function Collaborators() {
   return (
-    <div className="flex flex-col sm:flex-row items-center">
+    <div className="flex flex-col items-center sm:flex-row">
       <div className="flex items-center">
         {collaborators.map((user, index) => (
           <motion.div
@@ -54,7 +54,7 @@ export default function Collaborators() {
               damping: 15,
             }}
             whileHover={{ scale: 1.1, rotate: 0, translateY: -2 }}
-            className="-mr-3 relative group"
+            className="group relative -mr-3"
           >
             <div className="overflow-hidden rounded-2xl border-2 border-neutral-200">
               <Tooltip>

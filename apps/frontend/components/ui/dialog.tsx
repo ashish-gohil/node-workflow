@@ -8,6 +8,11 @@ import { cn } from "@/lib/utils";
 
 import CornerIcons from "./corners";
 
+
+
+
+
+
 function Dialog(props: React.ComponentProps<typeof DialogPrimitive.Root>) {
   return <DialogPrimitive.Root data-slot="dialog" {...props} />;
 }
@@ -91,13 +96,13 @@ function DialogContent({
           <DialogPrimitive.Close
             data-slot="dialog-close"
             className="
-              absolute right-4 top-4
+              text-text-muted absolute right-4
+              top-4
               p-1
-              text-text-muted
               opacity-70
               transition-opacity
-              hover:opacity-100
               hover:cursor-pointer
+              hover:opacity-100
               focus:outline-none
               focus:ring-0
               disabled:pointer-events-none

@@ -13,17 +13,17 @@ export function MergeNode({ id, data, selected }: NodeProps<MergeNodeType>) {
   const inputCount = data.inputs ?? 2;
 
   return (
-    <div className="group flex gap-2 h-10 justify-between items-center">
+    <div className="group flex h-10 items-center justify-between gap-2">
       <div className="relative">
         <NodeStatusIndicator
           status="initial"
           variant="border"
-          className="rounded-r-[3px] rounded-l-[11px]"
+          className="rounded-l-[11px] rounded-r-[3px]"
         >
           <BaseNode
             onDoubleClick={() => data.onEdit?.(id)}
             className={`
-              w-12 h-10
+              h-10 w-12
               ${selected ? "border-border-strong" : ""}
             `}
           >
@@ -46,8 +46,8 @@ export function MergeNode({ id, data, selected }: NodeProps<MergeNodeType>) {
             })}
 
             {/* -------- ICON -------- */}
-            <div className="w-full h-full flex items-center justify-center">
-              <Layers className="size-5 text-text-secondary" />
+            <div className="flex h-full w-full items-center justify-center">
+              <Layers className="text-text-secondary size-5" />
             </div>
 
             {/* -------- OUTPUT HANDLE (RIGHT) -------- */}
@@ -57,7 +57,7 @@ export function MergeNode({ id, data, selected }: NodeProps<MergeNodeType>) {
               type="source"
               position={Position.Right}
             >
-              <PlusCircle className="size-3 text-border-strong group-hover:text-text-secondary" />
+              <PlusCircle className="text-border-strong group-hover:text-text-secondary size-3" />
             </ButtonHandle>
           </BaseNode>
         </NodeStatusIndicator>

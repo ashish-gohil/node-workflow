@@ -157,7 +157,7 @@
 /* Apply root styles using the variables */
 @layer base {
   body {
-    @apply bg-[var(--color-bg)] text-[var(--color-text-primary)];
+    @apply bg-bg text-text-primary;
   }
 
   /* Example utility usage in HTML:

@@ -42,8 +42,8 @@ export function ActionNodeBase({
   const curNode = nodes.find((node) => node.id === id)!;
 
   return (
-    <div className=" flex gap-2 gap-y-0.5 max-w-[110px]  items-start flex-col">
-      <div className="relative group">
+    <div className=" flex max-w-[110px] flex-col items-start  gap-2 gap-y-0.5">
+      <div className="group relative">
         <NodeStatusIndicator
           status="success"
           variant="border"
@@ -52,7 +52,7 @@ export function ActionNodeBase({
           <BaseNode
             onDoubleClick={() => onEdit?.(id)}
             className={`
-              w-12 h-10
+              h-10 w-12
               ${selected ? "border-border-strong" : ""}
             `}
           >
@@ -75,7 +75,7 @@ export function ActionNodeBase({
             })}
 
             {/* -------- ICON -------- */}
-            <div className="w-full h-full flex items-center justify-center">
+            <div className="flex h-full w-full items-center justify-center">
               {icon}
             </div>
 
@@ -101,7 +101,7 @@ export function ActionNodeBase({
           </BaseNode>
         </NodeStatusIndicator>
       </div>
-      <div className="text-text font-normal leading-4 w-full text-wrap h-auto flex">
+      <div className="text-text flex h-auto w-full text-wrap font-normal leading-4">
         Hello world
       </div>
     </div>

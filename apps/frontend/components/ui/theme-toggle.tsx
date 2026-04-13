@@ -22,12 +22,12 @@ export default function ThemeToggle() {
   return (
     <button
       onClick={() => setTheme(isDark ? "light" : "dark")}
-      className="p-2  transition flex items-center justify-center"
+      className="flex  items-center justify-center p-2 transition"
     >
       {isDark ? (
-        <Moon className="size-6 transition-transform duration-200 hover:scale-110 text-text-muted" />
+        <Moon className="text-text-muted size-6 transition-transform duration-200 hover:scale-110" />
       ) : (
-        <Sun className="size-6 transition-transform duration-200 hover:scale-110 text-yellow-500" />
+        <Sun className="size-6 text-yellow-500 transition-transform duration-200 hover:scale-110" />
       )}
     </button>
   );

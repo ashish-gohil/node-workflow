@@ -7,6 +7,11 @@ import { ManualTriggerNodeType } from "@/app/types/tirggers";
 
 import { TriggerNodeBase } from "./trigger-node-base";
 
+
+
+
+
+
 export function ManualTriggerNode({
   id,
   data,
@@ -18,7 +23,7 @@ export function ManualTriggerNode({
       selected={selected}
       status={data.execution!}
       onEdit={data.onEdit}
-      icon={<MousePointerClick className="size-5 text-text-secondary" />}
+      icon={<MousePointerClick className="text-text-secondary size-5" />}
     />
   );
 }

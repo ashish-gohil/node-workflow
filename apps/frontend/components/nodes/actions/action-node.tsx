@@ -11,6 +11,11 @@ import {
 
 import { CustomHandle } from "../../handles/custom-handle";
 
+
+
+
+
+
 export type ActionNodeData = Node<{
   label: string;
   description?: string;
@@ -34,7 +39,7 @@ export function ActionNode({ id, data }: NodeProps<ActionNodeData>) {
         {/* Content */}
         <BaseNodeContent>
           {data.description && (
-            <div className="text-xs text-text-muted">{data.description}</div>
+            <div className="text-text-muted text-xs">{data.description}</div>
           )}
         </BaseNodeContent>
 

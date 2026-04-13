@@ -1,6 +1,5 @@
 "use client";
-import React, { useState } from "react";
-import { useCallback } from "react";
+import React, { useCallback,useState  } from "react";
 import { OnConnectEnd, useReactFlow } from "@xyflow/react";
 import { useShallow } from "zustand/react/shallow";
 
@@ -98,17 +97,17 @@ export default function NewWorkflow() {
   console.log(edges);
 
   return (
-    <div className="z-20 bg-transparent w-screen h-[calc(100vh-80px)]">
-      <div className="w-full h-full">
+    <div className="z-20 h-[calc(100vh-80px)] w-screen bg-transparent">
+      <div className="h-full w-full">
         <ThemeHydrated>
           <FlowCanvas
             fitView
-            className="w-full h-full"
+            className="h-full w-full"
             readOnly={false}
             onConnectEnd={onConnectEnd}
           >
             {nodes.length === 0 && (
-              <div className="flex justify-center flex-col gap-2 items-center h-full w-full">
+              <div className="flex h-full w-full flex-col items-center justify-center gap-2">
                 <TriggerSheet setConfigNodeId={setConfigNodeId} />
                 <div className="text-text-muted text-2xl">Add trigger</div>
               </div>

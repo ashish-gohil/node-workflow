@@ -17,6 +17,11 @@ import {
 
 import { TriggerConfigProps } from "./trigger-config-dialog";
 
+
+
+
+
+
 const HTTP_METHODS: WebhookHttpMethod[] = [
   "GET",
   "POST",
@@ -41,7 +46,7 @@ export function WebhookTriggerConfig({
   };
 
   return (
-    <div className="space-y-4 flex flex-col gap-3">
+    <div className="flex flex-col gap-3 space-y-4">
       {/* ---------------- Webhook Path ---------------- */}
       <Input
         label="Webhook Path"
@@ -57,7 +62,7 @@ export function WebhookTriggerConfig({
 
       {/* ---------------- HTTP Method ---------------- */}
       <div className="flex flex-col gap-1">
-        <div className="text-sm font-medium text-text-secondary">
+        <div className="text-text-secondary text-sm font-medium">
           HTTP Method
         </div>
         <Select
@@ -84,7 +89,7 @@ export function WebhookTriggerConfig({
 
       {/* ---------------- Authentication ---------------- */}
       <div className="flex flex-col gap-1">
-        <div className="text-sm font-medium text-text-secondary">
+        <div className="text-text-secondary text-sm font-medium">
           Authentication
         </div>
         <Select
@@ -221,7 +226,7 @@ export function WebhookTriggerConfig({
 
       {/* ---------------- Response Mode ---------------- */}
       <div className="flex flex-col gap-1">
-        <div className="text-sm font-medium text-text-secondary">
+        <div className="text-text-secondary text-sm font-medium">
           Response Mode
         </div>
         <Select

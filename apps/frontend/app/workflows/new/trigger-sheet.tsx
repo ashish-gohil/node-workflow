@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from "react";
 
+import { Button } from "../../../components/ui/button";
 import {
   DEFAULT_MANUAL_TRIGGER_DATA,
   DEFAULT_SCHEDULER_TRIGGER_DATA,
@@ -13,7 +14,6 @@ import {
   TriggerSheetElement,
 } from "@/app/types/tirggers";
 
-import { Button } from "../../../components/ui/button";
 import {
   Sheet,
   SheetContent,
@@ -152,7 +152,7 @@ export default function TriggerSheet({
         <Button
           allowCorners={true}
           cornerSize="md"
-          className="relative hover:cursor-pointer rounded-none  z-30 bg-bg hover:bg-bg p-10  border-2 border-border-strong border-dashed text-text-secondary "
+          className="bg-bg hover:bg-bg border-border-strong  text-text-secondary relative z-30 rounded-none  border-2 border-dashed p-10 hover:cursor-pointer "
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -176,7 +176,7 @@ export default function TriggerSheet({
           <SheetDescription>
             Trigger is a step that starts your workflow
           </SheetDescription>
-          <div className="flex flex-col gap-4 cursor-pointer pt-6 ">
+          <div className="flex cursor-pointer flex-col gap-4 pt-6 ">
             {triggerNodes.map((node) => (
               <div
                 onClick={() => {
@@ -193,12 +193,12 @@ export default function TriggerSheet({
                   }
                 }}
                 key={node.type}
-                className="w-full flex gap-3 justify-start items-start"
+                className="flex w-full items-start justify-start gap-3"
               >
-                <div className="w-16 flex justify-center items-start p-2">
+                <div className="flex w-16 items-start justify-center p-2">
                   {node?.icon}
                 </div>
-                <div className="w-full flex flex-col gap-0">
+                <div className="flex w-full flex-col gap-0">
                   <div className="text-text-primary">{node.label}</div>
                   <div className="text-text-muted">{node.description}</div>
                 </div>

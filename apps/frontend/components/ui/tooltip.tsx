@@ -48,10 +48,10 @@ function TooltipContent({
         {...props}
       >
         {children}
-        <TooltipPrimitive.Arrow className="z-50 size-2.5 translate-y-[calc(-50%_-_2px)] rotate-45 rounded-[2px] bg-inverse-muted fill-inverse-muted" />
+        <TooltipPrimitive.Arrow className="bg-inverse-muted fill-inverse-muted z-50 size-2.5 translate-y-[calc(-50%-2px)] rotate-45 rounded-[2px]" />
       </TooltipPrimitive.Content>
     </TooltipPrimitive.Portal>
   );
 }
 
-export { Tooltip, TooltipContent, TooltipProvider,TooltipTrigger };
+export { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger };

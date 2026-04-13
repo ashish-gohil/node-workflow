@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from "react";
 
+import { SchedulerTriggerConfig } from "./scheduler-trigger-config";
 import {
   TriggerNode,
   TriggerNodesDataTypes,
@@ -15,7 +16,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-import { SchedulerTriggerConfig } from "./scheduler-trigger-config";
 import { WebhookTriggerConfig } from "./webhook-trigger-config";
 
 interface ITriggerConfigDialog {
@@ -64,7 +64,7 @@ export default function TriggerConfigDialog({
             setConfigData={setTempConfigData}
           />
         </div>
-        <DialogFooter className="flex gap-6 mt-0 p-0">
+        <DialogFooter className="mt-0 flex gap-6 p-0">
           <Button
             onClick={onClose}
             variant="outline"

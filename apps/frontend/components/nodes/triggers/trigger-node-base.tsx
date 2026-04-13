@@ -30,12 +30,12 @@ export function TriggerNodeBase({
   const curNode = nodes.find((node) => node.id === id)!;
 
   return (
-    <div className="group flex gap-2 h-10 justify-between items-center">
+    <div className="group flex h-10 items-center justify-between gap-2">
       {/* Execute */}
       <Button
         allowCorners
         cornerSize="xs"
-        className="opacity-0 group-hover:opacity-100 h-8 tracking-tight"
+        className="h-8 tracking-tight opacity-0 group-hover:opacity-100"
       >
         Execute step
       </Button>
@@ -49,12 +49,12 @@ export function TriggerNodeBase({
           <BaseNode
             onDoubleClick={() => onEdit?.(id)}
             className={`
-              w-12 h-10 
+              h-10 w-12 
               ${selected ? "border-border-strong hover:ring-border-default" : ""}
             `}
           >
             {/* -------- ICON -------- */}
-            <div className="w-full h-full flex items-center justify-center">
+            <div className="flex h-full w-full items-center justify-center">
               {icon}
             </div>
 

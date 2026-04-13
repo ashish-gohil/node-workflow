@@ -3,9 +3,9 @@ import localFont from "next/font/local";
 import { ThemeProvider } from "next-themes";
 import { ReactFlowProvider } from "@xyflow/react";
 
+import Header from "../components/ui/header";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
-import Header from "../components/ui/header";
 
 import "./globals.css";
 
@@ -37,12 +37,12 @@ export default function RootLayout({
           defaultTheme="dark"
           enableSystem={true}
         >
-          <div className={"fixed top-0 left-0 right-0 z-50"}>
+          <div className={"fixed left-0 right-0 top-0 z-50"}>
             <Header />
           </div>
 
           <ReactFlowProvider>
-            <main className="pt-20 h-full bg-bg">
+            <main className="bg-bg h-full pt-20">
               <TooltipProvider>{children}</TooltipProvider>
             </main>
           </ReactFlowProvider>
