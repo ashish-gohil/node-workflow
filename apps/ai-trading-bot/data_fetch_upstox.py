@@ -288,6 +288,9 @@ def fetch_chunk(client, instrument_key, unit, interval, start, end, retries=3):
     from upstox_client.rest import ApiException
     for attempt in range(retries):
         try:
+            print(instrument_key, unit, interval,
+                start.strftime("%Y-%m-%d"),
+                end.strftime("%Y-%m-%d"))
             resp = client.get_historical_candle_data1(
                 instrument_key, unit, interval,
                 start.strftime("%Y-%m-%d"),
@@ -307,7 +310,7 @@ def fetch_historical_data(
     symbol:        str,
     unit:          str      = "days",
     interval:      str      = "1",
-    start_date:    str      = "2000-01-01",
+    start_date:    str      = "2010-01-01",
     end_date:      str      = None,     # None = fetch up to latest trading day
     max_workers:   int      = 5,
     use_cache:     bool     = True,
@@ -422,7 +425,7 @@ def _do_fetch(symbol, unit, interval, start, end, max_workers):
 
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
         futures = {
-            executor.submit(fetch_chunk, client, instrument_key, unit, interval, s, e): (s, e)
+            executor.submit(fetch_chunk, client, instrument_key, unit, interval, e, s): (s, e)
             for s, e in chunks
         }
         for future in as_completed(futures):

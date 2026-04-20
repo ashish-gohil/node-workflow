@@ -1,0 +1,11 @@
+{
+  "symbol": "Nifty%20IT",
+  "unit": "days",
+  "interval": "1",
+  "start_date": "2010-01-01",
+  "end_date": "2026-04-01",
+  "rows": 4027,
+  "timeframe": "daily",
+  "fetched_at": "2026-04-14T17:41:00",
+  "parquet": "data\\NIFTY%20IT\\NIFTY%20IT_daily_2010-01-01_2026-04-01.parquet"
+}

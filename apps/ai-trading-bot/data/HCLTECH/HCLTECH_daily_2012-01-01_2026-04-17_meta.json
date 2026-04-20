@@ -1,0 +1,11 @@
+{
+  "symbol": "HCLTECH",
+  "unit": "days",
+  "interval": "1",
+  "start_date": "2012-01-01",
+  "end_date": "2026-04-17",
+  "rows": 3532,
+  "timeframe": "daily",
+  "fetched_at": "2026-04-19T14:15:27",
+  "parquet": "data\\HCLTECH\\HCLTECH_daily_2012-01-01_2026-04-17.parquet"
+}

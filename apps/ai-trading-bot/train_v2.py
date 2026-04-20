@@ -65,7 +65,6 @@ from model_v4 import StockPredictor
 
 
 # ─── Default config ───────────────────────────────────────────────────────────
-
 DEFAULT_CFG = {
     "mode":            "single",
     "symbol":          "RELIANCE",

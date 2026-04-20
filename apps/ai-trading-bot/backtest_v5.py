@@ -1,5 +1,5 @@
 """
-backtest_v2.py — Portfolio-Based Backtesting for StockPredictor V4
+backtest_v2.py — Portfolio-Based Backtesting for StockForecastNet V5
 ====================================================================
 
 TRADING RULES IMPLEMENTED
@@ -81,9 +81,10 @@ import joblib
 import numpy as np
 import torch
 
-from dataset_v2 import StockDatasetV2
+from dataset_v5 import StockDatasetV2
 from features_v2 import add_features_v2, FEATURE_COLS
-from model_v4 import StockPredictor
+from model_v5 import StockForecastNet
+StockPredictor = StockForecastNet  # backwards compat
 from utils.trading_v2 import (
     CONFIDENCE_FLOOR, generate_signal_v2, pred_to_confidence
 )
@@ -397,7 +398,7 @@ def _execute_sell(
 # ─── Main backtest function ───────────────────────────────────────────────────
 
 def backtest_v2(
-    model:              StockPredictor,
+    model:              StockForecastNet,
     dataset:            StockDatasetV2,
     horizon:            int   = 3,
     min_confidence:     float = CONFIDENCE_FLOOR,
@@ -528,9 +529,12 @@ def backtest_v2(
         if portfolio.position is not None:
             continue
 
-        x, _ = dataset[i]
+        x, time_feats, _ = dataset[i]   # V5: unpack (x, time_features, y_ret)
         with torch.no_grad():
-            pred_raw = model(x.unsqueeze(0).to(dev)).squeeze(-1).item()
+            # V5: model takes both feature seq and time features
+            # predictions shape: (1, horizon); use last step as primary signal
+            preds    = model(x.unsqueeze(0).to(dev), time_feats.unsqueeze(0).to(dev))
+            pred_raw = preds[0, -1].item()   # primary signal = furthest horizon step
 
         direction  = 1 if pred_raw > 0 else 0
         confidence = pred_to_confidence(pred_raw)
@@ -853,7 +857,7 @@ def _save_csv(trades: list, path: str):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="Portfolio-based backtest for StockPredictor V4",
+        description="Portfolio-based backtest for StockForecastNet V5",
         formatter_class=argparse.RawTextHelpFormatter,
         epilog=(
             "Examples:\n"
@@ -935,7 +939,7 @@ if __name__ == "__main__":
     if cfg.get("input_dim") != dataset.n_features:
         cfg["input_dim"] = dataset.n_features
 
-    model = StockPredictor(**cfg)
+    model = StockForecastNet(**cfg)
     state = torch.load(args.model, map_location="cpu")
     missing, unexpected = model.load_state_dict(state, strict=False)
     if missing:

@@ -26022,5 +26022,23 @@
     "security_type": "NORMAL",
     "intraday_margin": 100.0,
     "intraday_leverage": 1.0
+  },
+  {
+    "segment": "NSE_EQ",
+    "name": "NSE_INDEX|Nifty%20IT",
+    "exchange": "NSE",
+    "isin": "INE192H01020",
+    "instrument_type": "EQ",
+    "instrument_key": "NSE_INDEX|Nifty IT",
+    "lot_size": 1,
+    "freeze_quantity": 100000.0,
+    "exchange_token": "10871",
+    "tick_size": 1.0,
+    "trading_symbol": "Nifty%20IT",
+    "short_name": "Nifty IT",
+    "qty_multiplier": 1.0,
+    "security_type": "NORMAL",
+    "intraday_margin": 100.0,
+    "intraday_leverage": 1.0
   }
 ]

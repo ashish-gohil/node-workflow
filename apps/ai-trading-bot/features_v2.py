@@ -163,6 +163,7 @@ FEATURE_COLS = [
     "day_of_week",   # 0=Mon, 1=Fri (normalised): Mon gaps, Fri profit-taking
     "month_norm",    # 0=Jan, 1=Dec: seasonal patterns, Jan effect, Dec selling
     "is_month_end",  # 1 if last 3 days of month: options expiry, rebalancing
+    
 ]
 
 
@@ -233,7 +234,7 @@ def add_features_v2(df: pd.DataFrame) -> pd.DataFrame:
     macd   = ema12 - ema26
     sig    = macd.ewm(span=9, adjust=False).mean()
     df["macd_norm"]      = macd / close.replace(0, np.nan)
-    df["macd_hist_norm"] = (macd - sig) / close.replace(0, np.nan)
+    df["macd_hist_norm"] = (macd - sig) / close.replace(0, np.nan)  
 
     # ── RSI ───────────────────────────────────────────────────────────────────
     df["rsi_14"]   = _rsi(close, 14)

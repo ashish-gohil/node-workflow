@@ -88,6 +88,20 @@ class StockDatasetV2(Dataset):
                 "Call add_features_v2() before creating StockDatasetV2."
             )
 
+        # Store close prices BEFORE narrowing df to FEATURE_COLS.
+        # The backtest needs raw ₹ close prices to:
+        #   - compute share quantities (shares = allocated_cash / entry_price)
+        #   - mark open positions to market (unrealised P&L)
+        #   - compute entry/exit prices for each trade
+        # Index alignment with dataset samples:
+        #   dataset[i] entry price  = _close_prices[i + window]
+        #   dataset[i] exit price   = _close_prices[i + window + horizon]
+        #   prev close for sample i = _close_prices[i + window - 1]
+        if "close" in df.columns:
+            self._close_prices = df["close"].values.copy()
+        else:
+            self._close_prices = None  # inference-only mode without raw prices
+
         df = df[FEATURE_COLS].copy().reset_index(drop=True)
 
         if scaler is None:
