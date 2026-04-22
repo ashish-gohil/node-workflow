@@ -53,9 +53,9 @@ from torch.utils.data import ConcatDataset
 
 from config import settings
 from data_fetch_upstox import fetch_historical_data
-from dataset_v5 import StockDatasetV2, build_multi_stock_dataset
-from features_v2 import FEATURE_COLS, add_features_v2
-from model_v6 import StockForecastNet
+from dataset_v2 import StockDatasetV2, build_multi_stock_dataset
+from features_v6 import FEATURE_COLS, add_features_v6
+from model_v2 import StockForecastNet
 
 
 # ─── Defaults ─────────────────────────────────────────────────────────────────
@@ -385,7 +385,7 @@ def run_single(cfg: dict):
     device = detect_device(); set_seed(cfg["seed"])
 
     df_raw = _load_or_fetch(cfg["symbol"], cfg["start_date"])
-    df     = add_features_v2(df_raw)
+    df     = add_features_v6(df_raw)
     n      = len(df); n_val = int(n * cfg["val_split"]); n_tr = n - n_val - cfg["gap"]
 
     train_ds = StockDatasetV2(df.iloc[:n_tr], window=cfg["seq_len"],
@@ -448,7 +448,7 @@ def run_finetune(cfg: dict):
     device = detect_device(); set_seed(cfg["seed"])
 
     df_raw = _load_or_fetch(cfg["symbol"], cfg["start_date"])
-    df     = add_features_v2(df_raw)
+    df     = add_features_v6(df_raw)
     n      = len(df); n_val = int(n * cfg["val_split"]); n_tr = n - n_val - cfg["gap"]
 
     pretrain_cfg_path = cfg["pretrain_path"].replace(".pth", "_config.pth")

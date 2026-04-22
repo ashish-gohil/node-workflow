@@ -23,10 +23,10 @@ import joblib, numpy as np, pandas as pd, torch
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, field_validator, model_validator
 
-from dataset_v5 import extract_time_features
-from features_v2 import FEATURE_COLS, add_features_v2
+from dataset_v6 import extract_time_features
+from features_v6 import FEATURE_COLS, add_features_v6
 from model_v6 import StockForecastNet
-from utils.trading_v2 import generate_signal_v2
+from utils.trading_v6 import generate_signal_v2
 
 MODEL_PATH  = os.getenv("MODEL_PATH",  "model_v6.pth")
 CONFIG_PATH = os.getenv("CONFIG_PATH", "model_v6_config.pth")
@@ -143,7 +143,7 @@ def _run_inference(df: pd.DataFrame, n_received: int) -> PredictResponse:
     horizon = cfg.get("horizon", 3)
 
     try:
-        df_feat = add_features_v2(df)
+        df_feat = add_features_v6(df)
     except Exception as e:
         raise HTTPException(422, f"Feature engineering failed: {e}")
 
@@ -280,7 +280,7 @@ def predict_ensemble(body: Dict[str, Any]):
         if not candles:
             raise HTTPException(422, "No candles found.")
         df_raw = _upstox_to_df(candles)
-        df     = add_features_v2(df_raw)
+        df     = add_features_v6(df_raw)
         ens    = ensemble_predict(
             _state["lgbm"], _state["model"], df, _state["scaler"],
             seq_len=_state["config"].get("seq_len", 90))

@@ -81,11 +81,11 @@ import joblib
 import numpy as np
 import torch
 
-from dataset_v5 import StockDatasetV2
-from features_v2 import add_features_v2, FEATURE_COLS
+from dataset_v6 import StockDatasetV2
+from features_v6 import add_features_v6, FEATURE_COLS
 from model_v6 import StockForecastNet
 StockPredictor = StockForecastNet
-from utils.trading_v2 import (
+from utils.trading_v6 import (
     CONFIDENCE_FLOOR, generate_signal_v2, pred_to_confidence
 )
 
@@ -454,7 +454,7 @@ def backtest_v2(
         raise ValueError(
             "dataset._close_prices is None — the dataset was built without "
             "a DataFrame containing a 'close' column. Pass the full featured "
-            "df (output of add_features_v2 called on a df that has 'close')."
+            "df (output of add_features_v6 called on a df that has 'close')."
         )
 
     close_prices = dataset._close_prices  # shape: (n_rows_in_clean_df,)
@@ -895,25 +895,25 @@ if __name__ == "__main__":
               else pd.read_csv(args.data))
 
     # IMPORTANT: keep 'close' in df for share-price tracking
-    # add_features_v2 works on a df with 'close'; it drops raw prices from
+    # add_features_v6 works on a df with 'close'; it drops raw prices from
     # the returned FEATURE_COLS — but we preserve 'close' via _close_prices
     # stored inside StockDatasetV2 (see dataset_v2.py)
-    df = add_features_v2(df_raw)
+    df = add_features_v6(df_raw)
 
     # Re-attach close prices from raw df to the feature df
-    # (add_features_v2 drops raw prices from output — we re-add for backtest)
+    # (add_features_v6 drops raw prices from output — we re-add for backtest)
     df_raw_aligned = df_raw.reset_index(drop=True)
     df_with_close  = df.copy()
     # Map clean df rows back to original close prices
-    # Since add_features_v2 drops NaN rows and resets index, we need
+    # Since add_features_v6 drops NaN rows and resets index, we need
     # to carry close prices through. We do this by using df_raw's close
     # aligned to the same row count after NaN removal.
     # The cleanest approach: pass df_raw close prices alongside features.
     # We achieve this by ensuring the df passed to StockDatasetV2 has 'close'.
     if "close" not in df.columns:
-        # Reconstruct: add_features_v2 resets index after dropping NaN.
+        # Reconstruct: add_features_v6 resets index after dropping NaN.
         # The raw df may be longer. We pass close from df_raw indexed to
-        # the surviving rows. Use the fact that add_features_v2 prints
+        # the surviving rows. Use the fact that add_features_v6 prints
         # "N rows → M clean rows" — M rows survive.
         n_raw = len(df_raw)
         n_clean = len(df)

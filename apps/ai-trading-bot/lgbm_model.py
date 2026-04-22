@@ -73,7 +73,7 @@ except ImportError:
     except ImportError:
         BACKEND = None
 
-from features_v2 import FEATURE_COLS, add_features_v2
+from features_v6 import FEATURE_COLS, add_features_v6
 from data_fetch_upstox import fetch_historical_data
 
 
@@ -283,7 +283,7 @@ class LGBMDirectionModel:
     def predict_latest(self, df: pd.DataFrame) -> dict:
         """
         Predict signal for the most recent available date.
-        df: DataFrame with FEATURE_COLS (from add_features_v2)
+        df: DataFrame with FEATURE_COLS (from add_features_v6)
         """
         X, _ = build_tree_features(df, horizon=self.horizon)
         X = X.fillna(0)[self.feature_names]
@@ -427,7 +427,7 @@ if __name__ == "__main__":
         print(f"  {sym}...", end=" ", flush=True)
         try:
             df_raw  = _load_stock_data(sym, args.start_date)
-            df_feat = add_features_v2(df_raw)
+            df_feat = add_features_v6(df_raw)
             n       = len(df_feat)
             n_val   = int(n * args.val_split)
             n_tr    = n - n_val - 10
