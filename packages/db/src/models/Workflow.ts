@@ -20,6 +20,9 @@ export type FlowNodeType =
   | ActionNodeTypes
   | TriggerNodeTypes;
 
+
+export type WorkflowStatus = "READY" | "PROCESSING" | "QUEUED" | "FAILED" // queued is when workflow is already present in queue 
+export type NodeExecutionStatus = "READY" | "PROCESSING" | "FAILED"
 export interface IWorkflow {
   workflowId: string;
   name: string;
@@ -27,7 +30,7 @@ export interface IWorkflow {
   active: boolean;
   version: number;
   lastRunAt: Date;
-  status: "running" | "ideal" | "queued"; // queued is when workflow is already present in queue 
+  status: WorkflowStatus;
   graph: {
     nodes: Array<{
       id: string;
@@ -36,7 +39,7 @@ export interface IWorkflow {
       config: Record<string, unknown>;
       type: "trigger" | "action";
       lastExecutedAt: Date;
-      executionStatus: "executing" | "ideal" | "queued"
+      executionStatus: NodeExecutionStatus;
       outputData?: Record<string, unknown>
       inputData?: Record<string, unknown>
 
@@ -91,8 +94,8 @@ const NodeSchema = new Schema(
 
     executionStatus: {
       type: String,
-      enum: ["executing", "ideal", "queued"],
-      default: "ideal",
+      enum: ["READY", "PROCESSING", "FAILED"],
+      default: "READY",
     },
 
     outputData: {
@@ -157,11 +160,18 @@ const WorkflowSchema = new Schema(
     lastRunAt: {
       type: Date,
     },
+    nextRunAt: {
+      type: Date,
+      index: true
+    },
 
+    lockedAt: Date,
+    lockId: String,
     status: {
       type: String,
-      enum: ["running", "ideal", "queued"],
-      default: "ideal",
+      enum: ["READY", "PROCESSING", "FAILED", "QUEUED"],
+      default: "READY",
+      index: true,
     },
 
     graph: {
