@@ -1,13 +1,12 @@
 {
   "name": "trigger-poller",
-  "module": "src/index.ts",
-  "type": "module",
   "private": true,
   "scripts": {
     "build": "bun build src/server.ts --target=node  --outdir dist  --bundle  --minify   --format=cjs"
   },
   "dependencies": {
     "@aws-sdk/client-sqs": "^3.998.0",
+    "@aws-sdk/client-ssm": "^3.1034.0",
     "@repo/auth": "*",
     "@repo/db": "*"
   },
