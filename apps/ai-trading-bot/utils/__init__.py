@@ -16,6 +16,6 @@ Why this file exists:
     `from utils import *` (not commonly used, but good practice).
 """
 
-from .trading_v2 import generate_signal_v2, CONFIDENCE_FLOOR
+from .trading_v6 import generate_signal_v2, CONFIDENCE_FLOOR
 
 __all__ = ["generate_signal_v2", "CONFIDENCE_FLOOR"]

@@ -1,7 +1,5 @@
 {
   "name": "workflow-worker",
-  "module": "src/index.ts",
-  "type": "module",
   "private": true,
   "scripts": {
     "build": "bun build src/index.ts --target=node  --outdir dist  --bundle  --minify   --format=cjs"
@@ -11,7 +9,9 @@
   },
   "dependencies": {
     "@repo/auth": "*",
-    "@repo/db": "*"
+    "@repo/db": "*",
+    "@types/aws-lambda": "^8.10.161",
+    "aws-lambda": "^1.0.7"
   },
   "peerDependencies": {
     "typescript": "^5"

@@ -34,9 +34,9 @@ class Settings(BaseSettings):
     UPSTOX_API_SECRET:   str = ""
 
     # ── Model files ───────────────────────────────────────────────────────────
-    MODEL_PATH:  str = "model_v2.pth"
-    CONFIG_PATH: str = "model_v2_config.pth"
-    SCALER_PATH: str = "scaler_v2.pkl"
+    MODEL_PATH:  str = "model_v6.pth"
+    CONFIG_PATH: str = "model_v6_config.pth"
+    SCALER_PATH: str = "scaler_v6.pkl"
 
     # ── TFT training defaults (matches train_v2.py DEFAULT_CFG) ──────────────
     WINDOW:        int   = 30     # Sequence window (days)
