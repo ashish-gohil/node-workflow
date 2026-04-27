@@ -15,5 +15,5 @@
 
     "skipLibCheck": true
   },
-  "include": ["src"]
+  "include": ["src", "src/models/webhook-registration.model.ts"]
 }
