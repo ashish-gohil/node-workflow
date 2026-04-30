@@ -11,6 +11,7 @@ export class DAGResolver {
 
     private buildAdjList() {
         const adjList: Record<string, string[]> = {}
+        this.nodes.forEach(node => { adjList[node.id] = [] })
         for (let edge of this.edges) {
             if (adjList[edge.source]) {
                 adjList[edge.source].push(edge.target)

@@ -1,11 +1,17 @@
 {
   "name": "workflow-worker",
   "private": true,
+  "type": "module",
   "scripts": {
-    "build": "bun build src/index.ts --target=node  --outdir dist  --bundle  --minify   --format=cjs"
+    "build": "bun build src/index.ts --target=node  --outdir dist  --bundle  --minify   --format=cjs",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "test:coverage": "vitest run --coverage"
   },
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "@vitest/coverage-v8": "4.1.5",
+    "vitest": "^4.1.5"
   },
   "dependencies": {
     "@repo/auth": "*",
