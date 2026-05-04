@@ -1,4 +1,4 @@
-type ResolvedValue =
+export type ResolvedValue =
     | string
     | number
     | boolean
@@ -6,7 +6,7 @@ type ResolvedValue =
     | ResolvedValue[]
     | { [key: string]: ResolvedValue }
 
-type ExecutionContext = Record<string, Record<string, unknown>>
+export type ExecutionContext = Record<string, Record<string, unknown>>
 
 export function expressionResolver(template: ResolvedValue, executionContext: ExecutionContext): ResolvedValue {
 

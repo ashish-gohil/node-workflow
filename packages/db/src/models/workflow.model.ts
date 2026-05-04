@@ -62,6 +62,7 @@ export type TriggerType = "CRON" | "WEBHOOK" | "MANUAL";
  */
 export interface INode {
   id: string;
+  name: string
   nodeType: FlowNodeType;
   type: "trigger" | "action";
   position: { x: number; y: number };
@@ -171,6 +172,8 @@ const NodeSchema = new Schema<INode>(
   {
     // Client-generated stable ID (nanoid recommended — short, URL-safe, unique)
     id: { type: String, required: true },
+
+    name: { type: String, required: true, trim: true },
 
     nodeType: {
       type: String,
