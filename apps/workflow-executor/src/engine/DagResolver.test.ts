@@ -18,6 +18,8 @@ describe("DAGResolver", () => {
                         nodeType: TriggerNodeTypes.ManualTrigger,
                         position: { x: 100, y: 200 },
                         config: {},
+                        name: "n1",
+                        error: null,
                     },
                 ];
                 const edges: IEdge[] = [];
@@ -34,6 +36,8 @@ describe("DAGResolver", () => {
                         nodeType: TriggerNodeTypes.ManualTrigger,
                         position: { x: 100, y: 200 },
                         config: {},
+                        name: "n1",
+                        error: null,
                     },
                     {
                         id: "n2",
@@ -41,6 +45,8 @@ describe("DAGResolver", () => {
                         nodeType: ActionNodeTypes.HttpRequest,
                         position: { x: 100, y: 200 },
                         config: {},
+                        name: "n2",
+                        error: null,
                     },
                     {
                         id: "n3",
@@ -48,6 +54,8 @@ describe("DAGResolver", () => {
                         nodeType: ActionNodeTypes.Code,
                         position: { x: 100, y: 200 },
                         config: {},
+                        name: "n3",
+                        error: null,
                     }
                 ];
                 const edges: IEdge[] = [{ id: "n1-n2", source: "n1", target: "n2" }, { id: "n2-n3", source: "n2", target: "n3" }];
@@ -72,6 +80,8 @@ describe("DAGResolver", () => {
                         nodeType: TriggerNodeTypes.ManualTrigger,
                         position: { x: 100, y: 200 },
                         config: {},
+                        name: "n1",
+                        error: null,
                     },
                     {
                         id: "n2",
@@ -79,6 +89,8 @@ describe("DAGResolver", () => {
                         nodeType: ActionNodeTypes.HttpRequest,
                         position: { x: 100, y: 200 },
                         config: {},
+                        name: "n2",
+                        error: null,
                     },
                     {
                         id: "n3",
@@ -86,12 +98,16 @@ describe("DAGResolver", () => {
                         nodeType: ActionNodeTypes.Code,
                         position: { x: 100, y: 200 },
                         config: {},
+                        name: "n3",
+                        error: null,
                     }, {
                         id: "n4",
                         type: "action",
                         nodeType: ActionNodeTypes.Merge,
                         position: { x: 100, y: 200 },
                         config: {},
+                        name: "n4",
+                        error: null,
                     }
                 ];
                 const edges: IEdge[] = [{ id: "n1-n2", source: "n1", target: "n2" }, { id: "n1-n3", source: "n1", target: "n3" }, { id: "n2-n4", source: "n2", target: "n4" }, { id: "n3-n4", source: "n3", target: "n4" }];

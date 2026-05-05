@@ -3,10 +3,10 @@ import { BaseNode } from "./BaseNode";
 
 class SetVariableNode extends BaseNode {
 
-    execute(input: ResolvedValue, context: ExecutionContext) {
+    execute(inputs: ResolvedValue, context: ExecutionContext, meta) {
 
-        console.log(output);
-        return output
+
+        return inputs as unknown as ResolvedValue
     }
 
 }

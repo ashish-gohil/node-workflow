@@ -1,23 +1,22 @@
-// check if registory has node type defined or not
-
 import { FlowNodeType, INode } from "@repo/db";
 import { BaseNode, NodeExecutionMeta } from "../nodes/BaseNode";
 import { ExecutionContext, expressionResolver, ResolvedValue } from "../utils/expression-resolver";
+import { ContextManager } from "./ContextManager";
 
 export class NodeRunner {
-    private readonly registory: Record<FlowNodeType, BaseNode>;
+    private readonly registry: Partial<Record<FlowNodeType, BaseNode>>;
     private readonly contextManager: ContextManager;
     private readonly workflowId: string;
     private readonly executionId: string;
-    constructor(registory: Record<FlowNodeType, BaseNode>, contextManager: ContextManager, workflowId: string, executionId: string) {
-        this.registory = registory;
+    constructor(registry: Record<FlowNodeType, BaseNode>, contextManager: ContextManager, workflowId: string, executionId: string) {
+        this.registry = registry;
         this.contextManager = contextManager;
         this.workflowId = workflowId;
         this.executionId = executionId;
     }
-    async run(node: INode) {
+    async run(node: INode): Promise<ResolvedValue> {
         try {
-            if (!this.registory[node.nodeType]) {
+            if (!this.registry[node.nodeType]) {
                 throw new Error(`Node type ${node.nodeType} not found in registry`);
             }
             const metaData: NodeExecutionMeta = {
@@ -34,19 +33,20 @@ export class NodeRunner {
             await this.contextManager.setNodeStatus(node.id, "RUNNING");
 
             // call adapter execute method
-            const output = await this.registory[node.nodeType].execute(inputs, context, metaData);
+            const output = await this.registry[node.nodeType]!.execute(inputs, context, metaData);
+            await this.contextManager.setNodeStatus(node.id, "SUCCESS");
 
             // store node output
-            await this.contextManager.setNodeOutput(node.id, output);
+            await this.contextManager.setNodeOutput(node.id, node.name, output);
 
             // update prev_run_data with node output
-            await this.contextManager.updatePrevRunData(node.id, output);
+            await this.contextManager.upsertPrevRunData(node.id, output);
 
-            await this.contextManager.setNodeStatus(node.id, "SUCCESS");
+            return output;
         } catch (err: any) {
             await this.contextManager.setNodeStatus(node.id, "FAILED");
             await this.contextManager.setNodeError(node.id, err.message);
-            throw err;
+            throw err; // this will be caught by the ExecutionEngine and marked as FAILED
         }
 
     }

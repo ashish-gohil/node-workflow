@@ -67,6 +67,7 @@ export interface INode {
   type: "trigger" | "action";
   position: { x: number; y: number };
   config: Record<string, unknown>;
+  error: string | null;
 }
 
 /**
@@ -174,6 +175,8 @@ const NodeSchema = new Schema<INode>(
     id: { type: String, required: true },
 
     name: { type: String, required: true, trim: true },
+
+    error: { type: String, default: null },
 
     nodeType: {
       type: String,
