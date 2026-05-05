@@ -38,7 +38,7 @@ export interface INodeResult {
 }
 
 export interface IExecutionError {
-    nodeId: string;
+    nodeId: string | null;
     message: string;
 }
 

@@ -17,7 +17,8 @@
     "@repo/auth": "*",
     "@repo/db": "*",
     "@types/aws-lambda": "^8.10.161",
-    "aws-lambda": "^1.0.7"
+    "aws-lambda": "^1.0.7",
+    "cron-parser": "^5.5.0"
   },
   "peerDependencies": {
     "typescript": "^5"

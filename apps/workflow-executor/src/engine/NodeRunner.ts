@@ -8,7 +8,7 @@ export class NodeRunner {
     private readonly contextManager: ContextManager;
     private readonly workflowId: string;
     private readonly executionId: string;
-    constructor(registry: Record<FlowNodeType, BaseNode>, contextManager: ContextManager, workflowId: string, executionId: string) {
+    constructor(registry: Partial<Record<FlowNodeType, BaseNode>>, contextManager: ContextManager, workflowId: string, executionId: string) {
         this.registry = registry;
         this.contextManager = contextManager;
         this.workflowId = workflowId;
