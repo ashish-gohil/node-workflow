@@ -3,7 +3,6 @@ import { BaseNode } from "../nodes/BaseNode";
 import { DAGResolver } from "./DagResolver";
 import { ContextManager } from "./ContextManager";
 import { NodeRunner } from "./NodeRunner";
-import { nodeRegistry } from "../nodes";
 import { CronExpressionParser } from 'cron-parser';
 
 export class ExecutionEngine {

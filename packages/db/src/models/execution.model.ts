@@ -71,10 +71,10 @@ export interface IExecution {
     finishedAt: Date | null;
 
     // --- Input that kicked off this run ---
-    inputData: IInputData;
+    inputData: IInputData | null;
 
     // --- Per-node results — keyed by nodeId ---
-    nodeResults: Record<string, INodeResult>;
+    nodeResults: Record<string, INodeResult> | null;
 
     // --- Top-level error summary for quick querying ---
     error: IExecutionError | null;
