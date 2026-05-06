@@ -1,45 +1,71 @@
 "use client";
 
-import { motion } from "motion/react";
+import { useRouter } from "next/navigation";
+import { ArrowRight, Zap } from "lucide-react";
 
 import { Button } from "../ui/button";
 
 export default function Hero() {
+  const router = useRouter();
+
   return (
-    <section className="flex min-h-screen items-center justify-center px-6 pt-32 text-center">
-      <div className="max-w-5xl">
-        <motion.h1
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="text-primary/60 text-5xl font-extrabold tracking-tight md:text-7xl"
-        >
+    <section
+      data-theme="brutalist"
+      className="dot-grid-cream flex min-h-screen flex-col items-start justify-center px-8 pt-20 pb-16 md:px-16 lg:px-24"
+    >
+      <div className="max-w-3xl">
+        {/* Eyebrow */}
+        <div className="mb-6 inline-flex items-center gap-2 border-2 border-black bg-lime-200 px-3 py-1 shadow-stamp-xs">
+          <Zap className="size-3.5 fill-black" aria-hidden="true" />
+          <span className="text-h6 font-bold uppercase tracking-wider text-black">
+            Workflow automation
+          </span>
+        </div>
+
+        {/* Headline */}
+        <h1 className="text-display-lg font-bold tracking-tighter text-black md:text-display-xl">
           Automate logic with
-          <div className="bg-linear-to-r from-accent-primary to-accent-secondary via-accent-muted bg-clip-text text-5xl font-extrabold tracking-tight text-transparent md:text-7xl">
-            visual precision
-          </div>
-        </motion.h1>
+          <br />
+          <span className="text-forest-600">visual precision.</span>
+        </h1>
 
-        <motion.p
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="mt-6 text-2xl text-slate-500"
-        >
-          Connect your stack with workflow architect. <br /> Deploy complex
-          logic in seconds without sacrificing technical control.
-        </motion.p>
+        {/* Description */}
+        <p className="mt-6 text-body-lg text-text-secondary max-w-xl">
+          Connect your stack with FLOW. Deploy complex pipelines in seconds
+          without sacrificing technical control.
+        </p>
 
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.4 }}
-          className="mt-6 flex justify-center gap-4"
-        >
-          <Button variant="primary" allowCorners cornerSize="sm">
-            Get Started
+        {/* CTAs */}
+        <div className="mt-10 flex flex-wrap items-center gap-6">
+          <Button
+            variant="stamp"
+            size="lg"
+            onClick={() => router.push("/workflows/new")}
+          >
+            Start building
+            <ArrowRight className="size-4" aria-hidden="true" />
           </Button>
-        </motion.div>
+
+          <button className="text-body-md font-medium text-text-secondary underline-offset-2 hover:text-text-primary hover:underline transition-colors duration-[120ms]">
+            View docs →
+          </button>
+        </div>
+
+        {/* Social proof */}
+        <div className="mt-16 flex flex-wrap items-center gap-8">
+          {[
+            { value: "12,840", label: "Workflows running" },
+            { value: "480+",   label: "Teams using FLOW" },
+            { value: "99.9%",  label: "Uptime" },
+          ].map(({ value, label }) => (
+            <div key={label} className="border-2 border-black bg-white p-4 shadow-stamp-xs">
+              <p className="text-display-lg font-mono font-bold tabular-nums text-black leading-none">
+                {value}
+              </p>
+              <p className="text-body-sm text-text-muted mt-1">{label}</p>
+            </div>
+          ))}
+        </div>
       </div>
     </section>
   );

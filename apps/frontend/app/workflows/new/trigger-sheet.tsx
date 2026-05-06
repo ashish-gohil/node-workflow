@@ -150,8 +150,7 @@ export default function TriggerSheet({
     <Sheet open={triggerSheetOpen} onOpenChange={setTriggerSheetOpen}>
       <SheetTrigger asChild>
         <Button
-          allowCorners={true}
-          cornerSize="md"
+         
           className="bg-bg hover:bg-bg border-border-strong  text-text-secondary relative z-30 rounded-none  border-2 border-dashed p-10 hover:cursor-pointer "
         >
           <svg

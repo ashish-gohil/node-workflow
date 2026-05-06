@@ -20,6 +20,36 @@ import { ActionNodeBase } from "./action-node-base";
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 export function DelayNode({ id, data, selected }: NodeProps<DelayNodeType>) {
   return (
     <ActionNodeBase

@@ -65,13 +65,7 @@ export default function TriggerConfigDialog({
           />
         </div>
         <DialogFooter className="mt-0 flex gap-6 p-0">
-          <Button
-            onClick={onClose}
-            variant="outline"
-            allowCorners
-            cornerSize="sm"
-            className="w-20"
-          >
+          <Button onClick={onClose} variant="ghost" className="w-20">
             Cancel
           </Button>
           <Button
@@ -79,8 +73,6 @@ export default function TriggerConfigDialog({
               onSave(tempConfigData);
               onClose();
             }}
-            allowCorners
-            cornerSize="sm"
             className="w-20"
           >
             Save

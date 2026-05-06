@@ -1,64 +1,56 @@
-import { Handle, Node, NodeProps, Position, useReactFlow } from "@xyflow/react";
+import { Node, NodeProps, Position } from "@xyflow/react";
 
 import { BaseHandle } from "@/components/handles/base-handle";
 import { NodeStatusIndicator } from "@/components/node-status-indicator";
 import {
   BaseNode,
-  BaseNodeContent,
+  BaseNodeDivider,
+  BaseNodeFooter,
   BaseNodeHeader,
-  BaseNodeHeaderTitle,
+  BaseNodeSubtitle,
+  BaseNodeTitle,
 } from "@/components/nodes/base-node";
-
-import { CustomHandle } from "../../handles/custom-handle";
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 export type ActionNodeData = Node<{
   label: string;
   description?: string;
 }>;
 
-export function ActionNode({ id, data }: NodeProps<ActionNodeData>) {
+export function ActionNode({ id, data, selected }: NodeProps<ActionNodeData>) {
   return (
-    <NodeStatusIndicator
-      status="loading" // success, initial, error
-      variant="border"
-      className="rounded-[10px]"
-    >
-      <BaseNode className="min-w-[160px]" id={id}>
+    <NodeStatusIndicator status="initial" variant="border">
+      <BaseNode selected={selected} className="min-w-[220px]">
         {/* Header */}
         <BaseNodeHeader>
-          <BaseNodeHeaderTitle className="text-sm leading-tight">
-            {data.label}
-          </BaseNodeHeaderTitle>
+          <BaseNodeTitle>
+            <h5 className="text-h5 font-semibold text-text-primary truncate">
+              {data.label}
+            </h5>
+          </BaseNodeTitle>
         </BaseNodeHeader>
 
-        {/* Content */}
-        <BaseNodeContent>
-          {data.description && (
-            <div className="text-text-muted text-xs">{data.description}</div>
-          )}
-        </BaseNodeContent>
+        {/* Subtitle */}
+        {data.description && (
+          <BaseNodeSubtitle>{data.description}</BaseNodeSubtitle>
+        )}
 
-        {/* Target Handle */}
+        <BaseNodeDivider />
+
+        {/* Footer */}
+        <BaseNodeFooter>
+          <span className="text-caption text-text-muted">No runs yet</span>
+        </BaseNodeFooter>
+
+        {/* Handles */}
         <BaseHandle
           position={Position.Left}
           type="target"
-          id="action-trigger-handle"
-          className="bottom-2"
+          id="action-in"
+        />
+        <BaseHandle
+          position={Position.Right}
+          type="source"
+          id="action-out"
         />
       </BaseNode>
     </NodeStatusIndicator>

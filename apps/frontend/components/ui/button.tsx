@@ -3,52 +3,64 @@
 import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
-import { motion } from "motion/react";
 
 import { cn } from "@/lib/utils";
-
-import CornerIcons from "./corners";
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 const buttonVariants = cva(
   [
     "relative inline-flex items-center justify-center gap-2 whitespace-nowrap",
-    "rounded-none text-sm font-medium transition-all",
-    "disabled:pointer-events-none disabled:opacity-60",
-    "outline-none focus-visible:ring-[3px] focus-visible:ring-state-focus",
-    "[&_svg]:pointer-events-none [&_svg]:shrink-0 hover:cursor-pointer",
+    "font-medium transition-colors duration-[120ms]",
+    "focus-visible:outline focus-visible:outline-[1.5px] focus-visible:outline-offset-2",
+    "focus-visible:outline-border-focus",
+    "disabled:pointer-events-none",
+    "[&_svg]:pointer-events-none [&_svg]:shrink-0",
   ].join(" "),
   {
     variants: {
       variant: {
-        primary:
-          "bg-btn-primary-bg text-btn-primary-text hover:bg-btn-primary-hover",
-        secondary:
-          "bg-btn-secondary-bg text-btn-secondary-text hover:bg-btn-secondary-hover",
-        outline:
-          "border-border-default text-text-primary hover:bg-state-hover border bg-transparent",
-        ghost: "text-text-primary hover:bg-btn-ghost-hover bg-transparent",
-        link: "text-accent-primary hover:text-accent-secondary bg-transparent underline underline-offset-4",
+        primary: [
+          "bg-forest-500 text-cream-50",
+          "hover:bg-forest-400 active:bg-forest-600",
+          "disabled:bg-neutral-300 disabled:text-neutral-500",
+          "rounded-sm",
+        ].join(" "),
+        secondary: [
+          "bg-bg-elevated text-text-primary border border-border-default",
+          "hover:bg-bg-overlay hover:border-border-strong",
+          "active:bg-bg-surface",
+          "disabled:opacity-50",
+          "rounded-sm",
+        ].join(" "),
+        ghost: [
+          "bg-transparent text-text-primary",
+          "hover:bg-white/[0.04] active:bg-white/[0.08]",
+          "disabled:text-text-disabled",
+          "rounded-sm",
+        ].join(" "),
+        destructive: [
+          "bg-transparent text-error border border-error",
+          "hover:bg-error/10 active:bg-error/20",
+          "disabled:opacity-50",
+          "rounded-sm",
+        ].join(" "),
+        link: [
+          "bg-transparent text-forest-300 underline-offset-2",
+          "hover:text-forest-200 hover:underline",
+          "disabled:text-text-disabled",
+        ].join(" "),
+        stamp: [
+          "rounded-none border-2 border-black bg-lime-200 text-black",
+          "font-bold tracking-wide uppercase",
+          "shadow-stamp transition-all duration-[120ms]",
+          "hover:shadow-stamp-lg hover:-translate-x-0.5 hover:-translate-y-0.5",
+          "active:shadow-stamp-pressed active:translate-x-[5px] active:translate-y-[5px]",
+        ].join(" "),
       },
       size: {
-        default: "h-9 px-4 py-2",
-        sm: "h-8 px-3 text-xs",
-        lg: "h-10 px-6",
-        icon: "size-9",
+        sm:      "h-8 px-3 text-body-sm",
+        default: "h-9 px-4 text-body-md",
+        lg:      "h-10 px-5 text-body-md",
+        icon:    "size-9",
       },
     },
     defaultVariants: {
@@ -59,61 +71,44 @@ const buttonVariants = cva(
 );
 
 export interface ButtonProps
-  extends
-    React.ButtonHTMLAttributes<HTMLButtonElement>,
+  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
   asChild?: boolean;
-  allowCorners?: boolean;
-  cornerSize?: "xs" | "sm" | "md" | "lg";
+  loading?: boolean;
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  (
-    {
-      className,
-      variant,
-      size,
-      asChild = false,
-      allowCorners = false,
-      cornerSize = "md",
-      children,
-      ...props
-    },
-    ref
-  ) => {
+  ({ className, variant, size, asChild = false, loading = false, disabled, children, ...props }, ref) => {
     const Comp = asChild ? Slot : "button";
-
-    const [isHovered, setIsHovered] = React.useState(false);
 
     return (
       <Comp
         ref={ref}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-        className={cn(
-          buttonVariants({ variant, size }),
-          "relative overflow-hidden",
-          className
-        )}
+        disabled={disabled || loading}
+        aria-busy={loading || undefined}
+        className={cn(buttonVariants({ variant, size }), className)}
         {...props}
       >
-        {children}
-
-        {allowCorners && isHovered && (
-          <motion.div
-            key="corners"
-            initial={{ opacity: 0, scale: 0.85 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.85 }}
-            transition={{
-              type: "spring",
-              stiffness: 260,
-              damping: 20,
-            }}
-            className="pointer-events-none absolute inset-0"
-          >
-            <CornerIcons size={cornerSize} />
-          </motion.div>
+        {loading ? (
+          <>
+            <svg
+              className="size-4 animate-spin"
+              viewBox="0 0 16 16"
+              fill="none"
+              aria-hidden="true"
+            >
+              <circle
+                cx="8" cy="8" r="6"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeDasharray="28"
+                strokeDashoffset="14"
+              />
+            </svg>
+            {children}
+          </>
+        ) : (
+          children
         )}
       </Comp>
     );

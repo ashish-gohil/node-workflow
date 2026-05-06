@@ -2,22 +2,11 @@ import type { Metadata } from "next";
 import { ThemeProvider } from "next-themes";
 import { ReactFlowProvider } from "@xyflow/react";
 
-import Header from "../components/ui/header";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
+import Header from "../components/ui/header";
+
 import "./globals.css";
-
-import { Inter, JetBrains_Mono } from "next/font/google";
-
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-sans",
-});
-
-const mono = JetBrains_Mono({
-  subsets: ["latin"],
-  variable: "--font-mono",
-});
 
 export const metadata: Metadata = {
   title: "FLOW",
@@ -30,11 +19,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      suppressHydrationWarning
-      className={`${inter.variable} ${mono.variable}`}
-    >
+    <html lang="en" suppressHydrationWarning>
       <body>
         <ThemeProvider attribute="data-theme" defaultTheme="dark">
           <div className="fixed top-0 right-0 left-0 z-50">

@@ -1,5 +1,14 @@
 import { Handle, Node, NodeProps, Position } from "@xyflow/react";
 
+import {
+  BaseNode,
+  BaseNodeDivider,
+  BaseNodeFooter,
+  BaseNodeHeader,
+  BaseNodeSubtitle,
+  BaseNodeTitle,
+} from "@/components/nodes/base-node";
+
 export type TriggerNodeData = Node<{
   label: string;
   description?: string;
@@ -7,25 +16,35 @@ export type TriggerNodeData = Node<{
 
 export function TriggerNode({ data, selected }: NodeProps<TriggerNodeData>) {
   return (
-    <div
-      className={`
-        bg-surface-elevated border-border text-text-primarys relative min-w-[160px]  rounded-lg  border px-4 py-3  transition-colors  ${selected ? "border-border-strong" : ""} `}
-    >
-      {/* Title */}
-      <div className="text-sm font-medium leading-tight">{data.label}</div>
+    <BaseNode selected={selected} className="min-w-[220px]">
+      {/* Header */}
+      <BaseNodeHeader>
+        <BaseNodeTitle>
+          <h5 className="text-h5 font-semibold text-text-primary truncate">
+            {data.label}
+          </h5>
+        </BaseNodeTitle>
+      </BaseNodeHeader>
 
-      {/* Optional subtitle */}
+      {/* Subtitle */}
       {data.description && (
-        <div className="text-text-muted mt-1 text-xs">{data.description}</div>
+        <BaseNodeSubtitle>{data.description}</BaseNodeSubtitle>
       )}
 
-      {/* Single output handle (right side) */}
+      <BaseNodeDivider />
+
+      {/* Footer */}
+      <BaseNodeFooter>
+        <span className="text-caption text-text-muted">Trigger</span>
+      </BaseNodeFooter>
+
+      {/* Output handle */}
       <Handle
-        id="out"
+        id="trigger-out"
         type="source"
         position={Position.Right}
-        className=" bg-accent-primary h-2.5 w-2.5 rounded-full border-0"
+        className="!bg-bg-canvas !border-[1.5px] !border-border-strong !size-2 !rounded-full hover:!border-forest-400 transition-colors"
       />
-    </div>
+    </BaseNode>
   );
 }

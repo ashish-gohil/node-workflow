@@ -27,6 +27,36 @@ import { TriggerConfigProps } from "./trigger-config-dialog";
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 const WEEKDAYS: Weekday[] = [
   "monday",
   "tuesday",

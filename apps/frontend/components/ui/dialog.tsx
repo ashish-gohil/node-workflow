@@ -23,6 +23,36 @@ import CornerIcons from "./corners";
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 function Dialog(props: React.ComponentProps<typeof DialogPrimitive.Root>) {
   return <DialogPrimitive.Root data-slot="dialog" {...props} />;
 }
@@ -80,19 +110,8 @@ function DialogContent({
       <DialogPrimitive.Content
         data-slot="dialog-content"
         className={cn(
-          `
-    fixed left-1/2 top-1/2 z-50
-    w-full max-w-[560px]
-    translate-x-[-50%] translate-y-[-50%]
-
-    grid gap-6 p-6
-    bg-surface
-    border border-border-strong
-    rounded-none
-
-    text-text-primary
-    outline-none
-    `,
+          "fixed left-1/2 top-1/2 z-50 w-full max-w-[560px] translate-x-[-50%] translate-y-[-50%]" +
+          " grid gap-6 p-6 bg-bg-elevated border border-border-default shadow-lg rounded-none text-text-primary outline-none",
           className
         )}
         {...props}

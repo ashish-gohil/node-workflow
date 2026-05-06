@@ -22,6 +22,36 @@ import { TriggerNodeBase } from "./trigger-node-base";
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 export function WebhookTriggerNode({
   id,
   data,

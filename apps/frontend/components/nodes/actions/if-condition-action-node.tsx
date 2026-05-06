@@ -20,6 +20,36 @@ import { ActionNodeBase } from "./action-node-base";
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 export function IfNode({ id, data, selected }: NodeProps<IfNodeType>) {
   return (
     <ActionNodeBase
