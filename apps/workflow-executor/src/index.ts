@@ -1,29 +1,24 @@
-import { Context, SQSEvent } from 'aws-lambda';
-import { connectMongo, WorkflowModel } from '@repo/db';
+import { SQSEvent } from 'aws-lambda';
+import { ExecutionEngine } from './engine/ExecutionEngine';
+import { nodeRegistry } from './nodes';
+import { connectMongo } from '@repo/db';
 
 
-export const handler = async (event: SQSEvent, context: Context) => {
-    console.log("-------event-------")
-    console.log(event)
-    console.log("-------event-------")
-    console.log("-----context--------")
-    console.log(context)
-    console.log("-----context--------")
+export const handler = async (event: SQSEvent) => {
 
-    const workflowIdsToBeExecuted = event.Records.map(record => JSON.parse(record.body).workflowId);
-    console.log("-------workflowIdsToBeExecuted-------");
-    console.log(workflowIdsToBeExecuted);
-    console.log("-------workflowIdsToBeExecuted-------");
-    if (workflowIdsToBeExecuted.length > 0) {
-        connectMongo();
+    connectMongo();
 
-        const wfs = await WorkflowModel.find({ workflowId: { $in: workflowIdsToBeExecuted } });
-        console.log("-----wfs from db------")
-        console.log(wfs)
-        console.log("-----wfs from db------")
-
+    const workflows: { workflowId: string; executionId: string }[] = event.Records.map(record => JSON.parse(record.body));
+    console.log("-------workflowsToBeExecuted-------");
+    console.log(workflows);
+    console.log("-------workflowsToBeExecuted-------");
+    if (workflows.length > 0) {
+        for (const wf of workflows) {
+            const executionEngine = new ExecutionEngine(wf.executionId, wf.workflowId, nodeRegistry)
+            console.log(`Executing workflow with workflowId, ${wf.workflowId} and executionId, ${wf.executionId}`)
+            await executionEngine.executeWorkflow();
+        }
     }
-
 
     return {
         success: true

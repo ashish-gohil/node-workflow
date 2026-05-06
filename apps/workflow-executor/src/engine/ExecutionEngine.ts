@@ -16,9 +16,14 @@ export class ExecutionEngine {
     }
 
     async executeWorkflow() {
+        console.log("inside executeWorkflow")
         try {
             // load wf from db
             const workflow = await WorkflowModel.findOne({ workflowId: this.workflowId })
+            console.log("---found workflow---");
+            console.log(workflow);
+            console.log("---found workflow---");
+
             if (!workflow) {
                 throw Error(`Workflow does not exist with id ${this.workflowId}`)
             }
@@ -35,8 +40,8 @@ export class ExecutionEngine {
                 return
             }
 
-            // updatee workflow status to processing
-            await WorkflowModel.findOneAndUpdate({ workflowId: this.workflowId }, {
+            // update workflow status to processing, so no other poller can poll it and put in queue again
+            const wfFromDb = await WorkflowModel.findOneAndUpdate({ workflowId: this.workflowId }, {
                 $set: {
                     status: "PROCESSING"
                 }
@@ -46,9 +51,24 @@ export class ExecutionEngine {
             const nodes: INode[] = execution.workflowSnapshot.nodes as INode[]
             const edges: IEdge[] = execution.workflowSnapshot.edges as IEdge[]
 
+            console.log("----wfFromDb------");
+            console.log(wfFromDb);
+            console.log("----wfFromDb------");
+
+            console.log("------nodes from workflow Snapshot------");
+            console.log(nodes)
+            console.log("------nodes from workflow Snapshot------");
+            console.log("------edges from workflow Snapshot------")
+            console.log(edges)
+            console.log("------edges from workflow Snapshot------")
+
             // create nodeTiers
             const dagResolver = new DAGResolver(nodes, edges)
             const nodeTiers = dagResolver.resolve();
+
+            console.log("--node tiers after DAG resolve---")
+            console.log(nodeTiers)
+            console.log("--node tiers after DAG resolve---")
 
             // set up context
             const contextManager = new ContextManager(this.executionId, this.workflowId)
@@ -64,7 +84,10 @@ export class ExecutionEngine {
 
                 const results = await Promise.allSettled(
                     tierNodes.map(node => nodeRunner.run(node))
-                )
+                );
+                console.log("-------results after all settled run-------")
+                console.log(results)
+                console.log("-------results after all settled run-------")
 
                 const failed = results.find(r => r.status === "rejected")
                 if (failed) {
@@ -100,6 +123,10 @@ export class ExecutionEngine {
 
 
         } catch (err: any) {
+
+            console.log("----failed inside executeWorkflow------")
+            console.log(err)
+            console.log("----failed inside executeWorkflow------")
             // mark execution failled with error
             await ExecutionModel.findOneAndUpdate({ executionId: this.executionId }, {
                 $set: {

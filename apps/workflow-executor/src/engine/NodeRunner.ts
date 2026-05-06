@@ -15,6 +15,9 @@ export class NodeRunner {
         this.executionId = executionId;
     }
     async run(node: INode): Promise<ResolvedValue> {
+        console.log("------running node with node-----")
+        console.log(node)
+        console.log("------running node with node-----")
         try {
             if (!this.registry[node.nodeType]) {
                 throw new Error(`Node type ${node.nodeType} not found in registry`);
@@ -27,13 +30,28 @@ export class NodeRunner {
             }
             // do expression resolution
             const context: ExecutionContext = this.contextManager.getContext();
+            console.log(`---context for node with nodeId ${node.id} and name ${node.name}-------`);
+            console.log(context)
+            console.log(`---context for node with nodeId ${node.id} and name ${node.name}-------`);
+
+
             const inputs = expressionResolver(node.config as ResolvedValue, context);
+
+            console.log(`---inputs for node with nodeId ${node.id} and name ${node.name}-------`);
+            console.log(inputs)
+            console.log(`---inputs for node with nodeId ${node.id} and name ${node.name}-------`);
 
             // make node status running
             await this.contextManager.setNodeStatus(node.id, "RUNNING");
 
             // call adapter execute method
-            const output = await this.registry[node.nodeType]!.execute(inputs, context, metaData);
+            const output = await this.registry[node.nodeType]!.execute
+                (inputs, context, metaData);
+
+            console.log(`---output for node with nodeId ${node.id} and name ${node.name}-------`);
+            console.log(output)
+            console.log(`---output for node with nodeId ${node.id} and name ${node.name}-------`);
+
             await this.contextManager.setNodeStatus(node.id, "SUCCESS");
 
             // store node output
