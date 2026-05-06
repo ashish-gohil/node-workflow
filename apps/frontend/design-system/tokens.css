@@ -1,0 +1,468 @@
+/* ============================================================
+   FLOW DESIGN SYSTEM — tokens.css
+   Drop into any project. Defaults to dark; toggle with
+   <html data-theme="light"> or class="theme-light".
+   ============================================================ */
+
+@import url("https://fonts.gstatic.com/s/jetbrainsmono/v24/tDbv2o-flEEny0FZhsfKu5WU4zr3E_BX0PnT8RD8yKwBNntkaToggR7BYRbKPx3cwhsk.woff2");
+
+:root,
+[data-theme="dark"],
+.theme-dark {
+  /* ---------- Brand & raw palette ---------- */
+  --color-forest-50: #e8f3ec;
+  --color-forest-100: #c7e2cf;
+  --color-forest-200: #9ecbab;
+  --color-forest-300: #6fae82;
+  --color-forest-400: #4a9163;
+  --color-forest-500: #2d6a4f;
+  --color-forest-600: #1f5237;
+  --color-forest-700: #143d28;
+  --color-forest-800: #0e2b1c;
+  --color-forest-900: #08180f;
+
+  --color-cream-50: #faf7f0;
+  --color-cream-100: #f2ede0;
+  --color-cream-200: #e5ddc8;
+  --color-cream-300: #d4c9ab;
+  --color-cream-400: #b8ab89;
+
+  /* Lime — brutalist / marketing accent */
+  --color-lime-50: #f0fbe4;
+  --color-lime-100: #dbf5c0;
+  --color-lime-200: #c5f4a5;
+  --color-lime-300: #a8e47c;
+  --color-lime-400: #84c95d;
+  --color-lime-500: #5fa63d;
+  --color-lime-600: #3f7a24;
+  --color-lime-700: #285115;
+
+  --color-neutral-0: #0a0e0c;
+  --color-neutral-50: #101512;
+  --color-neutral-100: #161c18;
+  --color-neutral-200: #1d241f;
+  --color-neutral-300: #262e28;
+  --color-neutral-400: #3a4540;
+  --color-neutral-500: #5a675f;
+  --color-neutral-600: #7a8881;
+  --color-neutral-700: #a1ada6;
+  --color-neutral-800: #d4dbd7;
+  --color-neutral-900: #faf7f0;
+
+  /* ---------- Semantic ---------- */
+  --color-success: #52b788;
+  --color-success-surface: rgba(82, 183, 136, 0.12);
+  --color-error: #e5484d;
+  --color-error-surface: rgba(229, 72, 77, 0.12);
+  --color-warning: #f5a524;
+  --color-warning-surface: rgba(245, 165, 36, 0.12);
+  --color-info: #5eb1ef;
+  --color-info-surface: rgba(94, 177, 239, 0.12);
+
+  /* ---------- Surfaces ---------- */
+  --bg-canvas: var(--color-neutral-0);
+  --bg-surface: var(--color-neutral-50);
+  --bg-elevated: var(--color-neutral-100);
+  --bg-overlay: var(--color-neutral-200);
+  --bg-inset: var(--color-neutral-50);
+
+  /* ---------- Text ---------- */
+  --text-primary: var(--color-cream-50);
+  --text-secondary: var(--color-neutral-700);
+  --text-muted: var(--color-neutral-600);
+  --text-disabled: var(--color-neutral-500);
+  --text-inverse: var(--color-neutral-0);
+  --text-brand: var(--color-forest-300);
+
+  /* ---------- Borders ---------- */
+  --border-subtle: rgba(255, 255, 255, 0.06);
+  --border-default: rgba(255, 255, 255, 0.1);
+  --border-strong: rgba(255, 255, 255, 0.16);
+  --border-intense: rgba(255, 255, 255, 0.24);
+  --border-focus: var(--color-forest-400);
+  --border-brand: var(--color-forest-500);
+
+  /* ---------- Accents ---------- */
+  --accent-primary: var(--color-forest-500);
+  --accent-primary-hover: var(--color-forest-400);
+  --accent-primary-press: var(--color-forest-600);
+  --accent-subtle: var(--color-forest-800);
+  --accent-subtle-hover: var(--color-forest-700);
+
+  /* ---------- Shadows (dark-mode tuned) ---------- */
+  --shadow-sm:
+    0 1px 0 0 rgba(255, 255, 255, 0.04) inset, 0 1px 2px rgba(0, 0, 0, 0.5);
+  --shadow-md:
+    0 1px 0 0 rgba(255, 255, 255, 0.05) inset, 0 4px 12px rgba(0, 0, 0, 0.45),
+    0 0 0 1px rgba(255, 255, 255, 0.04);
+  --shadow-lg:
+    0 1px 0 0 rgba(255, 255, 255, 0.06) inset, 0 12px 32px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(255, 255, 255, 0.05);
+  --shadow-xl:
+    0 24px 64px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.06);
+  --shadow-glow-brand:
+    0 0 0 1px rgba(45, 106, 79, 0.6), 0 0 16px rgba(45, 106, 79, 0.25);
+  --shadow-glow-error:
+    0 0 0 1px rgba(229, 72, 77, 0.6), 0 0 16px rgba(229, 72, 77, 0.25);
+  --shadow-focus-ring: 0 0 0 3px rgba(74, 145, 99, 0.25);
+
+  /* ---------- Stamp shadows (brutalist / marketing) ----------
+     Hard offset, no blur. Use with thick borders for a stamped feel.
+     Pair with --border-stamp (2px solid black) or its dark-mode equivalent.
+  */
+  --shadow-stamp-xs: 2px 2px 0 0 #000;
+  --shadow-stamp-sm: 4px 4px 0 0 #000;
+  --shadow-stamp: 6px 6px 0 0 #000;
+  --shadow-stamp-lg: 8px 8px 0 0 #000;
+  --shadow-stamp-pressed: 1px 1px 0 0 #000;
+  --shadow-stamp-lime: 6px 6px 0 0 var(--color-lime-300);
+  --shadow-stamp-forest: 6px 6px 0 0 var(--color-forest-500);
+
+  --border-stamp: 2px solid #000;
+  --border-stamp-thick: 3px solid #000;
+}
+
+[data-theme="light"],
+.theme-light {
+  --bg-canvas: #faf7f0;
+  --bg-surface: #ffffff;
+  --bg-elevated: #ffffff;
+  --bg-overlay: #ffffff;
+  --bg-inset: #f2ede0;
+
+  --text-primary: #0a0e0c;
+  --text-secondary: #3a4540;
+  --text-muted: #5a675f;
+  --text-disabled: #a1ada6;
+  --text-inverse: #faf7f0;
+  --text-brand: #1f5237;
+
+  --border-subtle: rgba(10, 14, 12, 0.06);
+  --border-default: rgba(10, 14, 12, 0.1);
+  --border-strong: rgba(10, 14, 12, 0.16);
+  --border-intense: rgba(10, 14, 12, 0.24);
+  --border-focus: var(--color-forest-500);
+  --border-brand: var(--color-forest-500);
+
+  --accent-primary: var(--color-forest-600);
+  --accent-primary-hover: var(--color-forest-500);
+  --accent-primary-press: var(--color-forest-700);
+  --accent-subtle: var(--color-forest-50);
+  --accent-subtle-hover: var(--color-forest-100);
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.04);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.06);
+  --shadow-xl: 0 24px 64px rgba(0, 0, 0, 0.16);
+
+  --color-success: #2d8a5f;
+  --color-error: #c13438;
+  --color-warning: #c97d0e;
+  --color-info: #2f7ab8;
+}
+
+/* ============================================================
+   Brutalist theme — cream + lime + hard black shadows.
+   For marketing pages, landing CTAs, portfolio-style surfaces.
+   Apply with <html data-theme="brutalist"> or class="theme-brutalist".
+   ============================================================ */
+[data-theme="brutalist"],
+.theme-brutalist {
+  --bg-canvas: #f5efe0;
+  --bg-surface: #ffffff;
+  --bg-elevated: #ffffff;
+  --bg-overlay: #ffffff;
+  --bg-inset: #f5efe0;
+  --bg-invert: #0a0e0c;
+
+  --text-primary: #0a0e0c;
+  --text-secondary: #1f2925;
+  --text-muted: #5a675f;
+  --text-disabled: #a1ada6;
+  --text-inverse: #faf7f0;
+  --text-brand: #3f7a24;
+
+  /* Borders are PURE BLACK and 2px thick in this theme */
+  --border-subtle: #0a0e0c;
+  --border-default: #0a0e0c;
+  --border-strong: #0a0e0c;
+  --border-intense: #0a0e0c;
+  --border-focus: #0a0e0c;
+  --border-brand: #0a0e0c;
+
+  --accent-primary: var(--color-lime-200);
+  --accent-primary-hover: var(--color-lime-300);
+  --accent-primary-press: var(--color-lime-400);
+  --accent-subtle: var(--color-lime-50);
+  --accent-subtle-hover: var(--color-lime-100);
+
+  /* Hard offset shadows are the default in brutalist mode */
+  --shadow-sm: var(--shadow-stamp-xs);
+  --shadow-md: var(--shadow-stamp-sm);
+  --shadow-lg: var(--shadow-stamp);
+  --shadow-xl: var(--shadow-stamp-lg);
+
+  --shadow-focus-ring: 0 0 0 3px var(--color-lime-300);
+}
+
+:root {
+  /* ---------- Radii ---------- */
+  --radius-none: 0px;
+  --radius-xs: 2px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-full: 9999px;
+
+  /* ---------- Spacing (4pt base) ---------- */
+  --space-0: 0px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+
+  /* ---------- Sizes ---------- */
+  --control-sm: 32px;
+  --control-md: 36px;
+  --control-lg: 40px;
+
+  --icon-xs: 12px;
+  --icon-sm: 14px;
+  --icon-md: 16px;
+  --icon-lg: 20px;
+  --icon-xl: 24px;
+
+  --container-sm: 640px;
+  --container-md: 768px;
+  --container-lg: 1024px;
+  --container-xl: 1280px;
+  --container-2xl: 1440px;
+
+  /* ---------- Typography ---------- */
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", monospace;
+  --font-display: "Inter Tight", "Inter", sans-serif;
+
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+  --text-display-xl: 56px;
+  --text-display-lg: 44px;
+  --text-h1: 32px;
+  --text-h2: 24px;
+  --text-h3: 20px;
+  --text-h4: 17px;
+  --text-h5: 14px;
+  --text-h6: 12px;
+  --text-body-lg: 16px;
+  --text-body-md: 14px;
+  --text-body-sm: 13px;
+  --text-caption: 12px;
+  --text-label: 12px;
+  --text-mono-md: 13px;
+  --text-mono-sm: 12px;
+
+  --lh-display-xl: 60px;
+  --lh-display-lg: 52px;
+  --lh-h1: 40px;
+  --lh-h2: 32px;
+  --lh-h3: 28px;
+  --lh-h4: 24px;
+  --lh-h5: 20px;
+  --lh-h6: 16px;
+  --lh-body-lg: 26px;
+  --lh-body-md: 22px;
+  --lh-body-sm: 20px;
+  --lh-caption: 16px;
+
+  --tracking-tightest: -0.03em;
+  --tracking-tighter: -0.02em;
+  --tracking-tight: -0.01em;
+  --tracking-normal: 0;
+  --tracking-wide: 0.02em;
+  --tracking-wider: 0.04em;
+
+  /* ---------- Motion ---------- */
+  --duration-instant: 0ms;
+  --duration-fast: 120ms;
+  --duration-base: 180ms;
+  --duration-slow: 280ms;
+  --duration-slower: 420ms;
+
+  --ease-out: cubic-bezier(0.2, 0, 0, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* ---------- z-index scale ---------- */
+  --z-base: 0;
+  --z-raised: 10;
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-drawer: 300;
+  --z-modal: 400;
+  --z-popover: 500;
+  --z-toast: 600;
+  --z-tooltip: 700;
+}
+
+/* ============================================================
+   Base reset + body defaults
+   ============================================================ */
+html {
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11", "ss01";
+}
+
+body {
+  background: var(--bg-canvas);
+  color: var(--text-primary);
+  font-size: var(--text-body-md);
+  line-height: var(--lh-body-md);
+}
+
+::selection {
+  background: var(--color-forest-500);
+  color: var(--color-cream-50);
+}
+
+/* Mono everywhere mono should be */
+code,
+kbd,
+pre,
+samp,
+.mono,
+[data-mono] {
+  font-family: var(--font-mono);
+  font-feature-settings: "zero", "ss01";
+}
+
+/* Tabular numerals on data */
+.tabular,
+table,
+.table,
+[data-tabular] {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Dotted-grid canvas background utility */
+.canvas-grid {
+  background-color: var(--bg-canvas);
+  background-image: radial-gradient(
+    circle,
+    var(--border-subtle) 1px,
+    transparent 1px
+  );
+  background-size: 16px 16px;
+}
+
+/* Brutalist dot grid — softer, suited to cream backgrounds */
+[data-theme="brutalist"] .canvas-grid,
+.theme-brutalist .canvas-grid,
+.dot-grid-cream {
+  background-color: #f5efe0;
+  background-image: radial-gradient(
+    circle,
+    rgba(10, 14, 12, 0.18) 1px,
+    transparent 1px
+  );
+  background-size: 14px 14px;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ============================================================
+   Optional: utility classes (use only if not on Tailwind)
+   ============================================================ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  height: var(--control-md);
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-body-md);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-tight);
+  transition:
+    background var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out);
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+.btn-primary {
+  background: var(--accent-primary);
+  color: var(--color-cream-50);
+}
+.btn-primary:hover {
+  background: var(--accent-primary-hover);
+}
+.btn-primary:active {
+  background: var(--accent-primary-press);
+}
+
+.btn-secondary {
+  background: var(--bg-elevated);
+  border-color: var(--border-default);
+  color: var(--text-primary);
+}
+.btn-secondary:hover {
+  background: var(--bg-overlay);
+  border-color: var(--border-strong);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--text-primary);
+}
+.btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.input {
+  height: var(--control-md);
+  padding: 0 var(--space-3);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: var(--text-body-md);
+  font-family: inherit;
+  transition:
+    border-color var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out);
+}
+.input:focus {
+  outline: none;
+  border-color: var(--border-focus);
+  box-shadow: var(--shadow-focus-ring);
+}
+
+.card {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  padding: var(--space-5);
+  box-shadow: var(--shadow-sm);
+}

@@ -1,0 +1,34 @@
+# Cursor rules — FLOW design system
+
+You are a senior product designer + engineer working in Cursor on a project that uses the FLOW design system.
+
+## Before generating any UI
+1. Read `design-system/CLAUDE.md` — full agent rules
+2. Read `design-system/DESIGN_SYSTEM.md` — foundations
+3. Read the matching `design-system/components/*.md` and `design-system/patterns/*.md`
+4. Use tokens from `design-system/tailwind.config.js` (or `tokens.css`)
+
+## Hard rules
+- Boxy: radius ≤ 4px on UI, ≤ 8px marketing, 0–2px brutalist
+- Three themes: dark (default app), light, brutalist (marketing)
+- Forest green + cream + neutrals + lime (brutalist only); never blue, never gradients (except shimmer)
+- 1px white-alpha borders (dark) or 2px solid black (brutalist) — never gray fills
+- Inter for UI, JetBrains Mono for IDs/numbers/code, always tabular-nums on numerics
+- Subtle shadows for app UI, hard offset (`stamp`) shadows for brutalist — never mix on one page
+- Lucide icons, 1.5px stroke
+- Swiss layout: left-align text, right-align numbers
+- Active states use 2px accent (left edge nav, bottom border tabs, inset shadow cards)
+
+## Defaults
+- React 18+ functional components, hooks
+- Tailwind CSS using project's `tailwind.config.js`
+- Real content (workflow automation domain), no Lorem ipsum
+- All states included (default + hover + active + disabled)
+- Accessibility built in (semantic HTML, ARIA, keyboard support)
+
+## Don't
+- Don't use Tailwind default colors (blue, indigo, purple)
+- Don't use `rounded-full`/`rounded-2xl` (only for the notification dot)
+- Don't add framer-motion or other heavy libs
+- Don't use emoji as functional icons
+- Don't generate code that doesn't reference the design system
