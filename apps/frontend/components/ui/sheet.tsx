@@ -8,11 +8,6 @@ import { cn } from "@/lib/utils";
 
 import CornerIcons from "./corners";
 
-
-
-
-
-
 function Sheet({ ...props }: React.ComponentProps<typeof SheetPrimitive.Root>) {
   return <SheetPrimitive.Root data-slot="sheet" {...props} />;
 }
@@ -43,7 +38,7 @@ function SheetOverlay({
     <SheetPrimitive.Overlay
       data-slot="sheet-overlay"
       className={cn(
-        "bg-neutral-0/75 fixed inset-0 z-50 backdrop-blur-[2px]",
+        "bg-bg-elevated/5 fixed inset-0 z-50 backdrop-blur-[2px]",
         "data-[state=open]:animate-in data-[state=open]:fade-in-0",
         "data-[state=closed]:animate-out data-[state=closed]:fade-out-0",
         "duration-[220ms]",

@@ -30,7 +30,7 @@ export default function NewWorkflow() {
      spawn a Delay node and wire it up to the source handle. */
   const onConnectEnd: OnConnectEnd = useCallback(
     (event, connectionState) => {
-      if (connectionState.isValid) {
+      if (!connectionState.isValid) {
         return;
       }
 

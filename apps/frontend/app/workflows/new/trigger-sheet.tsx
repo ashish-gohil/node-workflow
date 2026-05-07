@@ -169,7 +169,7 @@ export default function TriggerSheet({
           </svg>
         </Button>
       </SheetTrigger>
-      <SheetContent>
+      <SheetContent className="w-full">
         <SheetHeader>
           <SheetTitle>Select trigger node from the list</SheetTitle>
           <SheetDescription>
