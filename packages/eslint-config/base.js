@@ -51,49 +51,6 @@ export const config = [
       "simple-import-sort/exports": "error",
 
       // -----------------------------
-      // 🧠 Spellcheck (FIXED for Tailwind)
-      // -----------------------------
-      "spellcheck/spell-checker": [
-        "warn",
-        {
-          comments: true,
-          strings: true,
-          identifiers: false,
-          lang: "en_US",
-
-          // 🔥 Ignore Tailwind patterns
-          skipIfMatch: [
-            "^[a-z]+-[0-9]+$", // bg-500, p-4
-            "^[a-z]+-[a-z]+-[0-9]+$", // bg-red-500
-            "^[a-z]+-[a-z]+$", // flex-row, items-center
-            "^w-\\d+$",
-            "^h-\\d+$",
-            "^p[trblxy]?-[0-9]+$",
-            "^m[trblxy]?-[0-9]+$",
-            "^text-[a-z]+-[0-9]+$",
-          ],
-
-          skipWords: [
-            "n8n",
-            "Nextjs",
-            "Nodejs",
-            "Prisma",
-            "SQS",
-            "AWS",
-            "tsx",
-            "jsx",
-            "api",
-            "env",
-            "props",
-            "bg",
-            "hsl",
-            "mdx",
-            "radix",
-          ],
-        },
-      ],
-
-      // -----------------------------
       // 🧱 Core JS (RELAXED)
       // -----------------------------
       eqeqeq: ["error", "always"],

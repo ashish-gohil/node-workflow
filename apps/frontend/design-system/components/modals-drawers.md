@@ -6,20 +6,21 @@ Two patterns for transient surfaces: **Modal** for focused decisions, **Drawer**
 
 ## When to use which
 
-| Need | Use | Why |
-|---|---|---|
-| Confirm a destructive action | Modal | Demands focus, single decision |
-| Create a new resource (form) | Modal (sm/md) | Ephemeral, no canvas context needed |
-| Inspect a workflow node | **Drawer** | User must see the canvas while editing |
-| View execution logs / details | **Drawer** | Long-form, scroll-heavy |
-| Settings sub-screen | Drawer (xl) or full page | Depends on depth |
-| Quick command / search | Command palette (special modal) | See bottom of doc |
+| Need                          | Use                             | Why                                    |
+| ----------------------------- | ------------------------------- | -------------------------------------- |
+| Confirm a destructive action  | Modal                           | Demands focus, single decision         |
+| Create a new resource (form)  | Modal (sm/md)                   | Ephemeral, no canvas context needed    |
+| Inspect a workflow node       | **Drawer**                      | User must see the canvas while editing |
+| View execution logs / details | **Drawer**                      | Long-form, scroll-heavy                |
+| Settings sub-screen           | Drawer (xl) or full page        | Depends on depth                       |
+| Quick command / search        | Command palette (special modal) | See bottom of doc                      |
 
 ---
 
 ## 1 · Modal
 
 ### Anatomy
+
 ```
                      [backdrop blur 4px]
 
@@ -37,14 +38,16 @@ Two patterns for transient surfaces: **Modal** for focused decisions, **Drawer**
 ```
 
 ### Sizes
-| Size | Width | Use |
-|---|---|---|
-| sm | 400px | Confirmation dialogs |
-| md | 560px | Forms (3–5 fields) |
-| lg | 720px | Forms with side panel, image preview |
-| xl | 960px | Heavy forms, multi-step |
+
+| Size | Width | Use                                  |
+| ---- | ----- | ------------------------------------ |
+| sm   | 400px | Confirmation dialogs                 |
+| md   | 560px | Forms (3–5 fields)                   |
+| lg   | 720px | Forms with side panel, image preview |
+| xl   | 960px | Heavy forms, multi-step              |
 
 ### Spec
+
 - **Backdrop**: `bg: rgba(8, 12, 10, 0.72)`, `backdrop-filter: blur(4px)`, fades in 180ms
 - **Container**: `bg: bg-overlay` (`#1D241F`), `radius: md` (6px), `shadow: lg`, `border: 1px border-default`
 - **Header**: `padding: 20px 24px`, `border-b border-subtle`, title in `h3`, close button on right (`size-8` ghost, `×` icon)
@@ -55,38 +58,46 @@ Two patterns for transient surfaces: **Modal** for focused decisions, **Drawer**
 - **Exit**: `motion-base` (180ms), reverse
 
 ### Code
+
 ```html
-<div class="fixed inset-0 z-modal">
+<div class="z-modal fixed inset-0">
   <!-- Backdrop -->
-  <div class="absolute inset-0 bg-[rgba(8,12,10,0.72)] backdrop-blur-sm
-              animate-in fade-in duration-base"></div>
+  <div
+    class="animate-in fade-in duration-base absolute inset-0 bg-[rgba(8,12,10,0.72)] backdrop-blur-sm"
+  ></div>
 
   <!-- Modal -->
-  <div role="dialog" aria-modal="true" aria-labelledby="modal-title"
-       class="relative mx-auto mt-[15vh] max-w-[560px] w-[calc(100%-48px)]
-              bg-bg-overlay border border-default rounded-md shadow-lg
-              animate-in fade-in slide-in-from-bottom-2 duration-slow">
-
-    <header class="flex items-center justify-between px-6 py-5
-                   border-b border-subtle">
+  <div
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="modal-title"
+    class="bg-bg-overlay border-default animate-in fade-in slide-in-from-bottom-2 duration-slow relative mx-auto mt-[15vh] w-[calc(100%-48px)] max-w-[560px] rounded-md border shadow-lg"
+  >
+    <header
+      class="border-subtle flex items-center justify-between border-b px-6 py-5"
+    >
       <h3 id="modal-title" class="text-h3 font-semibold tracking-tight">
         Delete workflow
       </h3>
-      <button aria-label="Close"
-              class="size-8 rounded-sm hover:bg-white/[0.04]
-                     text-text-secondary">×</button>
+      <button
+        aria-label="Close"
+        class="text-text-secondary size-8 rounded-sm hover:bg-white/[0.04]"
+      >
+        ×
+      </button>
     </header>
 
-    <div class="px-6 py-6 max-h-[60vh] overflow-y-auto">
+    <div class="max-h-[60vh] overflow-y-auto px-6 py-6">
       <p class="text-body-md text-text-secondary">
-        This will permanently delete <span class="font-mono text-text-primary">
-        order-pipeline</span> and its 1,284 execution records.
-        This action cannot be undone.
+        This will permanently delete
+        <span class="text-text-primary font-mono"> order-pipeline</span> and its
+        1,284 execution records. This action cannot be undone.
       </p>
     </div>
 
-    <footer class="flex items-center justify-end gap-3 px-6 py-4
-                   border-t border-subtle">
+    <footer
+      class="border-subtle flex items-center justify-end gap-3 border-t px-6 py-4"
+    >
       <button class="btn-secondary">Cancel</button>
       <button class="btn-destructive">Delete</button>
     </footer>
@@ -95,6 +106,7 @@ Two patterns for transient surfaces: **Modal** for focused decisions, **Drawer**
 ```
 
 ### Behaviors
+
 - **Trap focus** inside the modal (cycle on Tab)
 - **Restore focus** to trigger on close
 - **Esc** to dismiss (unless destructive — require explicit click)
@@ -109,6 +121,7 @@ Two patterns for transient surfaces: **Modal** for focused decisions, **Drawer**
 Right-anchored sliding panel. Always over the canvas, never over a modal.
 
 ### Anatomy
+
 ```
                                     ┌──────────────────────┐
                                     │ Title          [×]   │  ← h4
@@ -125,13 +138,15 @@ Right-anchored sliding panel. Always over the canvas, never over a modal.
 ```
 
 ### Sizes
-| Size | Width | Use |
-|---|---|---|
-| sm | 360px | Quick details, light forms |
+
+| Size   | Width | Use                                |
+| ------ | ----- | ---------------------------------- |
+| sm     | 360px | Quick details, light forms         |
 | **md** | 480px | Default — node config, run details |
-| lg | 640px | Heavy forms, code editors |
+| lg     | 640px | Heavy forms, code editors          |
 
 ### Spec
+
 - `bg: bg-elevated`, full height
 - Left edge: `border-l border-default`
 - **No radius** (full-bleed top to bottom)
@@ -143,40 +158,49 @@ Right-anchored sliding panel. Always over the canvas, never over a modal.
 - **Exit**: `slide-out-to-right`, `180ms ease-out`
 
 ### Code
+
 ```html
-<div class="fixed inset-0 z-drawer pointer-events-none">
+<div class="z-drawer pointer-events-none fixed inset-0">
   <!-- Optional dimmed backdrop -->
-  <div class="absolute inset-0 bg-black/20 pointer-events-auto
-              animate-in fade-in duration-base"></div>
+  <div
+    class="animate-in fade-in duration-base pointer-events-auto absolute inset-0 bg-black/20"
+  ></div>
 
-  <aside role="dialog" aria-modal="true" aria-labelledby="drawer-title"
-         class="absolute right-0 top-0 h-full w-[480px] bg-bg-elevated
-                border-l border-default shadow-lg pointer-events-auto
-                flex flex-col
-                animate-in slide-in-from-right duration-slow ease-spring">
-
-    <header class="flex items-center justify-between px-6 py-4
-                   border-b border-subtle">
+  <aside
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="drawer-title"
+    class="bg-bg-elevated border-default animate-in slide-in-from-right duration-slow ease-spring pointer-events-auto absolute top-0 right-0 flex h-full w-[480px] flex-col border-l shadow-lg"
+  >
+    <header
+      class="border-subtle flex items-center justify-between border-b px-6 py-4"
+    >
       <div class="min-w-0">
-        <h4 id="drawer-title"
-            class="text-h4 font-semibold tracking-tight truncate">
+        <h4
+          id="drawer-title"
+          class="text-h4 truncate font-semibold tracking-tight"
+        >
           Webhook trigger
         </h4>
-        <p class="font-mono text-mono-sm text-text-muted truncate">
+        <p class="text-mono-sm text-text-muted truncate font-mono">
           node_8f3a2b1c
         </p>
       </div>
-      <button aria-label="Close drawer"
-              class="size-8 rounded-sm hover:bg-white/[0.04]
-                     text-text-secondary">×</button>
+      <button
+        aria-label="Close drawer"
+        class="text-text-secondary size-8 rounded-sm hover:bg-white/[0.04]"
+      >
+        ×
+      </button>
     </header>
 
     <div class="flex-1 overflow-y-auto px-6 py-6">
       <!-- Form / content -->
     </div>
 
-    <footer class="flex items-center justify-between gap-3 px-6 py-4
-                   border-t border-subtle bg-bg-elevated">
+    <footer
+      class="border-subtle bg-bg-elevated flex items-center justify-between gap-3 border-t px-6 py-4"
+    >
       <button class="btn-ghost text-error">Delete node</button>
       <div class="flex gap-2">
         <button class="btn-secondary">Cancel</button>
@@ -190,16 +214,20 @@ Right-anchored sliding panel. Always over the canvas, never over a modal.
 ### Variants
 
 **Persistent drawer** (no backdrop, canvas remains interactive)
+
 - Canvas resizes/shifts left when drawer opens
 - Use for inspector that user toggles often
 - Keyboard shortcut: `⌘\`
 
 **Modal drawer** (with backdrop)
+
 - Backdrop dims canvas; clicking it closes drawer
 - Use for one-off, focused tasks (e.g., import wizard)
 
 ### Internal structure
+
 Drawers commonly contain tabs:
+
 ```
 ┌──────────────────────────────────────┐
 │ Title                          [×]   │
@@ -219,6 +247,7 @@ Drawers commonly contain tabs:
 Triggered by `⌘K`. Anchored top-center, overlays everything.
 
 ### Spec
+
 - Position: `top: 15vh`, centered horizontally
 - Width: 640px, max 90vw
 - `bg: bg-overlay`, `border: 1px border-default`, `radius: md`, `shadow: xl`
@@ -243,6 +272,7 @@ Triggered by `⌘K`. Anchored top-center, overlays everything.
 ```
 
 ### Behaviors
+
 - **↑/↓** to navigate, **Enter** to execute, **Esc** to dismiss
 - Type-ahead fuzzy search across all registered commands
 - Section headers are skipped during navigation
@@ -255,6 +285,7 @@ Triggered by `⌘K`. Anchored top-center, overlays everything.
 Anchored bottom-right, stacked vertically with 12px gap.
 
 ### Spec
+
 - Width: 360px
 - `bg: bg-overlay`, `border: 1px border-default`, `radius: sm`, `shadow: lg`
 - Padding: `12px 16px`
@@ -267,18 +298,24 @@ Anchored bottom-right, stacked vertically with 12px gap.
 - Stack max 3; older ones fade out
 
 ```html
-<div role="status" aria-live="polite"
-     class="w-[360px] bg-bg-overlay border border-default rounded-sm
-            shadow-lg p-4 flex items-start gap-3">
-  <svg class="size-4 mt-0.5 text-success shrink-0">✓</svg>
-  <div class="flex-1 min-w-0">
+<div
+  role="status"
+  aria-live="polite"
+  class="bg-bg-overlay border-default flex w-[360px] items-start gap-3 rounded-sm border p-4 shadow-lg"
+>
+  <svg class="text-success mt-0.5 size-4 shrink-0">✓</svg>
+  <div class="min-w-0 flex-1">
     <p class="text-body-md font-semibold">Workflow saved</p>
     <p class="text-body-sm text-text-secondary mt-0.5">
       Order pipeline is now active.
     </p>
   </div>
-  <button aria-label="Dismiss"
-          class="size-5 text-text-muted hover:text-text-primary">×</button>
+  <button
+    aria-label="Dismiss"
+    class="text-text-muted hover:text-text-primary size-5"
+  >
+    ×
+  </button>
 </div>
 ```
 
@@ -287,6 +324,7 @@ Anchored bottom-right, stacked vertically with 12px gap.
 ## Usage rules
 
 ✅ **Do**
+
 - Use modals only for ephemeral, focused decisions
 - Use drawers when the canvas/context must stay visible
 - Trap focus and restore on close
@@ -294,6 +332,7 @@ Anchored bottom-right, stacked vertically with 12px gap.
 - Auto-focus the first input or primary action on open
 
 ❌ **Don't**
+
 - Stack modals on modals
 - Use modals for long-form content (use a page instead)
 - Make drawers narrower than 360px (cramped) or wider than 720px (use a page)

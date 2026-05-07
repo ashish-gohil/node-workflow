@@ -24,11 +24,11 @@ Data-dense surface. The most "Swiss" component in the system — pure grid, mono
 
 ## Density
 
-| Density | Row height | Cell padding-y | Use |
-|---|---|---|---|
-| Compact | 40px | 10px | Logs, executions, dense ops |
-| **Default** | 48px | 14px | Main resource lists |
-| Comfortable | 56px | 18px | Marketing / settings tables |
+| Density     | Row height | Cell padding-y | Use                         |
+| ----------- | ---------- | -------------- | --------------------------- |
+| Compact     | 40px       | 10px           | Logs, executions, dense ops |
+| **Default** | 48px       | 14px           | Main resource lists         |
+| Comfortable | 56px       | 18px           | Marketing / settings tables |
 
 Cell padding-x: always **16px**.
 
@@ -39,17 +39,18 @@ Cell padding-x: always **16px**.
 ```html
 <thead class="bg-bg-elevated">
   <tr>
-    <th class="px-4 h-9 text-left text-h6 uppercase tracking-wider
-               font-semibold text-text-muted border-b border-default
-               sticky top-0 z-sticky bg-bg-elevated">
+    <th
+      class="text-h6 text-text-muted border-default z-sticky bg-bg-elevated sticky top-0 h-9 border-b px-4 text-left font-semibold tracking-wider uppercase"
+    >
       Name
     </th>
-    <th class="px-4 h-9 text-right ...">Duration</th>
+    <th class="h-9 px-4 text-right ...">Duration</th>
   </tr>
 </thead>
 ```
 
 **Spec**
+
 - `h6` style: 12px, uppercase, `tracking-wider`, weight 700
 - Color: `text-muted`
 - Background: `bg-elevated` (sets it apart from rows)
@@ -64,26 +65,27 @@ Cell padding-x: always **16px**.
 
 ```html
 <tbody>
-  <tr class="border-b border-subtle hover:bg-white/[0.03]
-             aria-selected:bg-forest-500/[0.08]
-             aria-selected:shadow-[inset_2px_0_0_0_var(--color-forest-500)]
-             transition-colors duration-fast cursor-pointer">
-    <td class="px-4 py-3 text-body-md text-text-primary">
+  <tr
+    class="border-subtle aria-selected:bg-forest-500/[0.08] duration-fast cursor-pointer border-b transition-colors hover:bg-white/[0.03] aria-selected:shadow-[inset_2px_0_0_0_var(--color-forest-500)]"
+  >
+    <td class="text-body-md text-text-primary px-4 py-3">
       Order processing pipeline
     </td>
     <td class="px-4 py-3">
       <span class="status-pill status-pill--success">● Success</span>
     </td>
-    <td class="px-4 py-3 text-right font-mono text-mono-md
-               text-text-secondary tabular-nums">
+    <td
+      class="text-mono-md text-text-secondary px-4 py-3 text-right font-mono tabular-nums"
+    >
       1.24s
     </td>
-    <td class="px-4 py-3 text-body-sm text-text-muted">2m ago</td>
+    <td class="text-body-sm text-text-muted px-4 py-3">2m ago</td>
   </tr>
 </tbody>
 ```
 
 **Spec**
+
 - `bg: bg-surface` (default)
 - Bottom border: `border-subtle` (1px) — between rows only
 - Hover: `bg: rgba(255,255,255,0.03)`
@@ -95,26 +97,28 @@ Cell padding-x: always **16px**.
 
 ## Cell types & alignment
 
-| Content | Font | Alignment | Color |
-|---|---|---|---|
-| Name / title | `body-md` 500 | left | `text-primary` |
-| Description / meta | `body-sm` | left | `text-secondary` |
-| Status | pill | left | semantic |
-| Number / duration / size | `mono-md`, `tabular-nums` | right | `text-secondary` |
-| Date / timestamp | `body-sm`, optionally mono | right or left | `text-muted` |
-| ID / hash | `mono-sm`, truncated | left | `text-muted` |
-| Actions (row menu) | icon button | right | `text-secondary` |
+| Content                  | Font                       | Alignment     | Color            |
+| ------------------------ | -------------------------- | ------------- | ---------------- |
+| Name / title             | `body-md` 500              | left          | `text-primary`   |
+| Description / meta       | `body-sm`                  | left          | `text-secondary` |
+| Status                   | pill                       | left          | semantic         |
+| Number / duration / size | `mono-md`, `tabular-nums`  | right         | `text-secondary` |
+| Date / timestamp         | `body-sm`, optionally mono | right or left | `text-muted`     |
+| ID / hash                | `mono-sm`, truncated       | left          | `text-muted`     |
+| Actions (row menu)       | icon button                | right         | `text-secondary` |
 
 ---
 
 ## Selection
 
 ### Bulk selection
+
 Add a 40px-wide first column with a checkbox:
 
 ```html
 <th class="w-10 px-4">
-  <input type="checkbox" class="checkbox" />  <!-- selects all -->
+  <input type="checkbox" class="checkbox" />
+  <!-- selects all -->
 </th>
 ```
 
@@ -164,10 +168,11 @@ For large datasets, prefer **infinite scroll with virtualization** over paginati
 ## States
 
 ### Loading (skeleton)
+
 Replace each row's text with skeleton bars matching cell width.
 
 ```html
-<tr class="border-b border-subtle">
+<tr class="border-subtle border-b">
   <td class="px-4 py-3">
     <div class="skeleton h-4 w-48"></div>
   </td>
@@ -175,7 +180,7 @@ Replace each row's text with skeleton bars matching cell width.
     <div class="skeleton h-5 w-20 rounded-xs"></div>
   </td>
   <td class="px-4 py-3 text-right">
-    <div class="skeleton h-4 w-12 ml-auto"></div>
+    <div class="skeleton ml-auto h-4 w-12"></div>
   </td>
 </tr>
 ```
@@ -183,18 +188,23 @@ Replace each row's text with skeleton bars matching cell width.
 Show 5–8 skeleton rows, then real data.
 
 ### Empty
+
 Render a single full-span row, 200px tall, centered:
+
 ```html
-<tr><td colspan="4" class="py-16 text-center">
-  <svg class="size-10 mx-auto text-text-muted">...</svg>
-  <p class="mt-3 text-h4 text-text-primary">No executions yet</p>
-  <p class="mt-1 text-body-sm text-text-secondary">
-    Run a workflow to see results here.
-  </p>
-</td></tr>
+<tr>
+  <td colspan="4" class="py-16 text-center">
+    <svg class="text-text-muted mx-auto size-10">...</svg>
+    <p class="text-h4 text-text-primary mt-3">No executions yet</p>
+    <p class="text-body-sm text-text-secondary mt-1">
+      Run a workflow to see results here.
+    </p>
+  </td>
+</tr>
 ```
 
 ### Error
+
 Same shape as empty, with `error` color icon and a "Try again" ghost button.
 
 ---
@@ -202,12 +212,15 @@ Same shape as empty, with `error` color icon and a "Try again" ghost button.
 ## Variants
 
 ### Striped
+
 **Avoid** by default — borders already provide separation. If used, alternate rows: `bg-white/[0.015]`.
 
 ### Bordered (full grid)
+
 For comparison tables only. Add `border-x border-default` to cells. Avoid in app surfaces.
 
 ### Inside a card
+
 - Remove the table's outer borders (the card provides them)
 - Header gets `bg-bg-overlay` to visually nest
 - First/last row: no top/bottom border (card handles edges)
@@ -225,6 +238,7 @@ For comparison tables only. Add `border-x border-default` to cells. Avoid in app
 ## Usage rules
 
 ✅ **Do**
+
 - Use `tabular-nums` on every numeric column
 - Keep row heights consistent within a table
 - Right-align numbers, left-align text
@@ -232,6 +246,7 @@ For comparison tables only. Add `border-x border-default` to cells. Avoid in app
 - Use semantic status pills, not raw colored text
 
 ❌ **Don't**
+
 - Add vertical borders between cells (visual noise)
 - Use `text-center` (Swiss tables align by content type, not for prettiness)
 - Mix font sizes within rows

@@ -2,6 +2,7 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import { Bell, Search, Zap } from "lucide-react";
+import { motion } from "motion/react";
 
 import useFlow from "@/app/store/flow-store";
 import { api } from "@/lib/api";
@@ -35,10 +36,20 @@ export default function Header() {
   };
 
   return (
-    <header className="bg-bg-canvas border-border-subtle flex h-14 items-center gap-4 border-b px-6">
+    <motion.header
+      initial={{ opacity: 0, y: -6 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.25, ease: "easeOut" }}
+      className="bg-bg-canvas border-text-primary dark:border-border-stamp flex h-[72px] items-center gap-4 border-b-[1.5px] px-8 py-3"
+    >
       {/* Logo + breadcrumbs */}
       <div className="flex min-w-0 flex-1 items-center gap-4">
-        <AppLogo />
+        <button
+          onClick={() => router.push("/")}
+          className="shrink-0 cursor-pointer"
+        >
+          <AppLogo />
+        </button>
 
         {isEditor && (
           <nav
@@ -47,7 +58,7 @@ export default function Header() {
           >
             <button
               onClick={() => router.push("/")}
-              className="text-text-secondary hover:text-text-primary transition-colors duration-[120ms]"
+              className="text-text-muted hover:text-text-primary transition-colors duration-[120ms]"
             >
               Workflows
             </button>
@@ -59,9 +70,9 @@ export default function Header() {
         )}
       </div>
 
-      {/* Center — search trigger */}
+      {/* Center search */}
       <button
-        className="border-border-default bg-bg-surface text-text-muted text-body-sm hover:border-border-strong hidden h-8 min-w-56 items-center gap-2 rounded-sm border px-3 transition-colors duration-[120ms] md:inline-flex"
+        className="btn-stamp hover:btn-stamp-hover active:btn-stamp-active text-body-sm text-text-muted hidden h-10 min-w-52 justify-start gap-2 px-3 font-normal md:inline-flex"
         aria-label="Search workflows (⌘K)"
       >
         <Search className="size-4 shrink-0" aria-hidden="true" />
@@ -71,13 +82,13 @@ export default function Header() {
         </kbd>
       </button>
 
-      {/* Right — actions */}
+      {/* Right actions */}
       <div className="flex items-center gap-2">
         <ThemeToggle />
 
         <button
           aria-label="Notifications"
-          className="text-text-secondary hover:text-text-primary inline-flex size-9 items-center justify-center rounded-sm transition-colors duration-[120ms] hover:bg-white/[0.04]"
+          className="btn-stamp hover:btn-stamp-hover active:btn-stamp-active hover:bg-accent-primary hover:text-accent-on size-10"
         >
           <Bell className="size-4" />
         </button>
@@ -103,6 +114,6 @@ export default function Header() {
           </Button>
         )}
       </div>
-    </header>
+    </motion.header>
   );
 }

@@ -22,10 +22,7 @@ export function MergeNode({ id, data, selected }: NodeProps<MergeNodeType>) {
         >
           <BaseNode
             onDoubleClick={() => data.onEdit?.(id)}
-            className={`
-              h-10 w-12
-              ${selected ? "border-border-strong" : ""}
-            `}
+            className={`h-10 w-12 ${selected ? "border-border-strong" : ""} `}
           >
             {/* -------- INPUT HANDLES (LEFT) -------- */}
             {Array.from({ length: inputCount }).map((_, index) => {

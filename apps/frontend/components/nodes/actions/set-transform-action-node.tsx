@@ -10,46 +10,6 @@ import { ActionNodeBase } from "./action-node-base";
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 export function SetNode({ id, data, selected }: NodeProps<SetNodeType>) {
   return (
     <ActionNodeBase

@@ -36,22 +36,27 @@ Always reference the matching file before generating. If a component or pattern 
 ## Prompt templates
 
 ### Generate a single component
+
 ```
 Build a {component name} per components/{component}.md. Use Tailwind with the tokens from tailwind.config.js. {Specific variant}, {state}, {data}.
 ```
 
 **Example:**
+
 > Build a workflow node card per `components/cards.md` § Workflow Node. Status = success, with one input port and two output ports, label "Webhook", subtitle "POST /api/orders", and "142 runs" meta. Use Tailwind.
 
 ### Generate a full page
+
 ```
 Build a {page name} for FLOW following patterns/{pattern}.md. Use the app shell from patterns/app-shell.md. {Specific content}.
 ```
 
 **Example:**
+
 > Build the Workflows index page following `patterns/dashboard.md`. Use the app shell from `patterns/app-shell.md`. Include: page header with "New workflow" CTA, a 24h/7d/30d range bar, four KPI cards (executions today, success rate, avg duration, failed runs), and a table listing 8 workflows with name, status pill, last run time, and a row menu.
 
 ### Generate the workflow editor (canvas)
+
 ```
 Build the FLOW workflow editor:
 - App shell from patterns/app-shell.md with sidebar collapsed and inspector open at 480px
@@ -63,6 +68,7 @@ Build the FLOW workflow editor:
 ```
 
 ### Restyle an existing screenshot/design
+
 ```
 Restyle the attached UI to match the FLOW design system. Keep the structure and content, but apply:
 - Dark canvas (#0A0E0C), elevated cards (#161C18)
@@ -75,11 +81,13 @@ Reference DESIGN_SYSTEM.md and components/*.md.
 ```
 
 ### Generate marketing variant
+
 ```
 Build a marketing {section} for FLOW. Use the design system but apply the marketing variant rules from patterns/dashboard.md § Marketing variant: max-w-content, larger headlines (display-xl), generous whitespace, optional radius up to 8px, allow one subtle radial gradient behind the hero.
 ```
 
 ### Generate empty / loading / error states
+
 ```
 For the {component/page}, generate the three states from patterns/empty-states.md:
 1. True empty (first-time user, no data ever)
@@ -119,17 +127,21 @@ When prompting, including 1–2 example pairs from this list dramatically improv
 ### Pair 1 — primary button
 
 **Bad (generic AI default):**
+
 ```html
-<button class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg shadow-md">
+<button
+  class="rounded-lg bg-blue-500 px-4 py-2 text-white shadow-md hover:bg-blue-600"
+>
   Run workflow
 </button>
 ```
 
 **Good (FLOW):**
+
 ```html
-<button class="h-9 px-4 rounded-sm bg-forest-500 hover:bg-forest-400
-               active:bg-forest-600 text-cream-50 text-body-md font-medium
-               transition-colors duration-fast">
+<button
+  class="bg-forest-500 hover:bg-forest-400 active:bg-forest-600 text-cream-50 text-body-md duration-fast h-9 rounded-sm px-4 font-medium transition-colors"
+>
   Run workflow
 </button>
 ```
@@ -137,22 +149,30 @@ When prompting, including 1–2 example pairs from this list dramatically improv
 ### Pair 2 — stat card
 
 **Bad:**
+
 ```html
-<div class="rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 p-6 shadow-2xl">
+<div
+  class="rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 p-6 shadow-2xl"
+>
   <h3 class="text-white">Executions</h3>
   <p class="text-4xl font-bold text-white">1284</p>
 </div>
 ```
 
 **Good:**
+
 ```html
-<div class="bg-bg-elevated border border-default rounded-sm p-5">
-  <p class="text-h6 uppercase tracking-wider text-text-muted">Executions today</p>
+<div class="bg-bg-elevated border-default rounded-sm border p-5">
+  <p class="text-h6 text-text-muted tracking-wider uppercase">
+    Executions today
+  </p>
   <div class="mt-3 flex items-baseline gap-3">
-    <span class="font-mono text-display-lg font-medium tabular-nums tracking-tighter">
+    <span
+      class="text-display-lg font-mono font-medium tracking-tighter tabular-nums"
+    >
       1,284
     </span>
-    <span class="text-body-sm font-medium text-success">↗ 12.3%</span>
+    <span class="text-body-sm text-success font-medium">↗ 12.3%</span>
   </div>
 </div>
 ```
@@ -160,25 +180,36 @@ When prompting, including 1–2 example pairs from this list dramatically improv
 ### Pair 3 — table row
 
 **Bad:**
+
 ```html
-<tr class="hover:bg-gray-100 odd:bg-gray-50">
+<tr class="odd:bg-gray-50 hover:bg-gray-100">
   <td>order-pipeline</td>
-  <td><span class="bg-green-100 text-green-800 rounded-full px-2 py-0.5">Success</span></td>
+  <td>
+    <span class="rounded-full bg-green-100 px-2 py-0.5 text-green-800"
+      >Success</span
+    >
+  </td>
   <td>1.24</td>
 </tr>
 ```
 
 **Good:**
+
 ```html
-<tr class="border-b border-subtle hover:bg-white/[0.03] cursor-pointer transition-colors duration-fast">
-  <td class="px-4 py-3 text-body-md">Order pipeline</td>
+<tr
+  class="border-subtle duration-fast cursor-pointer border-b transition-colors hover:bg-white/[0.03]"
+>
+  <td class="text-body-md px-4 py-3">Order pipeline</td>
   <td class="px-4 py-3">
-    <span class="inline-flex items-center gap-1.5 h-5 px-1.5 rounded-xs
-                 bg-success-surface text-success text-caption font-medium">
-      <span class="size-1 rounded-full bg-success"></span> Success
+    <span
+      class="bg-success-surface text-success text-caption inline-flex h-5 items-center gap-1.5 rounded-xs px-1.5 font-medium"
+    >
+      <span class="bg-success size-1 rounded-full"></span> Success
     </span>
   </td>
-  <td class="px-4 py-3 text-right font-mono text-mono-md text-text-secondary tabular-nums">
+  <td
+    class="text-mono-md text-text-secondary px-4 py-3 text-right font-mono tabular-nums"
+  >
     1.24s
   </td>
 </tr>
@@ -189,20 +220,24 @@ When prompting, including 1–2 example pairs from this list dramatically improv
 ## Tool-specific notes
 
 ### Claude.ai Projects
+
 - Upload the entire `design-system/` folder to **Project knowledge**
 - In the project's **system prompt**, paste the system prompt block from the top of this file
 - Reference files by name in conversations: "Build X per `components/cards.md`"
 
 ### Claude Code
+
 - Run from the parent directory of `design-system/`
 - Claude Code will read files on demand — no upload needed
 - Use slash commands or just reference the path: `Read design-system/components/buttons.md and build me a primary button`
 
 ### Cursor / Windsurf / Copilot Chat
+
 - Add `design-system/` to context (`@design-system` or similar)
 - Paste the system prompt as a custom rule
 
 ### Figma → code (with AI)
+
 - Reference `tokens.json` as the source of truth for colors, spacing, type
 - Paste the relevant component spec from `components/*.md` alongside the Figma frame
 

@@ -15,14 +15,16 @@ const badgeVariants = cva(
       variant: {
         /* Status — filled tinted surface + semantic text */
         success: "h-5 px-1.5 text-caption bg-success-surface text-success",
-        error:   "h-5 px-1.5 text-caption bg-error-surface text-error",
+        error: "h-5 px-1.5 text-caption bg-error-surface text-error",
         warning: "h-5 px-1.5 text-caption bg-warning-surface text-warning",
         running: "h-5 px-1.5 text-caption bg-info-surface text-info",
-        queued:  "h-5 px-1.5 text-caption bg-bg-inset text-text-muted",
+        queued: "h-5 px-1.5 text-caption bg-bg-inset text-text-muted",
         /* Outline — neutral, for tags, categories */
-        outline: "h-5 px-1.5 text-caption border border-border-default text-text-secondary",
+        outline:
+          "h-5 px-1.5 text-caption border border-border-default text-text-secondary",
         /* Solid — forest-tinted, for counts/KPIs */
-        solid: "h-5 px-1.5 text-caption bg-forest-800 text-forest-200 tabular-nums",
+        solid:
+          "h-5 px-1.5 text-caption bg-forest-800 text-forest-200 tabular-nums",
         /* Mono — IDs, versions, hashes */
         mono: "h-5 px-1.5 font-mono text-mono-sm bg-bg-inset border border-border-subtle text-text-secondary",
         /* KBD — keyboard shortcut */
@@ -36,7 +38,8 @@ const badgeVariants = cva(
 );
 
 export interface BadgeProps
-  extends React.HTMLAttributes<HTMLSpanElement>,
+  extends
+    React.HTMLAttributes<HTMLSpanElement>,
     VariantProps<typeof badgeVariants> {
   dot?: boolean;
   pulse?: boolean;
@@ -52,19 +55,32 @@ function Badge({
   children,
   ...props
 }: BadgeProps) {
-  const showDot = dot || variant === "success" || variant === "error" || variant === "warning" || variant === "running" || variant === "queued";
+  const showDot =
+    dot ||
+    variant === "success" ||
+    variant === "error" ||
+    variant === "warning" ||
+    variant === "running" ||
+    variant === "queued";
 
   return (
-    <span className={cn(badgeVariants({ variant }), onRemove && "pr-1 h-6", className)} {...props}>
+    <span
+      className={cn(
+        badgeVariants({ variant }),
+        onRemove && "h-6 pr-1",
+        className
+      )}
+      {...props}
+    >
       {showDot && (
         <span
           className={cn(
             "size-1 rounded-full",
             variant === "success" && "bg-success",
-            variant === "error"   && "bg-error",
+            variant === "error" && "bg-error",
             variant === "warning" && "bg-warning",
             variant === "running" && "bg-info animate-pulse-status",
-            variant === "queued"  && "bg-text-muted",
+            variant === "queued" && "bg-text-muted"
           )}
           aria-hidden="true"
         />
@@ -74,7 +90,7 @@ function Badge({
         <button
           aria-label={`Remove ${children}`}
           onClick={onRemove}
-          className="inline-flex size-3 items-center justify-center text-current opacity-60 hover:opacity-100 transition-opacity"
+          className="inline-flex size-3 items-center justify-center text-current opacity-60 transition-opacity hover:opacity-100"
         >
           <X className="size-3" />
         </button>
@@ -93,14 +109,18 @@ interface NotificationBadgeProps {
   "aria-label"?: string;
 }
 
-function NotificationBadge({ count, children, "aria-label": ariaLabel }: NotificationBadgeProps) {
+function NotificationBadge({
+  count,
+  children,
+  "aria-label": ariaLabel,
+}: NotificationBadgeProps) {
   return (
     <div className="relative inline-block">
       {children}
       {count !== undefined && count > 0 && (
         <span
           aria-label={ariaLabel ?? `${count} notifications`}
-          className="absolute right-1 top-1 flex min-w-4 h-4 items-center justify-center rounded-full bg-error px-1 text-[10px] font-semibold text-cream-50 tabular-nums"
+          className="bg-error text-cream-50 absolute top-1 right-1 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] font-semibold tabular-nums"
         >
           {count > 99 ? "99+" : count}
         </span>

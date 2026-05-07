@@ -1,4 +1,5 @@
 import type { Config } from "tailwindcss";
+import * as animate from "tailwindcss-animate";
 
 /**
  * FLOW Design System — Tailwind config (Next.js + shadcn + Turborepo)
@@ -97,7 +98,7 @@ const config: Config = {
         md: "0",
         lg: "0",
         node: "var(--node-radius)", // 2px — ONLY for workflow nodes
-        full: "9999px",             // ONLY for the notification dot / status pulses
+        full: "9999px", // ONLY for the notification dot / status pulses
       },
 
       borderWidth: {
@@ -115,19 +116,46 @@ const config: Config = {
 
       fontSize: {
         // [size, { lineHeight, letterSpacing, fontWeight }]
-        "display-xl": ["56px", { lineHeight: "60px", letterSpacing: "-0.03em", fontWeight: "500" }],
-        "display-lg": ["44px", { lineHeight: "52px", letterSpacing: "-0.025em", fontWeight: "500" }],
-        h1: ["32px", { lineHeight: "40px", letterSpacing: "-0.02em", fontWeight: "600" }],
-        h2: ["24px", { lineHeight: "32px", letterSpacing: "-0.015em", fontWeight: "600" }],
-        h3: ["20px", { lineHeight: "28px", letterSpacing: "-0.01em", fontWeight: "600" }],
-        h4: ["17px", { lineHeight: "24px", letterSpacing: "0", fontWeight: "600" }],
-        h5: ["14px", { lineHeight: "20px", letterSpacing: "0", fontWeight: "600" }],
-        h6: ["12px", { lineHeight: "16px", letterSpacing: "0.04em", fontWeight: "700" }],
+        "display-xl": [
+          "56px",
+          { lineHeight: "60px", letterSpacing: "-0.03em", fontWeight: "500" },
+        ],
+        "display-lg": [
+          "44px",
+          { lineHeight: "52px", letterSpacing: "-0.025em", fontWeight: "500" },
+        ],
+        h1: [
+          "32px",
+          { lineHeight: "40px", letterSpacing: "-0.02em", fontWeight: "600" },
+        ],
+        h2: [
+          "24px",
+          { lineHeight: "32px", letterSpacing: "-0.015em", fontWeight: "600" },
+        ],
+        h3: [
+          "20px",
+          { lineHeight: "28px", letterSpacing: "-0.01em", fontWeight: "600" },
+        ],
+        h4: [
+          "17px",
+          { lineHeight: "24px", letterSpacing: "0", fontWeight: "600" },
+        ],
+        h5: [
+          "14px",
+          { lineHeight: "20px", letterSpacing: "0", fontWeight: "600" },
+        ],
+        h6: [
+          "12px",
+          { lineHeight: "16px", letterSpacing: "0.04em", fontWeight: "700" },
+        ],
         "body-lg": ["16px", { lineHeight: "26px" }],
         "body-md": ["14px", { lineHeight: "22px" }],
         "body-sm": ["13px", { lineHeight: "20px" }],
         caption: ["12px", { lineHeight: "16px", fontWeight: "500" }],
-        label: ["12px", { lineHeight: "16px", letterSpacing: "0.02em", fontWeight: "500" }],
+        label: [
+          "12px",
+          { lineHeight: "16px", letterSpacing: "0.02em", fontWeight: "500" },
+        ],
         "mono-md": ["13px", { lineHeight: "20px" }],
         "mono-sm": ["12px", { lineHeight: "18px" }],
       },
@@ -194,9 +222,7 @@ const config: Config = {
       },
     },
   },
-  plugins: [
-    require("tailwindcss-animate"),
-  ],
+  plugins: [animate],
 };
 
 export default config;

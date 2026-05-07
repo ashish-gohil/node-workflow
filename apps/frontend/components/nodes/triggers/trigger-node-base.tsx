@@ -45,7 +45,7 @@ export function TriggerNodeBase({
       <Button
         variant="secondary"
         size="sm"
-        className="opacity-0 group-hover:opacity-100 transition-opacity duration-[120ms]"
+        className="opacity-0 transition-opacity duration-[120ms] group-hover:opacity-100"
         aria-label="Execute this step"
       >
         <Play className="size-3" aria-hidden="true" />
@@ -64,14 +64,14 @@ export function TriggerNodeBase({
               <span className="text-forest-300 shrink-0 [&_svg]:size-4">
                 {icon}
               </span>
-              <h5 className="text-h5 font-semibold text-text-primary truncate">
+              <h5 className="text-h5 text-text-primary truncate font-semibold">
                 {label}
               </h5>
             </BaseNodeTitle>
 
             <button
               aria-label="Node options"
-              className="text-text-muted hover:text-text-primary hover:bg-white/[0.04] size-6 rounded-sm inline-flex items-center justify-center transition-colors duration-[120ms] shrink-0"
+              className="text-text-muted hover:text-text-primary hover:bg-accent-subtle inline-flex size-6 shrink-0 items-center justify-center rounded-sm transition-colors duration-[120ms]"
             >
               <span className="text-body-md leading-none">⋯</span>
             </button>
@@ -79,7 +79,7 @@ export function TriggerNodeBase({
 
           {/* Subtitle */}
           {subtitle && (
-            <p className="px-4 pb-1 text-mono-sm font-mono text-text-muted truncate">
+            <p className="text-mono-sm text-text-muted truncate px-4 pb-1 font-mono">
               {subtitle}
             </p>
           )}

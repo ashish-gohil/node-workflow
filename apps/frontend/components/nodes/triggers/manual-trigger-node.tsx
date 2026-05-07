@@ -12,46 +12,6 @@ import { TriggerNodeBase } from "./trigger-node-base";
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 export function ManualTriggerNode({
   id,
   data,

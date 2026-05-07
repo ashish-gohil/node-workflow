@@ -1,14 +1,14 @@
 "use client";
-import React, { useCallback,useState  } from "react";
+import { useCallback, useState } from "react";
 import { OnConnectEnd, useReactFlow } from "@xyflow/react";
 import { useShallow } from "zustand/react/shallow";
 
 import useFlow, { FlowState } from "@/app/store/flow-store";
 import { ActionNodeTypes, DelayNodeType } from "@/app/types/actions";
+import { FlowNode } from "@/app/types/flow";
 import { TriggerNode } from "@/app/types/tirggers";
 import TriggerSheet from "@/app/workflows/new/trigger-sheet";
 import FlowCanvas from "@/components/flow/flow-canvas";
-// import { useTheme } from 'next-themes'
 import { ThemeHydrated } from "@/components/ui/theme-wraper";
 
 import TriggerConfigDialog from "./trigger-config/trigger-config-dialog";
@@ -17,87 +17,65 @@ import "@xyflow/react/dist/style.css";
 
 const selector = (state: FlowState) => ({
   nodes: state.nodes,
-  edges: state.edges,
-  onNodesChange: state.onNodesChange,
-  onEdgesChange: state.onEdgesChange,
-  onConnect: state.onConnect,
   setNodes: state.setNodes,
   setEdges: state.setEdges,
 });
 
 export default function NewWorkflow() {
   const { screenToFlowPosition } = useReactFlow();
-
-  const { nodes, edges, setNodes, setEdges } = useFlow(useShallow(selector));
-
+  const { nodes, setNodes, setEdges } = useFlow(useShallow(selector));
   const [configNodeId, setConfigNodeId] = useState<string | null>(null);
 
-  // When drag stops (create create action node if its valid position...)
+  /* Drop-to-create: when the user drags a connection into empty canvas,
+     spawn a Delay node and wire it up to the source handle. */
   const onConnectEnd: OnConnectEnd = useCallback(
     (event, connectionState) => {
-      if (!connectionState.isValid) {
-        let clientX = 0;
-
-        let clientY = 0;
-
-        if (event instanceof TouchEvent) {
-          clientX = event.changedTouches[0].clientX;
-          clientY = event.changedTouches[0].clientY;
-        } else if (event instanceof MouseEvent) {
-          clientX = event.clientX;
-          clientY = event.clientY;
-        }
-
-        const nodeId = crypto.randomUUID();
-
-        // this will open new action sheet to select new node...
-        const newNode: DelayNodeType = {
-          id: nodeId,
-          position: screenToFlowPosition({
-            x: clientX,
-            y: clientY,
-          }),
-          data: {
-            type: ActionNodeTypes.Delay,
-            label: "Delay",
-            config: { mode: "seconds", seconds: 20 },
-          },
-          origin: [0.5, 0.0],
-          type: ActionNodeTypes.Delay,
-        };
-
-        setNodes((nds) => [...nds, newNode]);
-
-        setEdges((eds) =>
-          eds.concat({
-            id: nodeId,
-            source: connectionState.fromNode!.id,
-            target: nodeId,
-            sourceHandle: connectionState.fromHandle?.id,
-          })
-        );
+      if (connectionState.isValid) {
+        return;
       }
+
+      const { clientX, clientY } =
+        event instanceof TouchEvent
+          ? event.changedTouches[0]
+          : (event as MouseEvent);
+
+      const nodeId = crypto.randomUUID();
+
+      const newNode: DelayNodeType = {
+        id: nodeId,
+        position: screenToFlowPosition({ x: clientX, y: clientY }),
+        data: {
+          type: ActionNodeTypes.Delay,
+          label: "Delay",
+          config: { mode: "seconds", seconds: 20 },
+        },
+        origin: [0.5, 0.0],
+        type: ActionNodeTypes.Delay,
+      };
+
+      setNodes((nds) => [...nds, newNode]);
+      setEdges((eds) =>
+        eds.concat({
+          id: `edge-${crypto.randomUUID()}`,
+          source: connectionState.fromNode!.id,
+          target: nodeId,
+          sourceHandle: connectionState.fromHandle?.id,
+        })
+      );
     },
     [screenToFlowPosition, setNodes, setEdges]
   );
 
-  const updateNodeData = (configNodeId: string, data: any) => {
-    const selectedNode = nodes.find((node) => node.id === configNodeId)!;
-
-    selectedNode.data = data;
-    setNodes((nds) => [
-      ...nds.filter((node) => node.id === configNodeId),
-      selectedNode,
-    ]);
+  const updateNodeData = (id: string, data: FlowNode["data"]) => {
+    setNodes((nds) =>
+      nds.map((node) =>
+        node.id === id ? ({ ...node, data } as FlowNode) : node
+      )
+    );
   };
 
-  console.log("nodes from page.tsx ");
-  console.log(nodes);
-  console.log("edges from page.tsx ");
-  console.log(edges);
-
   return (
-    <div className="z-20 h-[calc(100vh-80px)] w-screen bg-transparent">
+    <div className="z-20 h-full w-full bg-transparent">
       <div className="h-full w-full">
         <ThemeHydrated>
           <FlowCanvas

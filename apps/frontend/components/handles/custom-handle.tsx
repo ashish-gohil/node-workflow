@@ -22,7 +22,7 @@ export function CustomHandle({
   return (
     <div
       className={cn(
-        "absolute w-auto  top-1/2  flex items-center pointer-events-none",
+        "pointer-events-none absolute top-1/2 flex w-auto items-center",
         className
       )}
     >
@@ -30,12 +30,12 @@ export function CustomHandle({
         position={position}
         type={type}
         id={handleId}
-        className="bg-bg-muted border-border-default pointer-events-auto flex w-8 items-center justify-start rounded-full border"
+        className="bg-bg-inset border-border-default pointer-events-auto flex w-8 items-center justify-start rounded-full border-2"
       >
         {showPlus && (
           <>
-            <div className=" h-px w-8 bg-neutral-400" />
-            <button className="border-border-strong bg-accent-muted hover:bg-accent-muted pointer-events-auto absolute left-8 top-1 flex size-4 items-center justify-center rounded-full border transition hover:cursor-pointer">
+            <div className="bg-border-strong h-px w-8" />
+            <button className="border-border-strong bg-bg-elevated hover:bg-accent-subtle pointer-events-auto absolute top-1 left-8 flex size-4 items-center justify-center rounded-full border-2 transition-colors duration-[120ms] hover:cursor-pointer">
               <Plus size={14} className="text-text-primary" />
             </button>
           </>

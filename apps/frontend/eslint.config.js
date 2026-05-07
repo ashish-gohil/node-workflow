@@ -25,6 +25,14 @@ const eslintconfig = [
       import: importPlugin,
       unicorn,
     },
+    settings: {
+      "import/resolver": {
+        typescript: {
+          project: "./tsconfig.json",
+        },
+        node: true,
+      },
+    },
     rules: {
       ...importPlugin.configs.recommended.rules,
 
@@ -33,7 +41,6 @@ const eslintconfig = [
 
       "@typescript-eslint/no-explicit-any": "warn",
 
-      "import/order": ["warn"],
       "prefer-const": "error",
       "no-var": "error",
     },

@@ -18,10 +18,10 @@ Compact labels for status, categories, IDs, counts. Always tight, never decorati
 
 ## Sizes
 
-| Size | Height | Padding-x | Text | Icon | Use |
-|---|---|---|---|---|---|
-| sm | 20px | 6px | 12px / 500 | 12px | Inline within rows / tables |
-| **md** | 24px | 8px | 12px / 500 | 14px | Default |
+| Size   | Height | Padding-x | Text       | Icon | Use                         |
+| ------ | ------ | --------- | ---------- | ---- | --------------------------- |
+| sm     | 20px   | 6px       | 12px / 500 | 12px | Inline within rows / tables |
+| **md** | 24px   | 8px       | 12px / 500 | 14px | Default                     |
 
 ---
 
@@ -33,10 +33,10 @@ For run state, lifecycle, system state. Filled background tinted, text in semant
 
 ```html
 <!-- Success -->
-<span class="inline-flex items-center gap-1.5 h-5 px-1.5 rounded-xs
-             bg-success-surface text-success
-             text-caption font-medium">
-  <span class="size-1 rounded-full bg-success"></span>
+<span
+  class="bg-success-surface text-success text-caption inline-flex h-5 items-center gap-1.5 rounded-xs px-1.5 font-medium"
+>
+  <span class="bg-success size-1 rounded-full"></span>
   Success
 </span>
 ```
@@ -44,22 +44,22 @@ For run state, lifecycle, system state. Filled background tinted, text in semant
 **Pre-defined statuses**
 | Status | Surface | Text | Dot |
 |---|---|---|---|
-| Running  | `info-surface`    | `info`    | `info` (animated pulse) |
-| Success  | `success-surface` | `success` | `success` |
-| Failed   | `error-surface`   | `error`   | `error` |
-| Queued   | `bg-inset`        | `text-muted` | `text-muted` |
+| Running | `info-surface` | `info` | `info` (animated pulse) |
+| Success | `success-surface` | `success` | `success` |
+| Failed | `error-surface` | `error` | `error` |
+| Queued | `bg-inset` | `text-muted` | `text-muted` |
 | Retrying | `warning-surface` | `warning` | `warning` (pulse) |
-| Skipped  | `bg-inset`        | `neutral-500` | `neutral-500` |
-| Paused   | `bg-inset`        | `text-secondary` | `text-secondary` |
+| Skipped | `bg-inset` | `neutral-500` | `neutral-500` |
+| Paused | `bg-inset` | `text-secondary` | `text-secondary` |
 
 ### 2 · Outline (categories, tags, tech labels)
 
 Neutral container, used for grouping and metadata.
 
 ```html
-<span class="inline-flex items-center h-5 px-1.5 rounded-xs
-             border border-default text-text-secondary
-             text-caption font-medium">
+<span
+  class="border-default text-text-secondary text-caption inline-flex h-5 items-center rounded-xs border px-1.5 font-medium"
+>
   trigger
 </span>
 ```
@@ -69,9 +69,9 @@ Neutral container, used for grouping and metadata.
 Forest-tinted, used for emphasis or counts.
 
 ```html
-<span class="inline-flex items-center h-5 px-1.5 rounded-xs
-             bg-forest-800 text-forest-200
-             text-caption font-semibold tabular-nums">
+<span
+  class="bg-forest-800 text-forest-200 text-caption inline-flex h-5 items-center rounded-xs px-1.5 font-semibold tabular-nums"
+>
   142
 </span>
 ```
@@ -81,9 +81,9 @@ Forest-tinted, used for emphasis or counts.
 Technical metadata. Always mono.
 
 ```html
-<span class="inline-flex items-center h-5 px-1.5 rounded-xs
-             bg-bg-inset border border-subtle
-             font-mono text-mono-sm text-text-secondary">
+<span
+  class="bg-bg-inset border-subtle text-mono-sm text-text-secondary inline-flex h-5 items-center rounded-xs border px-1.5 font-mono"
+>
   v1.2.4
 </span>
 ```
@@ -93,12 +93,16 @@ Technical metadata. Always mono.
 Has an `×` icon for removal. Used in tag inputs, filter chips.
 
 ```html
-<span class="inline-flex items-center gap-1 h-6 px-2 rounded-xs
-             bg-forest-800 text-forest-200 text-caption">
+<span
+  class="bg-forest-800 text-forest-200 text-caption inline-flex h-6 items-center gap-1 rounded-xs px-2"
+>
   production
-  <button aria-label="Remove tag"
-          class="size-3 inline-flex items-center justify-center
-                 text-forest-300 hover:text-cream-50">×</button>
+  <button
+    aria-label="Remove tag"
+    class="text-forest-300 hover:text-cream-50 inline-flex size-3 items-center justify-center"
+  >
+    ×
+  </button>
 </span>
 ```
 
@@ -109,9 +113,9 @@ Minimal, attached to icons.
 ```html
 <div class="relative inline-block">
   <button aria-label="Notifications" class="size-9 rounded-sm">🔔</button>
-  <span class="absolute top-1 right-1 min-w-4 h-4 px-1 rounded-full
-               bg-error text-cream-50 text-[10px] font-semibold
-               flex items-center justify-center tabular-nums">
+  <span
+    class="bg-error text-cream-50 absolute top-1 right-1 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] font-semibold tabular-nums"
+  >
     3
   </span>
 </div>
@@ -124,9 +128,9 @@ For unread indicator without a number: 8px circle, no padding.
 Inline keyboard key indicator, often inside menus or tooltips.
 
 ```html
-<kbd class="inline-flex items-center justify-center min-w-5 h-5 px-1
-            rounded-xs bg-bg-inset border border-default
-            font-mono text-mono-sm text-text-secondary">
+<kbd
+  class="bg-bg-inset border-default text-mono-sm text-text-secondary inline-flex h-5 min-w-5 items-center justify-center rounded-xs border px-1 font-mono"
+>
   ⌘K
 </kbd>
 ```
@@ -135,19 +139,26 @@ Inline keyboard key indicator, often inside menus or tooltips.
 
 ## States
 
-| State | Visual |
-|---|---|
-| Default | as defined per variant |
-| Hover (interactive only) | bg darkens by ~4% |
-| Focus | `shadow-focus-ring` |
+| State                       | Visual                                   |
+| --------------------------- | ---------------------------------------- |
+| Default                     | as defined per variant                   |
+| Hover (interactive only)    | bg darkens by ~4%                        |
+| Focus                       | `shadow-focus-ring`                      |
 | Animated (running/retrying) | dot pulses 1.4s, surface gently breathes |
 
 ### Pulse animation for active states
 
 ```css
 @keyframes status-pulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50%      { opacity: 0.6; transform: scale(0.85); }
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(0.85);
+  }
 }
 .status-dot--pulse {
   animation: status-pulse 1.4s ease-in-out infinite;
@@ -159,6 +170,7 @@ Inline keyboard key indicator, often inside menus or tooltips.
 ## Composition
 
 ### Stack
+
 Multiple tags in a row use `gap-1.5` (6px).
 
 ```html
@@ -170,6 +182,7 @@ Multiple tags in a row use `gap-1.5` (6px).
 ```
 
 ### Inside a button
+
 ```html
 <button class="btn-secondary inline-flex items-center gap-2">
   Workflows
@@ -178,6 +191,7 @@ Multiple tags in a row use `gap-1.5` (6px).
 ```
 
 ### Inside a row
+
 - Gap between row text and badge: 8px
 - Vertical-align: center
 - Truncate the row text first, never the badge
@@ -187,12 +201,14 @@ Multiple tags in a row use `gap-1.5` (6px).
 ## Usage rules
 
 ✅ **Do**
+
 - Use status pills for any run / lifecycle state
 - Use mono for IDs, versions, hashes — never sans
 - Use a leading dot (●) for status, icon for category, nothing for plain labels
 - Keep badges within `h-5` or `h-6` — don't make them button-sized
 
 ❌ **Don't**
+
 - Use radius > 4px (pills break the boxy aesthetic — only the round notification dot is allowed)
 - Stack 5+ badges on a row (refactor: show first 3 + "+N more")
 - Use color alone for status (always include text or icon)

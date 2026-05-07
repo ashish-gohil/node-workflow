@@ -22,46 +22,6 @@ import { TriggerConfigProps } from "./trigger-config-dialog";
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 const HTTP_METHODS: WebhookHttpMethod[] = [
   "GET",
   "POST",

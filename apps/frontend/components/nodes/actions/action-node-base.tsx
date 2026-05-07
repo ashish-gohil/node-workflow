@@ -60,9 +60,10 @@ export function ActionNodeBase({
       >
         {/* Input handles (left edge) */}
         {(inputs || [{ id: "in" }]).map((input, index) => {
-          const top = !inputs || inputs.length === 1
-            ? "50%"
-            : `${25 + (index * 50) / (inputs.length - 1)}%`;
+          const top =
+            !inputs || inputs.length === 1
+              ? "50%"
+              : `${25 + (index * 50) / (inputs.length - 1)}%`;
 
           return (
             <BaseHandle
@@ -81,14 +82,14 @@ export function ActionNodeBase({
             <span className="text-forest-300 shrink-0 [&_svg]:size-4">
               {icon}
             </span>
-            <h5 className="text-h5 font-semibold text-text-primary truncate">
+            <h5 className="text-h5 text-text-primary truncate font-semibold">
               {label}
             </h5>
           </BaseNodeTitle>
 
           <button
             aria-label="Node options"
-            className="text-text-muted hover:text-text-primary hover:bg-white/[0.04] size-6 rounded-sm inline-flex items-center justify-center transition-colors duration-[120ms] shrink-0"
+            className="text-text-muted hover:text-text-primary hover:bg-accent-subtle inline-flex size-6 shrink-0 items-center justify-center rounded-sm transition-colors duration-[120ms]"
           >
             <span className="text-body-md leading-none">⋯</span>
           </button>

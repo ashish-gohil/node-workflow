@@ -1,6 +1,6 @@
 # CLAUDE.md — Agent rules for FLOW design system
 
-You are working inside a project that uses the FLOW design system. Read this file BEFORE generating any UI. This file is the source of truth for *how to behave*; the rest of the folder is the source of truth for *what to produce*.
+You are working inside a project that uses the FLOW design system. Read this file BEFORE generating any UI. This file is the source of truth for _how to behave_; the rest of the folder is the source of truth for _what to produce_.
 
 ---
 
@@ -24,11 +24,11 @@ If a relevant file doesn't exist, say so and propose adding one — don't invent
 
 The system supports three themes. Pick one per page based on context:
 
-| Theme | When to use | Key visual cue |
-|---|---|---|
-| **Dark** (default) | App shell, dashboard, workflow editor, settings, any in-product surface | Near-black canvas (#0A0E0C), forest green accent, subtle shadows, white-alpha borders |
-| **Light** | Light-mode user preference within the app | Cream canvas, dark forest accent, light shadows |
-| **Brutalist** | Marketing pages, landing, pricing, blog, portfolio | Cream + dot-grid background, lime-200 accent, **2px solid black borders, hard offset shadows (no blur)**, big bold type |
+| Theme              | When to use                                                             | Key visual cue                                                                                                          |
+| ------------------ | ----------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| **Dark** (default) | App shell, dashboard, workflow editor, settings, any in-product surface | Near-black canvas (#0A0E0C), forest green accent, subtle shadows, white-alpha borders                                   |
+| **Light**          | Light-mode user preference within the app                               | Cream canvas, dark forest accent, light shadows                                                                         |
+| **Brutalist**      | Marketing pages, landing, pricing, blog, portfolio                      | Cream + dot-grid background, lime-200 accent, **2px solid black borders, hard offset shadows (no blur)**, big bold type |
 
 Switch theme via `<html data-theme="dark|light|brutalist">` or class.
 

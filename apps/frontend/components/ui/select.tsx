@@ -13,46 +13,6 @@ import CornerIcons from "./corners";
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /* ------------------------------------------------------------------ */
 /* Root                                                               */
 /* ------------------------------------------------------------------ */
@@ -98,37 +58,21 @@ function SelectTrigger({
       data-slot="select-trigger"
       data-size={size}
       className={cn(
-        /* Layout */
-        "group flex items-center justify-between gap-2",
-        "data-[size=default]:h-9 data-[size=sm]:h-8",
-        "px-3 rounded-xs",
-
-        /* Surface */
-        "bg-surface",
-        "border border-border-default",
-
-        /* Text */
-        "text-sm text-text-primary",
+        /* Stamp surface */
+        "btn-stamp",
+        "group justify-between data-[size=default]:h-10 data-[size=sm]:h-8",
+        "text-body-sm px-3.5 font-medium",
         "data-placeholder:text-text-muted",
 
-        /* Hover */
-        "hover:border-border-strong",
+        /* Hover/active translate effect */
+        "hover:btn-stamp-hover",
 
-        /* Focus */
-        "focus-visible:outline-none",
-        "focus-visible:ring-2 focus-visible:ring-state-focus/30",
-        "focus-visible:border-state-focus",
-
-        /* OPEN STATE (dropdown visible) ⭐ */
-        "data-[state=open]:border-state-focus",
-        "data-[state=open]:ring-2",
-        "data-[state=open]:ring-state-focus/30",
+        /* Focus / open state — depressed look */
+        "focus-visible:btn-stamp-hover focus-visible:outline-none",
+        "data-[state=open]:btn-stamp-hover",
 
         /* Disabled */
-        "disabled:opacity-50 disabled:cursor-not-allowed",
-
-        /* Animation */
-        "transition-colors",
+        "disabled:cursor-not-allowed disabled:opacity-50",
 
         className
       )}
@@ -159,51 +103,22 @@ function SelectContent({
         data-slot="select-content"
         position={position}
         align={align}
+        sideOffset={6}
         className={cn(
-          "z-50 min-w-30",
-          /* Surface */
-          "bg-surface",
-          "border border-border-default",
-          "rounded-xs shadow-lg",
+          "overlay-surface z-50 min-w-30 p-1.5",
 
           /* Animation */
           "data-[state=open]:animate-in data-[state=closed]:animate-out",
           "data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0",
-          "data-[state=open]:zoom-in-95 data-[state=closed]:zoom-out-95",
 
           /* Layout */
-          "max-h-60 overflow-y-auto p-1",
+          "max-h-60 overflow-y-auto",
 
           className
         )}
         {...props}
       >
-        <div>
-          <span
-            className={cn(
-              "size-2 absolute pointer-events-none border-border-strong",
-              "top-1 left-1 border-t-2 border-l-2"
-            )}
-          />
-          <span
-            className={cn(
-              "size-2 absolute pointer-events-none border-border-strong",
-              "top-1 right-1 border-t-2 border-r-2"
-            )}
-          />
-          <span
-            className={cn(
-              "size-2 absolute pointer-events-none border-border-strong",
-              "bottom-1 left-1 border-b-2 border-l-2"
-            )}
-          />
-          <span
-            className={cn(
-              "size-2 absolute pointer-events-none border-border-strong",
-              "bottom-1 right-1 border-b-2 border-r-2"
-            )}
-          />
-        </div>
+        <CornerIcons size="sm" />
         <SelectScrollUpButton />
         <SelectPrimitive.Viewport className="p-2">
           {children}
@@ -255,14 +170,14 @@ function SelectItem({
         "text-text-primary",
 
         /* Hover / Focus */
-        "focus:bg-state-hover focus:outline-none",
+        "focus:bg-accent-subtle focus:outline-none",
 
         /* Selected */
-        "data-[state=checked]:bg-accent-muted/30",
-        "data-[state=checked]:text-accent-primary",
+        "data-[state=checked]:bg-accent-subtle",
+        "data-[state=checked]:text-text-brand",
 
         /* Disabled */
-        "data-disabled:opacity-50 data-disabled:pointer-events-none",
+        "data-disabled:pointer-events-none data-disabled:opacity-50",
 
         className
       )}
@@ -271,7 +186,7 @@ function SelectItem({
       <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>
 
       <SelectPrimitive.ItemIndicator className="absolute right-2">
-        <CheckIcon className="text-accent-primary size-4" />
+        <CheckIcon className="text-forest-300 size-4" />
       </SelectPrimitive.ItemIndicator>
     </SelectPrimitive.Item>
   );
@@ -288,7 +203,7 @@ function SelectSeparator({
   return (
     <SelectPrimitive.Separator
       data-slot="select-separator"
-      className={cn("my-1 h-px", "bg-border-muted", className)}
+      className={cn("my-1 h-px", "bg-border-subtle", className)}
       {...props}
     />
   );

@@ -1,11 +1,10 @@
 @import "tailwindcss";
-@import url("https://fonts.gstatic.com/s/jetbrainsmono/v24/tDbv2o-flEEny0FZhsfKu5WU4zr3E_BX0PnT8RD8yKwBNntkaToggR7BYRbKPx3cwhsk.woff2");
 
 /* Dark mode via data-theme attribute */
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
 /* ============================================================
-   STATIC DESIGN TOKENS — raw palette, type, radius, stamp shadows
+   STATIC DESIGN TOKENS — raw palette, type, radius, shadows
    ============================================================ */
 @theme {
   /* Forest palette */
@@ -49,7 +48,12 @@
   --color-neutral-700: #a1ada6;
   --color-neutral-800: #d4dbd7;
 
-  /* Semantic — fixed hue, only lightness shifts per theme */
+  /* Mac window traffic lights — static, never theme-dependent */
+  --color-mac-red: #ff5f57;
+  --color-mac-yellow: #febc2e;
+  --color-mac-green: #28c840;
+
+  /* Semantic fixed */
   --color-success: #52b788;
   --color-success-surface: rgba(82, 183, 136, 0.12);
   --color-error: #e5484d;
@@ -60,11 +64,10 @@
   --color-info-surface: rgba(94, 177, 239, 0.12);
 
   /* Typography */
-  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --font-sans: var(--font-inter), system-ui, -apple-system, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", monospace;
-  --font-display: "Inter", "Inter", sans-serif;
+  --font-display: "Inter", sans-serif;
 
-  /* Font sizes with line-height + tracking baked in */
   --text-display-xl: 56px;
   --text-display-xl--line-height: 60px;
   --text-display-xl--letter-spacing: -0.03em;
@@ -113,21 +116,16 @@
   --text-mono-sm: 12px;
   --text-mono-sm--line-height: 18px;
 
-  /* Border radius — boxy first */
+  /* Radius — sharp by default, only nodes keep small radius */
   --radius-none: 0px;
-  --radius-xs: 2px; /* badges, status dots */
-  --radius-sm: 4px; /* buttons, inputs, cards, nodes */
-  --radius-md: 6px; /* larger UI surfaces */
-  --radius-lg: 8px; /* marketing non-stamp */
-  --radius: 0px; /* base default = boxy */
-  --radius-full: 9999px; /* notification dots ONLY */
-
-  /* Stamp shadows — hard offset, no blur (brutalist/marketing only) */
-  --shadow-stamp-xs: 2px 2px 0 0 #000;
-  --shadow-stamp-sm: 4px 4px 0 0 #000;
-  --shadow-stamp: 6px 6px 0 0 #000;
-  --shadow-stamp-lg: 8px 8px 0 0 #000;
-  --shadow-stamp-pressed: 1px 1px 0 0 #000;
+  --radius-xs: 0px;
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+  --radius: 0px;
+  --radius-full: 9999px;
+  /* Node-specific radius (workflow canvas only) */
+  --radius-node: 4px;
 
   /* Transition durations */
   --duration-fast: 120ms;
@@ -136,38 +134,37 @@
 }
 
 /* ============================================================
-   SEMANTIC TOKENS — reference CSS custom props for theme-switching
+   SEMANTIC TOKENS — reference CSS custom props for theming
    ============================================================ */
 @theme inline {
-  /* Surfaces */
   --color-bg-canvas: var(--bg-canvas);
   --color-bg-surface: var(--bg-surface);
   --color-bg-elevated: var(--bg-elevated);
   --color-bg-overlay: var(--bg-overlay);
   --color-bg-inset: var(--bg-inset);
 
-  /* Text */
   --color-text-primary: var(--text-primary);
   --color-text-secondary: var(--text-secondary);
   --color-text-muted: var(--text-muted);
   --color-text-disabled: var(--text-disabled);
   --color-text-brand: var(--text-brand);
 
-  /* Borders */
   --color-border-subtle: var(--border-subtle);
   --color-border-default: var(--border-default);
   --color-border-strong: var(--border-strong);
   --color-border-intense: var(--border-intense);
   --color-border-focus: var(--border-focus);
   --color-border-brand: var(--border-brand);
+  --color-border-stamp: var(--border-stamp);
 
-  /* Accent */
   --color-accent-primary: var(--accent-primary);
   --color-accent-hover: var(--accent-hover);
   --color-accent-press: var(--accent-press);
   --color-accent-subtle: var(--accent-subtle);
+  --color-accent-on: var(--accent-on);
 
-  /* Shadows (theme-aware) */
+  --color-hard-shadow: var(--hard-shadow-color);
+
   --shadow-sm: var(--ds-shadow-sm);
   --shadow-md: var(--ds-shadow-md);
   --shadow-lg: var(--ds-shadow-lg);
@@ -175,6 +172,8 @@
   --shadow-glow-brand: var(--ds-shadow-glow-brand);
   --shadow-glow-error: var(--ds-shadow-glow-error);
   --shadow-focus-ring: var(--ds-shadow-focus-ring);
+  --shadow-card: var(--ds-shadow-card);
+  --shadow-overlay: var(--ds-shadow-overlay);
 }
 
 /* ============================================================
@@ -192,19 +191,29 @@
   --text-secondary: #a1ada6;
   --text-muted: #7a8881;
   --text-disabled: #5a675f;
-  --text-brand: #6fae82;
+  --text-brand: #4fc97a;
 
+  /* Dark mode: muted, lighter borders (design spec) */
   --border-subtle: rgba(255, 255, 255, 0.06);
-  --border-default: rgba(255, 255, 255, 0.1);
-  --border-strong: rgba(255, 255, 255, 0.16);
-  --border-intense: rgba(255, 255, 255, 0.24);
+  --border-default: rgba(255, 255, 255, 0.12);
+  --border-strong: rgba(255, 255, 255, 0.2);
+  --border-intense: rgba(255, 255, 255, 0.32);
   --border-focus: #4a9163;
   --border-brand: #2d6a4f;
+  --border-stamp: #000000;
 
-  --accent-primary: #2d6a4f;
-  --accent-hover: #4a9163;
-  --accent-press: #1f5237;
+  /* Lighter shade in dark mode (design spec: lighter for dark) */
+  --accent-primary: #4fc97a;
+  --accent-hover: #5fe08c;
+  --accent-press: #2d6a4f;
   --accent-subtle: #0e2b1c;
+  --accent-on: #0a0e0c;
+
+  /* Hard-shadow color — Swiss/brutalist offset shadow */
+  --hard-shadow-color: #1f4d38;
+
+  /* Brand accent glow — used for hover/spotlight effects */
+  --accent-glow: rgba(79, 201, 122, 0.18);
 
   --ds-shadow-sm:
     0 1px 0 0 rgba(255, 255, 255, 0.04) inset, 0 1px 2px rgba(0, 0, 0, 0.5);
@@ -217,39 +226,55 @@
   --ds-shadow-xl:
     0 24px 64px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.06);
   --ds-shadow-glow-brand:
-    0 0 0 1px rgba(45, 106, 79, 0.6), 0 0 16px rgba(45, 106, 79, 0.25);
+    0 0 0 1px rgba(45, 106, 79, 0.6), 0 0 24px rgba(45, 106, 79, 0.2);
   --ds-shadow-glow-error:
     0 0 0 1px rgba(229, 72, 77, 0.6), 0 0 16px rgba(229, 72, 77, 0.25);
   --ds-shadow-focus-ring: 0 0 0 3px rgba(74, 145, 99, 0.25);
+  --ds-shadow-card:
+    inset 2px 0 0 0 #2d6a4f, 0 1px 0 0 rgba(255, 255, 255, 0.05) inset,
+    0 3px 0 0 rgba(45, 106, 79, 0.2), 0 4px 16px rgba(0, 0, 0, 0.3);
+  --ds-shadow-overlay:
+    inset 3px 0 0 0 #2d6a4f, -2px 4px 0 0 rgba(45, 106, 79, 0.3),
+    0 24px 64px rgba(0, 0, 0, 0.55);
 }
 
 /* ============================================================
    LIGHT THEME
    ============================================================ */
 [data-theme="light"] {
-  --bg-canvas: #faf7f0;
-  --bg-surface: #ffffff;
+  --bg-canvas: #f2ede0;
+  --bg-surface: #faf7f0;
   --bg-elevated: #ffffff;
-  --bg-overlay: #f2ede0;
+  --bg-overlay: #ffffff;
   --bg-inset: #f2ede0;
 
-  --text-primary: #0a0e0c;
+  --text-primary: #0e2b1c;
   --text-secondary: #3a4540;
   --text-muted: #5a675f;
   --text-disabled: #a1ada6;
   --text-brand: #1f5237;
 
-  --border-subtle: rgba(10, 14, 12, 0.06);
-  --border-default: rgba(10, 14, 12, 0.1);
-  --border-strong: rgba(10, 14, 12, 0.16);
-  --border-intense: rgba(10, 14, 12, 0.24);
+  /* Light mode: very dark, pronounced borders (design spec) */
+  --border-subtle: rgba(14, 43, 28, 0.08);
+  --border-default: rgba(14, 43, 28, 0.18);
+  --border-strong: rgba(14, 43, 28, 0.4);
+  --border-intense: rgba(14, 43, 28, 0.55);
   --border-focus: #2d6a4f;
   --border-brand: #2d6a4f;
+  --border-stamp: #0e2b1c;
 
-  --accent-primary: #1f5237;
-  --accent-hover: #2d6a4f;
-  --accent-press: #143d28;
+  /* Lighter, brighter mint in light mode for visibility on cream */
+  --accent-primary: #4fc97a;
+  --accent-hover: #5fe08c;
+  --accent-press: #2d6a4f;
   --accent-subtle: #e8f3ec;
+  --accent-on: #0e2b1c;
+
+  /* Hard-shadow color — deep forest stamp on cream */
+  --hard-shadow-color: #0e2b1c;
+
+  /* Brand accent glow — used for hover/spotlight effects */
+  --accent-glow: rgba(79, 201, 122, 0.3);
 
   --ds-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.06);
   --ds-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.04);
@@ -257,15 +282,20 @@
     0 12px 32px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.06);
   --ds-shadow-xl: 0 24px 64px rgba(0, 0, 0, 0.16);
   --ds-shadow-glow-brand:
-    0 0 0 1px rgba(45, 106, 79, 0.3), 0 0 12px rgba(45, 106, 79, 0.15);
+    0 0 0 1px rgba(45, 106, 79, 0.3), 0 0 16px rgba(45, 106, 79, 0.12);
   --ds-shadow-glow-error:
     0 0 0 1px rgba(229, 72, 77, 0.3), 0 0 12px rgba(229, 72, 77, 0.15);
   --ds-shadow-focus-ring: 0 0 0 3px rgba(45, 106, 79, 0.2);
+  --ds-shadow-card:
+    inset 2px 0 0 0 #2d6a4f, 0 3px 0 0 rgba(45, 106, 79, 0.12),
+    0 4px 12px rgba(0, 0, 0, 0.06);
+  --ds-shadow-overlay:
+    inset 3px 0 0 0 #2d6a4f, -2px 4px 0 0 rgba(45, 106, 79, 0.18),
+    0 16px 48px rgba(0, 0, 0, 0.12);
 }
 
 /* ============================================================
-   BRUTALIST THEME — cream + lime + hard black shadows
-   Marketing pages, landing CTAs only.
+   BRUTALIST THEME — marketing/landing sections only
    ============================================================ */
 [data-theme="brutalist"] {
   --bg-canvas: #f5efe0;
@@ -297,23 +327,28 @@
   --ds-shadow-lg: 6px 6px 0 0 #000;
   --ds-shadow-xl: 8px 8px 0 0 #000;
   --ds-shadow-focus-ring: 0 0 0 3px #a8e47c;
+  --ds-shadow-card: 4px 4px 0 0 #000;
+  --ds-shadow-overlay: 6px 6px 0 0 #000;
 }
 
 /* ============================================================
    BASE STYLES
    ============================================================ */
 @layer base {
-  html {
-    font-family: var(--font-sans);
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    text-rendering: optimizeLegibility;
+  @font-face {
+    font-family: "JetBrainsMono";
+    src: url("/fonts/JetBrainsMono.woff2") format("woff2");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
   }
 
   body {
     @apply bg-bg-canvas text-text-primary;
+    font-family: var(--font-sans);
     font-size: 14px;
     line-height: 22px;
+    letter-spacing: -0.03em;
   }
 
   ::selection {
@@ -325,14 +360,179 @@
   kbd,
   pre,
   samp {
-    font-family: var(--font-mono);
+    font-family: var(--font-jetBrainsMono);
     font-feature-settings: "zero", "ss01";
   }
 
-  /* Hide React Flow attribution panel */
   body .react-flow__panel {
     display: none !important;
   }
+
+  html {
+    @apply tracking-tighter;
+  }
+}
+
+/* ============================================================
+   SURFACE UTILITIES
+   ============================================================ */
+@utility card-surface {
+  background-color: var(--bg-elevated);
+  border: 1.5px solid var(--border-stamp);
+  border-radius: 0;
+  box-shadow: 4px 4px 0 0 var(--hard-shadow-color);
+  transition:
+    transform var(--duration-base) cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow var(--duration-base) cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@utility overlay-surface {
+  background-color: var(--bg-elevated);
+  border: 1.5px solid var(--border-stamp);
+  border-radius: 0;
+  box-shadow: 6px 6px 0 0 var(--hard-shadow-color);
+}
+
+/* ============================================================
+   STAMP / HARD-SHADOW BUTTON UTILITIES (Swiss brutalist)
+   ============================================================ */
+@utility btn-stamp {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border: 1.5px solid var(--border-stamp);
+  border-radius: 0;
+  background-color: var(--bg-elevated);
+  color: var(--text-primary);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  box-shadow: 4px 4px 0 0 var(--hard-shadow-color);
+  transition:
+    transform var(--duration-fast) cubic-bezier(0.2, 0, 0, 1),
+    box-shadow var(--duration-fast) cubic-bezier(0.2, 0, 0, 1),
+    background-color var(--duration-fast) cubic-bezier(0.2, 0, 0, 1);
+}
+
+@utility btn-stamp-hover {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 0 var(--hard-shadow-color);
+}
+
+@utility btn-stamp-active {
+  transform: translate(4px, 4px);
+  box-shadow: 0 0 0 0 var(--hard-shadow-color);
+}
+
+@utility btn-stamp-primary {
+  background-color: var(--accent-primary);
+  color: var(--accent-on);
+  border-color: var(--border-stamp);
+}
+
+@utility btn-stamp-primary-hover {
+  background-color: var(--accent-hover);
+}
+
+@utility btn-stamp-ghost {
+  background-color: transparent;
+  border-color: var(--border-default);
+  box-shadow: none;
+}
+
+@utility btn-stamp-ghost-hover {
+  background-color: var(--bg-elevated);
+  border-color: var(--border-strong);
+  transform: none;
+  box-shadow: none;
+}
+
+/* Larger stamp for the deep elevation feel (used by big CTA / overlays) */
+@utility stamp-lg {
+  box-shadow: 6px 6px 0 0 var(--hard-shadow-color);
+}
+@utility stamp-xl {
+  box-shadow: 8px 8px 0 0 var(--hard-shadow-color);
+}
+
+/* Workflow nodes — only place that retains a tiny radius */
+@utility rounded-node {
+  border-radius: 4px;
+}
+
+/* ============================================================
+   LAYOUT UTILITIES — single shared container for the whole app
+   ============================================================ */
+@utility section-container {
+  max-width: 1280px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 32px;
+  padding-right: 32px;
+}
+
+@media (max-width: 640px) {
+  .section-container {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+}
+
+@utility section-container-wide {
+  max-width: 1440px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 32px;
+  padding-right: 32px;
+}
+
+/* ============================================================
+   LANDING COMPONENT UTILITIES
+   ============================================================ */
+@utility bento-card {
+  position: relative;
+  background-color: var(--bg-elevated);
+  border: 1.5px solid var(--border-stamp);
+  border-radius: 0;
+  overflow: hidden;
+  box-shadow: 6px 6px 0 0 var(--hard-shadow-color);
+  transition:
+    transform var(--duration-slow) cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow var(--duration-slow) cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@utility bento-card-hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 8px 8px 0 0 var(--hard-shadow-color);
+}
+
+@utility landing-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: var(--text-h6);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-brand);
+}
+
+@utility terminal-surface {
+  background-color: var(--neutral-0, #0a0e0c);
+  border: 2px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+}
+
+/* CTA panel — dark stamped section used in landing CTA. Theme-scoped here
+   instead of leaking into global theme tokens. */
+@utility cta-panel {
+  background-color: #050b08;
+}
+[data-theme="light"] .cta-panel {
+  background-color: #1f4d38;
 }
 
 /* ============================================================
@@ -342,7 +542,6 @@
   scrollbar-width: thin;
   scrollbar-color: var(--border-default) transparent;
 }
-
 ::-webkit-scrollbar {
   width: 4px;
   height: 4px;
@@ -364,7 +563,7 @@
 }
 
 /* ============================================================
-   CANVAS GRID UTILITY
+   CANVAS GRID
    ============================================================ */
 .canvas-grid {
   background-color: var(--bg-canvas);
@@ -376,31 +575,34 @@
   background-size: 16px 16px;
 }
 
-[data-theme="brutalist"] .canvas-grid,
-.dot-grid-cream {
-  background-color: #f5efe0;
-  background-image: radial-gradient(
-    circle,
-    rgba(10, 14, 12, 0.18) 1px,
-    transparent 1px
-  );
-  background-size: 14px 14px;
-}
-
 /* ============================================================
-   REDUCED MOTION
+   SVG CONN ANIMATIONS
    ============================================================ */
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    transition-duration: 0.01ms !important;
+@keyframes conn-flow {
+  from {
+    stroke-dashoffset: 40;
+  }
+  to {
+    stroke-dashoffset: 0;
   }
 }
 
+@keyframes conn-flow-dash {
+  from {
+    stroke-dashoffset: 20;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.conn-animate {
+  stroke-dasharray: 6 4;
+  animation: conn-flow 1.2s linear infinite;
+}
+
 /* ============================================================
-   STATUS PULSE ANIMATION (running/retrying nodes)
+   ANIMATIONS
    ============================================================ */
 @keyframes pulse-status {
   0%,
@@ -413,6 +615,123 @@
     transform: scale(0.85);
   }
 }
+
 .animate-pulse-status {
   animation: pulse-status 1.4s ease-in-out infinite;
+}
+
+@keyframes cursor-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+.animate-cursor {
+  animation: cursor-blink 1.1s step-start infinite;
+}
+
+/* Aurora gradient drift — used behind hero copy. Very slow ambient motion. */
+@keyframes aurora-drift {
+  0% {
+    transform: translate3d(-6%, -2%, 0) rotate(0deg);
+    opacity: 0.55;
+  }
+  50% {
+    transform: translate3d(6%, 3%, 0) rotate(8deg);
+    opacity: 0.85;
+  }
+  100% {
+    transform: translate3d(-6%, -2%, 0) rotate(0deg);
+    opacity: 0.55;
+  }
+}
+.animate-aurora {
+  animation: aurora-drift 60s ease-in-out infinite;
+}
+
+@keyframes aurora-drift-2 {
+  0% {
+    transform: translate3d(4%, 2%, 0) scale(1);
+    opacity: 0.4;
+  }
+  50% {
+    transform: translate3d(-3%, -4%, 0) scale(1.1);
+    opacity: 0.7;
+  }
+  100% {
+    transform: translate3d(4%, 2%, 0) scale(1);
+    opacity: 0.4;
+  }
+}
+.animate-aurora-2 {
+  animation: aurora-drift-2 75s ease-in-out infinite;
+}
+
+/* CTA grid drift — animated grid panel backdrop */
+@keyframes grid-drift {
+  from {
+    background-position:
+      0 0,
+      0 0;
+  }
+  to {
+    background-position:
+      24px 24px,
+      24px 24px;
+  }
+}
+.animate-grid-drift {
+  animation: grid-drift 6s linear infinite;
+}
+
+/* Headline word-swap — replaces text with vertical typing flip */
+@keyframes word-flip-out {
+  0% {
+    transform: translateY(0) skewX(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-110%) skewX(-6deg);
+    opacity: 0;
+  }
+}
+@keyframes word-flip-in {
+  0% {
+    transform: translateY(110%) skewX(6deg);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0) skewX(0);
+    opacity: 1;
+  }
+}
+@keyframes underline-sweep {
+  0% {
+    transform: scaleX(0);
+    transform-origin: left;
+  }
+  60% {
+    transform: scaleX(1);
+    transform-origin: left;
+  }
+  100% {
+    transform: scaleX(1);
+    transform-origin: left;
+  }
+}
+
+/* ============================================================
+   REDUCED MOTION
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }

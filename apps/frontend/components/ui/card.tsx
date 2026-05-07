@@ -2,20 +2,34 @@ import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
+import CornerIcons from "./corners";
+
+
+
+
+
+
 /* ============================================================
    CONTENT CARD — generic workhorse: header + body + footer
    ============================================================ */
 
-function Card({ className, ...props }: React.ComponentProps<"article">) {
+function Card({
+  className,
+  children,
+  ...props
+}: React.ComponentProps<"article">) {
   return (
     <article
       data-slot="card"
       className={cn(
-        "bg-bg-elevated border border-border-default rounded-sm shadow-sm overflow-hidden",
+        "card-surface hover:bento-card-hover relative overflow-hidden",
         className
       )}
       {...props}
-    />
+    >
+      <CornerIcons size="md" />
+      {children}
+    </article>
   );
 }
 
@@ -24,7 +38,7 @@ function CardHeader({ className, ...props }: React.ComponentProps<"header">) {
     <header
       data-slot="card-header"
       className={cn(
-        "flex items-start justify-between gap-4 border-b border-border-subtle px-6 py-5",
+        "border-border-subtle flex items-start justify-between gap-4 border-b px-6 py-5",
         className
       )}
       {...props}
@@ -36,7 +50,10 @@ function CardTitle({ className, ...props }: React.ComponentProps<"h3">) {
   return (
     <h3
       data-slot="card-title"
-      className={cn("text-h3 font-semibold tracking-tight text-text-primary", className)}
+      className={cn(
+        "text-h3 text-text-primary font-semibold tracking-tight",
+        className
+      )}
       {...props}
     />
   );
@@ -77,7 +94,7 @@ function CardFooter({ className, ...props }: React.ComponentProps<"footer">) {
     <footer
       data-slot="card-footer"
       className={cn(
-        "flex items-center justify-between border-t border-border-subtle px-6 py-4",
+        "border-border-subtle flex items-center justify-between border-t px-6 py-4",
         className
       )}
       {...props}
@@ -111,15 +128,18 @@ function StatCard({
   return (
     <div
       className={cn(
-        "bg-bg-elevated border border-border-default rounded-sm p-5 shadow-sm transition-colors hover:border-border-strong",
-        accent && "border-l-2 border-l-forest-500 pl-[calc(1.25rem-2px)]",
+        "card-surface hover:bento-card-hover p-5",
+        accent &&
+          "border-l-accent-primary border-l-[3px] pl-[calc(1.25rem-3px)]",
         className
       )}
       {...props}
     >
-      <p className="text-h6 text-text-muted uppercase tracking-wider">{label}</p>
+      <p className="text-h6 text-text-muted tracking-wider uppercase">
+        {label}
+      </p>
       <div className="mt-3 flex items-baseline gap-3">
-        <span className="text-display-lg font-mono font-medium tracking-tighter tabular-nums text-text-primary">
+        <span className="text-display-lg text-text-primary font-mono font-medium tracking-tighter tabular-nums">
           {value}
         </span>
         {delta && (
@@ -133,9 +153,7 @@ function StatCard({
           </span>
         )}
       </div>
-      {meta && (
-        <p className="text-caption text-text-secondary mt-2">{meta}</p>
-      )}
+      {meta && <p className="text-caption text-text-secondary mt-2">{meta}</p>}
     </div>
   );
 }
@@ -149,8 +167,8 @@ function ListCard({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="list-card"
       className={cn(
-        "flex items-center gap-3 border-b border-border-subtle px-5 py-4",
-        "hover:bg-white/[0.02] transition-colors cursor-pointer",
+        "border-border-subtle flex items-center gap-3 border-b px-5 py-4",
+        "hover:bg-accent-subtle/40 cursor-pointer transition-colors",
         className
       )}
       {...props}
@@ -167,7 +185,7 @@ function SettingsCard({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="settings-card"
       className={cn(
-        "bg-bg-surface border border-border-subtle rounded-sm p-6",
+        "bg-bg-surface border-border-subtle rounded-sm border p-6",
         className
       )}
       {...props}
@@ -186,12 +204,19 @@ interface EmptyCardProps extends React.ComponentProps<"div"> {
   action?: React.ReactNode;
 }
 
-function EmptyCard({ icon, heading, description, action, className, ...props }: EmptyCardProps) {
+function EmptyCard({
+  icon,
+  heading,
+  description,
+  action,
+  className,
+  ...props
+}: EmptyCardProps) {
   return (
     <div
       data-slot="empty-card"
       className={cn(
-        "flex flex-col items-center justify-center gap-4 rounded-sm border border-dashed border-border-default p-8 text-center",
+        "border-border-default flex flex-col items-center justify-center gap-4 rounded-sm border border-dashed p-8 text-center",
         className
       )}
       {...props}
@@ -202,9 +227,11 @@ function EmptyCard({ icon, heading, description, action, className, ...props }: 
         </span>
       )}
       <div className="space-y-1">
-        <h4 className="text-h4 font-semibold text-text-primary">{heading}</h4>
+        <h4 className="text-h4 text-text-primary font-semibold">{heading}</h4>
         {description && (
-          <p className="text-body-sm text-text-secondary max-w-xs">{description}</p>
+          <p className="text-body-sm text-text-secondary max-w-xs">
+            {description}
+          </p>
         )}
       </div>
       {action && <div className="mt-2">{action}</div>}
@@ -221,8 +248,10 @@ function StampCard({ className, ...props }: React.ComponentProps<"article">) {
     <article
       data-slot="stamp-card"
       className={cn(
-        "rounded-none border-2 border-black bg-white p-8 shadow-stamp",
-        "transition-all duration-[120ms] hover:shadow-stamp-lg hover:-translate-x-0.5 hover:-translate-y-0.5",
+        "bg-bg-elevated border-border-stamp rounded-none border-2 p-8",
+        "shadow-[6px_6px_0_0_var(--hard-shadow-color)]",
+        "hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[8px_8px_0_0_var(--hard-shadow-color)]",
+        "transition-all duration-[120ms]",
         className
       )}
       {...props}

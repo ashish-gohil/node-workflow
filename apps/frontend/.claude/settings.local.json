@@ -1,0 +1,5 @@
+{
+  "permissions": {
+    "allow": ["Bash(Get-ChildItem *)", "PowerShell(npm run *)"]
+  }
+}

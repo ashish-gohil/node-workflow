@@ -24,39 +24,40 @@ Sizes: sm 32 · **md 36 (default)** · lg 40
 
 ```html
 <div class="flex flex-col gap-1.5">
-  <label class="text-h6 uppercase tracking-wider text-text-secondary">
+  <label class="text-h6 text-text-secondary tracking-wider uppercase">
     Workflow name
   </label>
-  <input type="text" placeholder="My workflow"
-         class="h-9 px-3 bg-bg-surface border border-strong rounded-sm
-                text-body-md text-text-primary
-                placeholder:text-text-muted
-                hover:border-intense
-                focus:outline-none focus:border-forest-400
-                focus:shadow-focus-ring
-                disabled:bg-bg-inset disabled:text-text-disabled
-                transition duration-fast" />
-  <span class="text-caption text-text-muted">
-    Lowercase, hyphens only
-  </span>
+  <input
+    type="text"
+    placeholder="My workflow"
+    class="bg-bg-surface border-strong text-body-md text-text-primary placeholder:text-text-muted hover:border-intense focus:border-forest-400 focus:shadow-focus-ring disabled:bg-bg-inset disabled:text-text-disabled duration-fast h-9 rounded-sm border px-3 transition focus:outline-none"
+  />
+  <span class="text-caption text-text-muted"> Lowercase, hyphens only </span>
 </div>
 ```
 
 ### 2 · With leading icon
+
 ```html
 <div class="relative">
-  <svg class="absolute left-3 top-1/2 -translate-y-1/2 size-4
-              text-text-muted pointer-events-none">...</svg>
-  <input class="h-9 pl-9 pr-3 ..." placeholder="Search workflows" />
+  <svg
+    class="text-text-muted pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2"
+  >
+    ...
+  </svg>
+  <input class="h-9 pr-3 pl-9 ..." placeholder="Search workflows" />
 </div>
 ```
 
 ### 3 · Mono input (env vars, expressions, regex)
+
 ```html
-<input class="h-9 px-3 font-mono text-mono-md tabular-nums
-              bg-bg-inset border border-strong rounded-sm
-              ..." placeholder="{{ $json.id }}" />
+<input
+  class="text-mono-md bg-bg-inset border-strong h-9 rounded-sm border px-3 font-mono tabular-nums ..."
+  placeholder="{{ $json.id }}"
+/>
 ```
+
 - Background uses `bg-inset` to signal "this is code/data"
 - Always use mono font + tabular nums
 - Wider tracking allowed: `tracking-wide` for readability
@@ -64,12 +65,12 @@ Sizes: sm 32 · **md 36 (default)** · lg 40
 ### 4 · Textarea
 
 ```html
-<textarea rows="4"
-  class="px-3 py-2 bg-bg-surface border border-strong rounded-sm
-         text-body-md leading-body-md resize-y min-h-[88px]
-         focus:outline-none focus:border-forest-400 focus:shadow-focus-ring
-         transition duration-fast"></textarea>
+<textarea
+  rows="4"
+  class="bg-bg-surface border-strong text-body-md leading-body-md focus:border-forest-400 focus:shadow-focus-ring duration-fast min-h-[88px] resize-y rounded-sm border px-3 py-2 transition focus:outline-none"
+></textarea>
 ```
+
 - Min height 88px (4 lines), resize: vertical only
 - For code/JSON: add `font-mono`, `bg-bg-inset`, `whitespace-pre`
 
@@ -77,18 +78,18 @@ Sizes: sm 32 · **md 36 (default)** · lg 40
 
 ```html
 <div class="relative">
-  <select class="h-9 px-3 pr-9 appearance-none w-full
-                 bg-bg-surface border border-strong rounded-sm
-                 text-body-md text-text-primary
-                 hover:border-intense
-                 focus:outline-none focus:border-forest-400
-                 focus:shadow-focus-ring transition duration-fast">
+  <select
+    class="bg-bg-surface border-strong text-body-md text-text-primary hover:border-intense focus:border-forest-400 focus:shadow-focus-ring duration-fast h-9 w-full appearance-none rounded-sm border px-3 pr-9 transition focus:outline-none"
+  >
     <option>HTTP Request</option>
     <option>Webhook</option>
     <option>Schedule</option>
   </select>
-  <svg class="absolute right-3 top-1/2 -translate-y-1/2 size-4
-              text-text-muted pointer-events-none">▾</svg>
+  <svg
+    class="text-text-muted pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2"
+  >
+    ▾
+  </svg>
 </div>
 ```
 
@@ -97,6 +98,7 @@ Sizes: sm 32 · **md 36 (default)** · lg 40
 Trigger uses input styling. Menu is a popover:
 
 **Menu spec**
+
 - `bg: bg-elevated`
 - `border: 1px border-default`
 - `radius: sm`
@@ -123,26 +125,28 @@ Trigger uses input styling. Menu is a popover:
 Selected values appear as inline chips inside the input control.
 
 ```html
-<div class="min-h-[36px] flex flex-wrap items-center gap-1.5
-            px-2 py-1 bg-bg-surface border border-strong rounded-sm
-            focus-within:border-forest-400 focus-within:shadow-focus-ring
-            transition duration-fast">
+<div
+  class="bg-bg-surface border-strong focus-within:border-forest-400 focus-within:shadow-focus-ring duration-fast flex min-h-[36px] flex-wrap items-center gap-1.5 rounded-sm border px-2 py-1 transition"
+>
   <!-- chip -->
-  <span class="inline-flex items-center gap-1 h-6 px-2
-               rounded-xs bg-forest-800 text-forest-200 text-caption">
+  <span
+    class="bg-forest-800 text-forest-200 text-caption inline-flex h-6 items-center gap-1 rounded-xs px-2"
+  >
     production
     <button class="text-forest-300 hover:text-cream-50">×</button>
   </span>
   <!-- input -->
-  <input class="flex-1 min-w-[80px] bg-transparent text-body-md
-                outline-none placeholder:text-text-muted"
-         placeholder="Add tag…" />
+  <input
+    class="text-body-md placeholder:text-text-muted min-w-[80px] flex-1 bg-transparent outline-none"
+    placeholder="Add tag…"
+  />
 </div>
 ```
 
 ### 8 · Checkbox & Radio
 
 Sharp corners (radius `xs` for checkbox, full circle for radio).
+
 - Size: 16px box, 16px radio
 - Default: `border 1px border-strong`, `bg bg-surface`
 - Checked: `bg forest-500`, `border forest-500`, white check icon
@@ -151,13 +155,11 @@ Sharp corners (radius `xs` for checkbox, full circle for radio).
 - Label: `body-md`, gap 8px right of control
 
 ```html
-<label class="inline-flex items-start gap-2 cursor-pointer">
-  <input type="checkbox"
-         class="appearance-none size-4 mt-0.5 rounded-xs
-                bg-bg-surface border border-strong
-                checked:bg-forest-500 checked:border-forest-500
-                focus-visible:shadow-focus-ring
-                transition duration-fast" />
+<label class="inline-flex cursor-pointer items-start gap-2">
+  <input
+    type="checkbox"
+    class="bg-bg-surface border-strong checked:bg-forest-500 checked:border-forest-500 focus-visible:shadow-focus-ring duration-fast mt-0.5 size-4 appearance-none rounded-xs border transition"
+  />
   <span class="text-body-md">Enable webhook authentication</span>
 </label>
 ```
@@ -167,12 +169,14 @@ Sharp corners (radius `xs` for checkbox, full circle for radio).
 For binary settings only. 28×16 track, 12×12 thumb.
 
 ```html
-<button role="switch" aria-checked="true"
-        class="relative w-7 h-4 rounded-full transition duration-fast
-               bg-forest-500 aria-[checked=false]:bg-neutral-400">
-  <span class="absolute top-0.5 left-0.5 size-3 rounded-full bg-cream-50
-               transition duration-fast translate-x-3
-               aria-[checked=false]:translate-x-0"></span>
+<button
+  role="switch"
+  aria-checked="true"
+  class="duration-fast bg-forest-500 relative h-4 w-7 rounded-full transition aria-[checked=false]:bg-neutral-400"
+>
+  <span
+    class="bg-cream-50 duration-fast absolute top-0.5 left-0.5 size-3 translate-x-3 rounded-full transition aria-[checked=false]:translate-x-0"
+  ></span>
 </button>
 ```
 
@@ -188,16 +192,16 @@ For binary settings only. 28×16 track, 12×12 thumb.
 
 ## States — full matrix
 
-| State | Border | Background | Text | Other |
-|---|---|---|---|---|
-| Default | `border-strong` | `bg-surface` | `text-primary` | — |
-| Hover | `border-intense` | same | same | cursor: text |
-| Focus | `border-focus` (`forest-400`) | same | same | `shadow-focus-ring` |
-| Filled | same | same | `text-primary` | — |
-| Error | `border: error` | same | same | helper red |
-| Success | `border: success` | same | same | rare; for inline validation |
-| Disabled | `border-subtle` | `bg-inset` | `text-disabled` | cursor: not-allowed |
-| Read-only | `border-subtle` | `bg-inset` | `text-secondary` | no focus ring |
+| State     | Border                        | Background   | Text             | Other                       |
+| --------- | ----------------------------- | ------------ | ---------------- | --------------------------- |
+| Default   | `border-strong`               | `bg-surface` | `text-primary`   | —                           |
+| Hover     | `border-intense`              | same         | same             | cursor: text                |
+| Focus     | `border-focus` (`forest-400`) | same         | same             | `shadow-focus-ring`         |
+| Filled    | same                          | same         | `text-primary`   | —                           |
+| Error     | `border: error`               | same         | same             | helper red                  |
+| Success   | `border: success`             | same         | same             | rare; for inline validation |
+| Disabled  | `border-subtle`               | `bg-inset`   | `text-disabled`  | cursor: not-allowed         |
+| Read-only | `border-subtle`               | `bg-inset`   | `text-secondary` | no focus ring               |
 
 ---
 
@@ -206,13 +210,15 @@ For binary settings only. 28×16 track, 12×12 thumb.
 Always reserve 16px below the input even when empty (prevents layout shift).
 
 ```html
-<span class="block min-h-4 text-caption text-text-muted
-             data-[state=error]:text-error">
+<span
+  class="text-caption text-text-muted data-[state=error]:text-error block min-h-4"
+>
   Helper text or error message
 </span>
 ```
 
 Error pattern:
+
 - Border red (`error`)
 - Helper text red, prefix with 12px alert icon
 - `aria-invalid="true"`, `aria-describedby` linking to error span
@@ -231,6 +237,7 @@ Error pattern:
 ## Usage rules
 
 ✅ **Do**
+
 - Place labels above inputs (left-aligned, never floating)
 - Always reserve helper space (16px) to prevent jump on error
 - Use mono inputs for technical fields (env vars, URLs, regex, JSON)
@@ -238,6 +245,7 @@ Error pattern:
 - Make the entire label clickable (wrap input + label in `<label>`)
 
 ❌ **Don't**
+
 - Floating labels (anti-Swiss, hides content)
 - Placeholder as a label substitute
 - Pill-shaped inputs (radius > 4px breaks the boxy system)

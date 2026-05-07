@@ -1,7 +1,6 @@
 "use client";
 import React, { useState } from "react";
 
-import { Button } from "../../../components/ui/button";
 import {
   DEFAULT_MANUAL_TRIGGER_DATA,
   DEFAULT_SCHEDULER_TRIGGER_DATA,
@@ -14,6 +13,7 @@ import {
   TriggerSheetElement,
 } from "@/app/types/tirggers";
 
+import { Button } from "../../../components/ui/button";
 import {
   Sheet,
   SheetContent,
@@ -150,8 +150,8 @@ export default function TriggerSheet({
     <Sheet open={triggerSheetOpen} onOpenChange={setTriggerSheetOpen}>
       <SheetTrigger asChild>
         <Button
-         
-          className="bg-bg hover:bg-bg border-border-strong  text-text-secondary relative z-30 rounded-none  border-2 border-dashed p-10 hover:cursor-pointer "
+          variant="ghost"
+          className="bg-bg-surface hover:bg-bg-overlay border-border-strong hover:border-border-intense text-text-secondary hover:text-text-primary relative z-30 rounded-sm border-2 border-dashed p-10 transition-colors duration-[150ms]"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -175,18 +175,13 @@ export default function TriggerSheet({
           <SheetDescription>
             Trigger is a step that starts your workflow
           </SheetDescription>
-          <div className="flex cursor-pointer flex-col gap-4 pt-6 ">
+          <div className="flex cursor-pointer flex-col gap-4 pt-6">
             {triggerNodes.map((node) => (
               <div
                 onClick={() => {
                   setTriggerSheetOpen(false);
-
                   const newNode = createTriggerNode(node.type);
-
-                  console.log(newNode);
                   setNodes((nds) => [...nds, newNode]);
-                  console.log("selected trigger node");
-                  console.log(node);
                   if (node.requireDataFields) {
                     setConfigNodeId(newNode.id);
                   }

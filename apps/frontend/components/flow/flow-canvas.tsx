@@ -12,6 +12,7 @@ import {
   ReactFlow,
 } from "@xyflow/react";
 
+import useFlow from "@/app/store/flow-store";
 import { ActionNodeTypes } from "@/app/types/actions";
 import { FlowEdge, FlowNode } from "@/app/types/flow";
 import { TriggerNodeTypes } from "@/app/types/tirggers";
@@ -24,7 +25,6 @@ import { SetNode } from "../nodes/actions/set-transform-action-node";
 import { ManualTriggerNode } from "../nodes/triggers/manual-trigger-node";
 import { SchedulerTriggerNode } from "../nodes/triggers/schedule-trigger-node";
 import { WebhookTriggerNode } from "../nodes/triggers/webhook-trigger-node";
-import useFlow from "@/app/store/flow-store";
 
 import "@xyflow/react/dist/style.css";
 

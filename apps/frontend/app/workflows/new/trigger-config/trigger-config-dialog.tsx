@@ -1,27 +1,25 @@
 "use client";
 import React, { useState } from "react";
+import { Clock, Webhook } from "lucide-react";
 
-import { SchedulerTriggerConfig } from "./scheduler-trigger-config";
 import {
   TriggerNode,
   TriggerNodesDataTypes,
   TriggerNodeTypes,
 } from "@/app/types/tirggers";
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { NodeConfigDialog } from "@/components/node-config/node-config-dialog";
 
+import { SchedulerTriggerConfig } from "./scheduler-trigger-config";
 import { WebhookTriggerConfig } from "./webhook-trigger-config";
 
 interface ITriggerConfigDialog {
   node: TriggerNode;
-  onSave: (data: any) => void;
+  onSave: (data: TriggerNodesDataTypes) => void;
   onClose: () => void;
+  /** Output of upstream node (none for triggers — always empty). */
+  inputData?: unknown;
+  /** Last execution result for this trigger. */
+  outputData?: unknown;
 }
 
 export interface TriggerConfigProps<T> {
@@ -36,10 +34,17 @@ const triggerConfigMap = {
   // [TriggerNodeTypes.ManualTrigger]: null,
 };
 
+const triggerIconMap: Partial<Record<TriggerNodeTypes, React.ReactNode>> = {
+  [TriggerNodeTypes.SchedulerTrigger]: <Clock className="size-5" />,
+  [TriggerNodeTypes.Webhook]: <Webhook className="size-5" />,
+};
+
 export default function TriggerConfigDialog({
   node,
   onSave,
   onClose,
+  inputData,
+  outputData,
 }: ITriggerConfigDialog) {
   //@ts-ignore
   const ConfigComponent = triggerConfigMap[node.type as TriggerNodeTypes];
@@ -53,32 +58,31 @@ export default function TriggerConfigDialog({
   }
 
   return (
-    <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent className="max-w-xl">
-        <DialogHeader>
-          <DialogTitle>{node.data?.label}</DialogTitle>
-        </DialogHeader>
-        <div className="max-h-[70vh] overflow-auto">
-          <ConfigComponent
-            configData={tempConfigData}
-            setConfigData={setTempConfigData}
-          />
-        </div>
-        <DialogFooter className="mt-0 flex gap-6 p-0">
-          <Button onClick={onClose} variant="ghost" className="w-20">
-            Cancel
-          </Button>
-          <Button
-            onClick={() => {
-              onSave(tempConfigData);
-              onClose();
-            }}
-            className="w-20"
-          >
-            Save
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    <NodeConfigDialog
+      open={true}
+      onOpenChange={(open) => {
+        if (!open) {
+          onClose();
+        }
+      }}
+      title={node.data?.label}
+      subtitle={node.data?.description}
+      icon={triggerIconMap[node.type as TriggerNodeTypes]}
+      // Triggers are the entry point — there's never input data.
+      showInput={false}
+      outputData={outputData}
+      outputPanel={{
+        emptyHint:
+          "Execute this trigger to see the data it will pass to the next step.",
+      }}
+      onSave={() => onSave(tempConfigData)}
+      onCancel={onClose}
+      inputData={inputData}
+    >
+      <ConfigComponent
+        configData={tempConfigData}
+        setConfigData={setTempConfigData}
+      />
+    </NodeConfigDialog>
   );
 }

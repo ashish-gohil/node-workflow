@@ -10,7 +10,7 @@ export default function DottedBackground({
   className?: string;
 }) {
   return (
-    <div className="bg-bg relative flex h-full w-full items-center justify-center">
+    <div className="bg-bg-canvas relative flex h-full w-full items-center justify-center">
       <div
         className={cn(
           "absolute inset-0",

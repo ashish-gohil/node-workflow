@@ -8,14 +8,14 @@ These are the **most important first nodes**.
 
 **Why it’s essential**
 
-* Debugging
-* Testing flows
-* Matches n8n’s *Manual Trigger*
+- Debugging
+- Testing flows
+- Matches n8n’s _Manual Trigger_
 
 **Use cases**
 
-* Click → Run workflow
-* Test downstream nodes
+- Click → Run workflow
+- Test downstream nodes
 
 ---
 
@@ -25,16 +25,16 @@ These are the **most important first nodes**.
 
 **Modes to support**
 
-* Every X seconds / minutes / hours
-* Daily at time
-* Weekly
-* Custom cron
+- Every X seconds / minutes / hours
+- Daily at time
+- Weekly
+- Custom cron
 
 **Use cases**
 
-* Cron jobs
-* Polling APIs
-* Scheduled reports
+- Cron jobs
+- Polling APIs
+- Scheduled reports
 
 ---
 
@@ -44,16 +44,16 @@ These are the **most important first nodes**.
 
 **Config**
 
-* HTTP Method (GET, POST, PUT, DELETE)
-* Path
-* Authentication (none / header token / basic)
-* Response mode (sync / async)
+- HTTP Method (GET, POST, PUT, DELETE)
+- Path
+- Authentication (none / header token / basic)
+- Response mode (sync / async)
 
 **Use cases**
 
-* GitHub webhooks
-* Stripe events
-* Form submissions
+- GitHub webhooks
+- Stripe events
+- Form submissions
 
 ---
 
@@ -63,9 +63,9 @@ These are the **most important first nodes**.
 
 **Examples**
 
-* New user created
-* Order completed
-* Payment failed
+- New user created
+- Order completed
+- Payment failed
 
 (You can add this later once you have internal events.)
 
@@ -83,16 +83,16 @@ These nodes **process data** or **talk to systems**.
 
 **Must-have features**
 
-* Method (GET, POST, PUT, DELETE)
-* Headers
-* Query params
-* Body (JSON / form)
-* Auth (API key, Bearer token)
+- Method (GET, POST, PUT, DELETE)
+- Headers
+- Query params
+- Body (JSON / form)
+- Auth (API key, Bearer token)
 
 **Why critical**
 
-* Replaces dozens of integrations
-* Core n8n node
+- Replaces dozens of integrations
+- Core n8n node
 
 ---
 
@@ -102,10 +102,10 @@ These nodes **process data** or **talk to systems**.
 
 **Capabilities**
 
-* Add fields
-* Remove fields
-* Rename keys
-* Set static values
+- Add fields
+- Remove fields
+- Rename keys
+- Set static values
 
 **Example**
 
@@ -124,16 +124,16 @@ These nodes **process data** or **talk to systems**.
 
 **Conditions**
 
-* Equals
-* Not equals
-* Greater / less
-* Exists
-* Contains
+- Equals
+- Not equals
+- Greater / less
+- Exists
+- Contains
 
 **Outputs**
 
-* True → path A
-* False → path B
+- True → path A
+- False → path B
 
 ---
 
@@ -143,15 +143,15 @@ These nodes **process data** or **talk to systems**.
 
 **Why important**
 
-* Escape hatch for advanced users
-* Power users love this
+- Escape hatch for advanced users
+- Power users love this
 
 **Example**
 
 ```js
 return {
-  fullName: `${input.firstName} ${input.lastName}`
-}
+  fullName: `${input.firstName} ${input.lastName}`,
+};
 ```
 
 ---
@@ -162,14 +162,14 @@ return {
 
 **Modes**
 
-* Wait X seconds
-* Wait until timestamp
+- Wait X seconds
+- Wait until timestamp
 
 **Use cases**
 
-* Rate limiting
-* Follow-up emails
-* Retry logic
+- Rate limiting
+- Follow-up emails
+- Retry logic
 
 ---
 
@@ -179,9 +179,9 @@ return {
 
 **Modes**
 
-* Merge by index
-* Merge by key
-* Append
+- Merge by index
+- Merge by key
+- Append
 
 ---
 
@@ -191,9 +191,9 @@ return {
 
 **Features**
 
-* Log input
-* Show output in UI
-* Helpful for debugging
+- Log input
+- Show output in UI
+- Helpful for debugging
 
 ---
 
@@ -203,12 +203,12 @@ Once core is stable, add these:
 
 ### Common ones
 
-* Email (SMTP / SendGrid)
-* Slack
-* Discord
-* Notion
-* Google Sheets
-* Webhook Response node
+- Email (SMTP / SendGrid)
+- Slack
+- Discord
+- Notion
+- Google Sheets
+- Webhook Response node
 
 ---
 
@@ -218,17 +218,17 @@ If you want **small but powerful**:
 
 ### Triggers
 
-* Manual Trigger
-* Schedule Trigger
-* Webhook Trigger
+- Manual Trigger
+- Schedule Trigger
+- Webhook Trigger
 
 ### Actions
 
-* HTTP Request
-* Set
-* IF
-* Code
-* Delay
+- HTTP Request
+- Set
+- IF
+- Code
+- Delay
 
 That alone can already build **real automations**.
 
@@ -238,11 +238,9 @@ That alone can already build **real automations**.
 
 Use this grouping early — very n8n-like:
 
-* **Triggers**
-* **Flow**
-* **Data**
-* **Code**
-* **Network**
-* **Utilities**
-
-
+- **Triggers**
+- **Flow**
+- **Data**
+- **Code**
+- **Network**
+- **Utilities**

@@ -32,14 +32,18 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
     ref
   ) => {
     const inputId = id ?? label?.toLowerCase().replace(/\s+/g, "-");
-    const helperId = error ? `${inputId}-error` : helper ? `${inputId}-helper` : undefined;
+    const helperId = error
+      ? `${inputId}-error`
+      : helper
+        ? `${inputId}-helper`
+        : undefined;
 
     return (
       <div className={cn("flex flex-col gap-1.5", containerClassName)}>
         {label && (
           <label
             htmlFor={inputId}
-            className="text-h6 uppercase tracking-wider text-text-secondary"
+            className="text-h6 text-text-secondary tracking-wider uppercase"
           >
             {label}
           </label>
@@ -47,7 +51,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
 
         <div className="relative">
           {leadingIcon && (
-            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-text-muted [&_svg]:size-4">
+            <span className="text-text-muted pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 [&_svg]:size-4">
               {leadingIcon}
             </span>
           )}
@@ -60,26 +64,20 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             aria-describedby={helperId}
             data-slot="input"
             className={cn(
-              // Base
-              "h-9 w-full rounded-sm px-3 text-body-md",
-              "bg-bg-surface text-text-primary",
-              "border border-border-strong",
-              // Placeholder
+              // Stamp surface
+              "btn-stamp text-body-md text-text-primary h-10 w-full px-3.5 font-normal",
               "placeholder:text-text-muted",
-              // Hover
-              "hover:border-border-intense",
-              // Focus
-              "focus:outline-none focus:border-border-focus",
-              "focus:[box-shadow:var(--ds-shadow-focus-ring)]",
+              // Focus → depressed look
+              "focus:btn-stamp-hover focus:outline-none",
+              "hover:btn-stamp-hover",
               // Disabled
-              "disabled:bg-bg-inset disabled:text-text-disabled disabled:border-border-subtle disabled:cursor-not-allowed",
+              "disabled:cursor-not-allowed disabled:opacity-50",
               // Error
-              "aria-invalid:border-error aria-invalid:[box-shadow:0_0_0_3px_rgba(229,72,77,0.2)]",
+              "aria-invalid:border-error",
               // Mono variant
-              mono && "font-mono text-mono-md bg-bg-inset tracking-wide tabular-nums",
+              mono && "text-mono-md font-mono tracking-wide tabular-nums",
               // Leading icon padding
-              leadingIcon && "pl-9",
-              "transition-colors duration-[120ms]",
+              leadingIcon && "pl-10",
               className
             )}
             {...props}
@@ -89,7 +87,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         <span
           id={helperId}
           className={cn(
-            "block min-h-4 text-caption",
+            "text-caption block min-h-4",
             error ? "text-error" : "text-text-muted"
           )}
         >
@@ -115,7 +113,19 @@ type TextareaProps = React.ComponentProps<"textarea"> & {
 };
 
 const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
-  ({ className, containerClassName, label, helper, error, mono = false, id, ...props }, ref) => {
+  (
+    {
+      className,
+      containerClassName,
+      label,
+      helper,
+      error,
+      mono = false,
+      id,
+      ...props
+    },
+    ref
+  ) => {
     const inputId = id ?? label?.toLowerCase().replace(/\s+/g, "-");
 
     return (
@@ -123,7 +133,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
         {label && (
           <label
             htmlFor={inputId}
-            className="text-h6 uppercase tracking-wider text-text-secondary"
+            className="text-h6 text-text-secondary tracking-wider uppercase"
           >
             {label}
           </label>
@@ -134,23 +144,24 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
           id={inputId}
           aria-invalid={error ? "true" : undefined}
           className={cn(
-            "w-full rounded-sm px-3 py-2 text-body-md leading-[22px]",
-            "bg-bg-surface text-text-primary",
-            "border border-border-strong",
+            "btn-stamp text-body-md text-text-primary w-full px-3.5 py-2.5 leading-[22px] font-normal",
             "placeholder:text-text-muted",
-            "hover:border-border-intense",
-            "focus:outline-none focus:border-border-focus",
-            "focus:[box-shadow:var(--ds-shadow-focus-ring)]",
-            "disabled:bg-bg-inset disabled:text-text-disabled disabled:cursor-not-allowed",
-            "resize-y min-h-[88px]",
-            mono && "font-mono text-mono-md bg-bg-inset",
-            "transition-colors duration-[120ms]",
+            "focus:btn-stamp-hover hover:btn-stamp-hover focus:outline-none",
+            "disabled:cursor-not-allowed disabled:opacity-50",
+            "min-h-[88px] resize-y",
+            mono && "text-mono-md font-mono",
+            "aria-invalid:border-error",
             className
           )}
           {...props}
         />
 
-        <span className={cn("block min-h-4 text-caption", error ? "text-error" : "text-text-muted")}>
+        <span
+          className={cn(
+            "text-caption block min-h-4",
+            error ? "text-error" : "text-text-muted"
+          )}
+        >
           {error ?? helper}
         </span>
       </div>

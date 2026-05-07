@@ -23,7 +23,7 @@ export function ActionNode({ id, data, selected }: NodeProps<ActionNodeData>) {
         {/* Header */}
         <BaseNodeHeader>
           <BaseNodeTitle>
-            <h5 className="text-h5 font-semibold text-text-primary truncate">
+            <h5 className="text-h5 text-text-primary truncate font-semibold">
               {data.label}
             </h5>
           </BaseNodeTitle>
@@ -42,16 +42,8 @@ export function ActionNode({ id, data, selected }: NodeProps<ActionNodeData>) {
         </BaseNodeFooter>
 
         {/* Handles */}
-        <BaseHandle
-          position={Position.Left}
-          type="target"
-          id="action-in"
-        />
-        <BaseHandle
-          position={Position.Right}
-          type="source"
-          id="action-out"
-        />
+        <BaseHandle position={Position.Left} type="target" id="action-in" />
+        <BaseHandle position={Position.Right} type="source" id="action-out" />
       </BaseNode>
     </NodeStatusIndicator>
   );

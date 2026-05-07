@@ -14,7 +14,7 @@ export function BaseHandle({
     <Handle
       {...props}
       className={cn(
-        "size-2! hover:scale-110 rounded-full border border-border-inverse! bg-accent-muted! transition-colors",
+        "border-border-strong! bg-bg-canvas! hover:border-accent-primary! size-2! rounded-full border-2 transition-colors duration-[120ms] hover:scale-110",
         className
       )}
     >
