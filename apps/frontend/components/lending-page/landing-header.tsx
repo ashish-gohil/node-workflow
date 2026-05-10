@@ -6,15 +6,9 @@ import { useTheme } from "next-themes";
 import { ChevronDown, ExternalLink, Moon, Sun, Zap } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 
+import AppLogo from "@/components/ui/app-logo";
 import CornerIcons from "@/components/ui/corners";
 import { cn } from "@/lib/utils";
-
-const NAV_LINKS = [
-  { label: "Product", href: "#" },
-  { label: "Templates", href: "#" },
-  { label: "Docs", href: "#" },
-  { label: "Pricing", href: "#" },
-];
 
 const PROFILE_ITEMS = [
   {
@@ -145,35 +139,11 @@ export default function LandingHeader() {
             {/* Logo */}
             <button
               onClick={() => router.push("/")}
-              className="group flex shrink-0 cursor-pointer items-center gap-2.5"
+              className="shrink-0 cursor-pointer"
               aria-label="FLOW home"
             >
-              <span className="btn-stamp bg-accent-primary text-accent-on size-7 shadow-[2px_2px_0_0_var(--hard-shadow-color)] transition-shadow duration-[150ms] group-hover:shadow-[3px_3px_0_0_var(--hard-shadow-color)]">
-                <Zap className="size-3.5 fill-current" aria-hidden="true" />
-              </span>
-              <span className="text-body-md text-text-primary font-bold tracking-tight">
-                FLOW
-              </span>
+              <AppLogo />
             </button>
-
-            {/* Nav links */}
-            <nav
-              className="hidden items-center gap-1 md:flex"
-              aria-label="Primary"
-            >
-              {NAV_LINKS.map((link) => (
-                <motion.a
-                  key={link.label}
-                  href={link.href}
-                  whileHover={{ y: -1 }}
-                  transition={{ duration: 0.12 }}
-                  className="text-body-sm text-text-secondary hover:text-text-primary hover:bg-accent-subtle group relative rounded-sm px-3 py-1.5 font-medium transition-colors duration-[150ms]"
-                >
-                  {link.label}
-                  <span className="bg-text-brand absolute right-3 bottom-0 left-3 h-px origin-left scale-x-0 transition-transform duration-[200ms] group-hover:scale-x-100" />
-                </motion.a>
-              ))}
-            </nav>
 
             {/* Spacer */}
             <div className="flex-1" />

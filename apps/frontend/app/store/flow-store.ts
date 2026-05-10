@@ -19,8 +19,10 @@ export type FlowState = {
   onConnect: OnConnect;
 
   setNodes: (nodes: FlowNode[] | ((nodes: FlowNode[]) => FlowNode[])) => void;
-
   setEdges: (edges: FlowEdge[] | ((edges: FlowEdge[]) => FlowEdge[])) => void;
+
+  editingActionNodeId: string | null;
+  setEditingActionNodeId: (id: string | null) => void;
 
   reset: () => void;
 };
@@ -59,10 +61,14 @@ const useFlow = create<FlowState>((set, get) => ({
     }));
   },
 
+  editingActionNodeId: null,
+  setEditingActionNodeId: (id) => set({ editingActionNodeId: id }),
+
   reset: () => {
     set({
       nodes: [],
       edges: [],
+      editingActionNodeId: null,
     });
   },
 }));

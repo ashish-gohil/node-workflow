@@ -64,12 +64,11 @@ function SelectTrigger({
         "text-body-sm px-3.5 font-medium",
         "data-placeholder:text-text-muted",
 
-        /* Hover/active translate effect */
-        "hover:btn-stamp-hover",
-
-        /* Focus / open state — depressed look */
-        "focus-visible:btn-stamp-hover focus-visible:outline-none",
+        /* Open state — depressed look */
         "data-[state=open]:btn-stamp-hover",
+
+        /* Focus ring (keyboard nav) */
+        "focus-visible:outline-none focus-visible:[border-color:var(--color-border-focus)]",
 
         /* Disabled */
         "disabled:cursor-not-allowed disabled:opacity-50",

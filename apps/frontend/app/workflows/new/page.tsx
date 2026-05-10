@@ -4,13 +4,14 @@ import { OnConnectEnd, useReactFlow } from "@xyflow/react";
 import { useShallow } from "zustand/react/shallow";
 
 import useFlow, { FlowState } from "@/app/store/flow-store";
-import { ActionNodeTypes, DelayNodeType } from "@/app/types/actions";
+import { ActionNodeDataTypes, ActionNodeTypes, DelayNodeType } from "@/app/types/actions";
 import { FlowNode } from "@/app/types/flow";
 import { TriggerNode } from "@/app/types/tirggers";
 import TriggerSheet from "@/app/workflows/new/trigger-sheet";
 import FlowCanvas from "@/components/flow/flow-canvas";
 import { ThemeHydrated } from "@/components/ui/theme-wraper";
 
+import ActionConfigDialog from "./action-config/action-config-dialog";
 import TriggerConfigDialog from "./trigger-config/trigger-config-dialog";
 
 import "@xyflow/react/dist/style.css";
@@ -19,11 +20,13 @@ const selector = (state: FlowState) => ({
   nodes: state.nodes,
   setNodes: state.setNodes,
   setEdges: state.setEdges,
+  editingActionNodeId: state.editingActionNodeId,
+  setEditingActionNodeId: state.setEditingActionNodeId,
 });
 
 export default function NewWorkflow() {
   const { screenToFlowPosition } = useReactFlow();
-  const { nodes, setNodes, setEdges } = useFlow(useShallow(selector));
+  const { nodes, setNodes, setEdges, editingActionNodeId, setEditingActionNodeId } = useFlow(useShallow(selector));
   const [configNodeId, setConfigNodeId] = useState<string | null>(null);
 
   /* Drop-to-create: when the user drags a connection into empty canvas,
@@ -101,6 +104,20 @@ export default function NewWorkflow() {
           onClose={() => setConfigNodeId(null)}
         />
       )}
+
+      {editingActionNodeId && (() => {
+        const editNode = nodes.find((n) => n.id === editingActionNodeId);
+        return editNode ? (
+          <ActionConfigDialog
+            node={editNode}
+            onSave={(data: ActionNodeDataTypes) => {
+              updateNodeData(editingActionNodeId, data);
+              setEditingActionNodeId(null);
+            }}
+            onClose={() => setEditingActionNodeId(null)}
+          />
+        ) : null;
+      })()}
     </div>
   );
 }

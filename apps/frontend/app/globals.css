@@ -193,14 +193,14 @@
   --text-disabled: #5a675f;
   --text-brand: #4fc97a;
 
-  /* Dark mode: muted, lighter borders (design spec) */
-  --border-subtle: rgba(255, 255, 255, 0.06);
-  --border-default: rgba(255, 255, 255, 0.12);
-  --border-strong: rgba(255, 255, 255, 0.2);
-  --border-intense: rgba(255, 255, 255, 0.32);
+  /* Dark mode: borders nudged up so they're detectable without being harsh */
+  --border-subtle: rgba(255, 255, 255, 0.09);
+  --border-default: rgba(255, 255, 255, 0.18);
+  --border-strong: rgba(255, 255, 255, 0.28);
+  --border-intense: rgba(255, 255, 255, 0.42);
   --border-focus: #4a9163;
   --border-brand: #2d6a4f;
-  --border-stamp: #000000;
+  --border-stamp: rgba(255, 255, 255, 0.18);
 
   /* Lighter shade in dark mode (design spec: lighter for dark) */
   --accent-primary: #4fc97a;
@@ -380,17 +380,14 @@
   background-color: var(--bg-elevated);
   border: 1.5px solid var(--border-stamp);
   border-radius: 0;
-  box-shadow: 4px 4px 0 0 var(--hard-shadow-color);
-  transition:
-    transform var(--duration-base) cubic-bezier(0.16, 1, 0.3, 1),
-    box-shadow var(--duration-base) cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 2px 2px 0 0 var(--hard-shadow-color);
 }
 
 @utility overlay-surface {
   background-color: var(--bg-elevated);
   border: 1.5px solid var(--border-stamp);
   border-radius: 0;
-  box-shadow: 6px 6px 0 0 var(--hard-shadow-color);
+  box-shadow: 3px 3px 0 0 var(--hard-shadow-color);
 }
 
 /* ============================================================
@@ -409,7 +406,7 @@
   font-weight: 600;
   letter-spacing: 0.01em;
   white-space: nowrap;
-  box-shadow: 4px 4px 0 0 var(--hard-shadow-color);
+  box-shadow: 2px 2px 0 0 var(--hard-shadow-color);
   transition:
     transform var(--duration-fast) cubic-bezier(0.2, 0, 0, 1),
     box-shadow var(--duration-fast) cubic-bezier(0.2, 0, 0, 1),
@@ -417,12 +414,12 @@
 }
 
 @utility btn-stamp-hover {
-  transform: translate(2px, 2px);
-  box-shadow: 2px 2px 0 0 var(--hard-shadow-color);
+  transform: translate(1px, 1px);
+  box-shadow: 1px 1px 0 0 var(--hard-shadow-color);
 }
 
 @utility btn-stamp-active {
-  transform: translate(4px, 4px);
+  transform: translate(2px, 2px);
   box-shadow: 0 0 0 0 var(--hard-shadow-color);
 }
 
@@ -497,15 +494,12 @@
   border: 1.5px solid var(--border-stamp);
   border-radius: 0;
   overflow: hidden;
-  box-shadow: 6px 6px 0 0 var(--hard-shadow-color);
-  transition:
-    transform var(--duration-slow) cubic-bezier(0.16, 1, 0.3, 1),
-    box-shadow var(--duration-slow) cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 3px 3px 0 0 var(--hard-shadow-color);
 }
 
 @utility bento-card-hover {
-  transform: translate(-2px, -2px);
-  box-shadow: 8px 8px 0 0 var(--hard-shadow-color);
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0 0 var(--hard-shadow-color);
 }
 
 @utility landing-eyebrow {

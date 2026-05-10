@@ -48,14 +48,14 @@ export function ActionNodeBase({
   outputs,
   inputs,
 }: ActionNodeBaseProps) {
-  const { nodes } = useFlow();
+  const { nodes, setEditingActionNodeId } = useFlow();
   const curNode = nodes.find((node) => node.id === id)!;
 
   return (
     <NodeStatusIndicator status="initial" variant="border">
       <BaseNode
         selected={selected}
-        onDoubleClick={() => onEdit?.(id)}
+        onDoubleClick={() => setEditingActionNodeId(id)}
         className="min-w-[220px]"
       >
         {/* Input handles (left edge) */}
@@ -117,7 +117,7 @@ export function ActionNodeBase({
               }}
             >
               <ActionSheet
-                setConfigNodeId={() => {}}
+                setConfigNodeId={setEditingActionNodeId}
                 sourceHandleId={output.id}
                 sourceNode={curNode}
               />

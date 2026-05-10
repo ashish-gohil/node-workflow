@@ -135,6 +135,10 @@
         "express": "^5.2.1",
         "jsonwebtoken": "^9.0.3",
       },
+      "devDependencies": {
+        "@types/node": "^25.1.0",
+        "tsup": "^8.5.1",
+      },
       "peerDependencies": {
         "typescript": "^5",
       },

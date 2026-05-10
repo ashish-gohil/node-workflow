@@ -22,7 +22,7 @@ function Card({
     <article
       data-slot="card"
       className={cn(
-        "card-surface hover:bento-card-hover relative overflow-hidden",
+        "card-surface relative overflow-hidden",
         className
       )}
       {...props}
@@ -128,7 +128,7 @@ function StatCard({
   return (
     <div
       className={cn(
-        "card-surface hover:bento-card-hover p-5",
+        "card-surface p-5",
         accent &&
           "border-l-accent-primary border-l-[3px] pl-[calc(1.25rem-3px)]",
         className
@@ -167,8 +167,7 @@ function ListCard({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="list-card"
       className={cn(
-        "border-border-subtle flex items-center gap-3 border-b px-5 py-4",
-        "hover:bg-accent-subtle/40 cursor-pointer transition-colors",
+        "border-border-subtle flex items-center gap-3 border-b px-5 py-4 cursor-pointer",
         className
       )}
       {...props}
@@ -249,9 +248,7 @@ function StampCard({ className, ...props }: React.ComponentProps<"article">) {
       data-slot="stamp-card"
       className={cn(
         "bg-bg-elevated border-border-stamp rounded-none border-2 p-8",
-        "shadow-[6px_6px_0_0_var(--hard-shadow-color)]",
-        "hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[8px_8px_0_0_var(--hard-shadow-color)]",
-        "transition-all duration-[120ms]",
+        "shadow-[3px_3px_0_0_var(--hard-shadow-color)]",
         className
       )}
       {...props}

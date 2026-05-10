@@ -64,19 +64,12 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             aria-describedby={helperId}
             data-slot="input"
             className={cn(
-              // Stamp surface
               "btn-stamp text-body-md text-text-primary h-10 w-full px-3.5 font-normal",
               "placeholder:text-text-muted",
-              // Focus → depressed look
-              "focus:btn-stamp-hover focus:outline-none",
-              "hover:btn-stamp-hover",
-              // Disabled
+              "focus:outline-none focus:[border-color:var(--color-border-focus)]",
               "disabled:cursor-not-allowed disabled:opacity-50",
-              // Error
               "aria-invalid:border-error",
-              // Mono variant
               mono && "text-mono-md font-mono tracking-wide tabular-nums",
-              // Leading icon padding
               leadingIcon && "pl-10",
               className
             )}
@@ -146,7 +139,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
           className={cn(
             "btn-stamp text-body-md text-text-primary w-full px-3.5 py-2.5 leading-[22px] font-normal",
             "placeholder:text-text-muted",
-            "focus:btn-stamp-hover hover:btn-stamp-hover focus:outline-none",
+            "focus:outline-none focus:[border-color:var(--color-border-focus)]",
             "disabled:cursor-not-allowed disabled:opacity-50",
             "min-h-[88px] resize-y",
             mono && "text-mono-md font-mono",
