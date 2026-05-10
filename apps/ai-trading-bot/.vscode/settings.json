@@ -1,9 +1,0 @@
-{
-  "python.defaultInterpreterPath": "venv/Scripts/python.exe",
-  "cursor.python.interpreter": "venv/Scripts/python.exe",
-  "python.analysis.autoImportCompletions": true,
-  "python.analysis.typeCheckingMode": "basic",
-  "editor.formatOnSave": true,
-  "python.formatting.provider": "black",
-  "python.analysis.extraPaths": ["."]
-}
