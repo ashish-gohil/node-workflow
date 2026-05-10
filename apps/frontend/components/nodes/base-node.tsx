@@ -32,7 +32,7 @@ export function BaseNode({
         "hover:border-border-strong",
         // Selected
         selected &&
-          "border-forest-500 border-2 shadow-[var(--ds-shadow-glow-brand)]",
+          "border-forest-500 border-2 shadow-glow-brand",
         // Running — animated border pulse via outline
         status === "running" && [
           "border-forest-300",

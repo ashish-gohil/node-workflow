@@ -228,7 +228,7 @@ export default function CTAStrip() {
   };
 
   return (
-    <section className="bg-bg-canvas py-24">
+    <section className="py-24">
       <div className="section-container">
         <motion.div
           ref={panelRef}

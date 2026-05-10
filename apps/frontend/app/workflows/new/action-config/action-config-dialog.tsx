@@ -77,7 +77,7 @@ export default function ActionConfigDialog({
     <NodeConfigDialog
       open={true}
       onOpenChange={(open) => {
-        if (!open) onClose();
+        if (!open) {onClose();}
       }}
       title={data.label ?? nodeType}
       subtitle={data.description}

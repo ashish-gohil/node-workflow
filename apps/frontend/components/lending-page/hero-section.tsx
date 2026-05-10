@@ -470,38 +470,7 @@ export default function Hero() {
   const router = useRouter();
 
   return (
-    <section className="bg-bg-canvas relative overflow-hidden pt-32 pb-24">
-      {/* ── Aurora layered gradients (drift) ── */}
-      <div className="pointer-events-none absolute inset-0">
-        {/* Top-center large mint glow */}
-        <div
-          className="animate-aurora absolute -top-[20%] left-1/2 h-[700px] w-[1100px] -translate-x-1/2 opacity-50 blur-3xl"
-          style={{
-            background:
-              "radial-gradient(ellipse 60% 60% at 50% 50%, var(--accent-primary), transparent 70%)",
-          }}
-        />
-        {/* Left forest haze */}
-        <div
-          className="animate-aurora-2 absolute top-[10%] -left-[10%] h-[700px] w-[700px] opacity-35 blur-3xl"
-          style={{
-            background:
-              "radial-gradient(circle at 50% 50%, var(--accent-press), transparent 65%)",
-          }}
-        />
-        {/* Right cream-mint haze */}
-        <div
-          className="animate-aurora absolute top-[30%] -right-[12%] h-[600px] w-[600px] opacity-30 blur-3xl"
-          style={{
-            background:
-              "radial-gradient(circle at 50% 50%, var(--accent-hover), transparent 60%)",
-            animationDelay: "-6s",
-          }}
-        />
-        {/* Bottom fade */}
-        <div className="from-bg-canvas absolute inset-x-0 bottom-0 h-[280px] bg-gradient-to-t to-transparent" />
-      </div>
-
+    <section className="relative pt-32 pb-24">
       <div className="section-container relative">
         {/* ── Hero copy (centered) ── */}
         <motion.div

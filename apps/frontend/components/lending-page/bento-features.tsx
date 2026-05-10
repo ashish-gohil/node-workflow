@@ -1,9 +1,25 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { motion } from "motion/react";
+import {
+  ArrowRight,
+  Bot,
+  Brain,
+  Clock,
+  Code2,
+  Database,
+  Globe,
+  Search,
+  Zap,
+} from "lucide-react";
+import {
+  motion,
+  type TargetAndTransition,
+  type Transition,
+} from "motion/react";
 
 import CornerIcons from "@/components/ui/corners";
+import { cn } from "@/lib/utils";
 
 /* ──────────────────────────────────────────── */
 /*  Shared card wrapper                         */
@@ -30,22 +46,26 @@ function BentoCard({
   );
 }
 
-/* Shared visual frame — consistent padding, height, overflow. */
 function BentoVisual({
   children,
-  className = "",
+  className,
 }: {
   children: React.ReactNode;
   className?: string;
 }) {
   return (
-    <div className={`relative h-48 w-full overflow-hidden p-6 ${className}`}>
+    <div
+      className={cn(
+        "relative min-h-[240px] w-full flex-1 overflow-hidden",
+        className
+      )}
+    >
       {children}
     </div>
   );
 }
 
-/* Hook: returns true when the parent .group element is being hovered. */
+/* Hook: fires true when the nearest .group card is hovered. */
 function useGroupHover<T extends HTMLElement>() {
   const ref = useRef<T>(null);
   const [hovered, setHovered] = useState(false);
@@ -59,13 +79,13 @@ function useGroupHover<T extends HTMLElement>() {
     if (!card) {
       return;
     }
-    const onEnter = () => setHovered(true);
-    const onLeave = () => setHovered(false);
-    card.addEventListener("mouseenter", onEnter);
-    card.addEventListener("mouseleave", onLeave);
+    const on = () => setHovered(true);
+    const off = () => setHovered(false);
+    card.addEventListener("mouseenter", on);
+    card.addEventListener("mouseleave", off);
     return () => {
-      card.removeEventListener("mouseenter", onEnter);
-      card.removeEventListener("mouseleave", onLeave);
+      card.removeEventListener("mouseenter", on);
+      card.removeEventListener("mouseleave", off);
     };
   }, []);
 
@@ -73,109 +93,282 @@ function useGroupHover<T extends HTMLElement>() {
 }
 
 /* ──────────────────────────────────────────── */
-/*  Card 1: AI Workflow Builder                 */
-/*  Hover: nodes float (stagger), brand pulses, */
-/*  dashed connections animate, glow rises.     */
+/*  Mini node — mirrors actual BaseNode style   */
+/*  Used inside bento illustrations only.       */
 /* ──────────────────────────────────────────── */
 
+interface MiniNodeProps {
+  icon: React.ReactNode;
+  label: string;
+  subtitle?: string;
+  accentColor?: string;
+  brand?: boolean;
+  className?: string;
+  style?: React.CSSProperties;
+  animate?: TargetAndTransition;
+  transition?: Transition;
+}
+
+function MiniNode({
+  icon,
+  label,
+  subtitle,
+  accentColor = "transparent",
+  brand = false,
+  className,
+  style,
+  animate,
+  transition,
+}: MiniNodeProps) {
+  return (
+    <motion.div
+      animate={animate}
+      transition={transition}
+      className={cn(
+        "absolute flex items-center gap-2 rounded-[4px] border px-2.5 py-1.5 select-none",
+        brand
+          ? "bg-accent-primary border-border-stamp text-accent-on"
+          : "bg-bg-elevated border-border-default text-text-primary",
+        className
+      )}
+      style={{
+        boxShadow: `inset 2px 0 0 0 ${accentColor}, 2px 2px 0 0 var(--hard-shadow-color)`,
+        ...style,
+      }}
+    >
+      <span
+        className={cn(
+          "shrink-0 [&_svg]:size-3",
+          brand ? "text-accent-on" : "text-text-muted"
+        )}
+      >
+        {icon}
+      </span>
+      <div className="min-w-0">
+        <div className="truncate text-[11px] leading-tight font-semibold">
+          {label}
+        </div>
+        {subtitle && (
+          <div
+            className={cn(
+              "truncate font-mono text-[9px] leading-tight",
+              brand ? "opacity-70" : "text-text-muted"
+            )}
+          >
+            {subtitle}
+          </div>
+        )}
+      </div>
+    </motion.div>
+  );
+}
+
+/* ──────────────────────────────────────────── */
+/*  Card 1 — AI Workflow Builder                */
+/*  n8n-style mini canvas: nodes + edges.       */
+/* ──────────────────────────────────────────── */
+
+/*
+  Virtual layout (% of container 100×100):
+
+  Row 1 (top):  [Webhook]          [AI Agent]          [Output]
+  Row 2 (bot):  [GPT-4o]           [Web Search]        [Memory]
+
+  Edge endpoints in % coordinates (viewBox="0 0 100 100"):
+  - Webhook right-center   → AI Agent left-center
+  - AI Agent right-center  → Output left-center
+  - GPT-4o  top-center     → AI Agent bottom-left
+  - Search  top-center     → AI Agent bottom-center
+  - Memory  top-center     → AI Agent bottom-right
+*/
+
 const AI_NODES = [
-  { label: "Trigger", x: "8%", y: "12%", brand: false, delay: 0 },
-  { label: "Tools", x: "60%", y: "12%", brand: false, delay: 0.06 },
-  { label: "LLM Reasoner", x: "33%", y: "42%", brand: true, delay: 0.12 },
-  { label: "Memory", x: "10%", y: "70%", brand: false, delay: 0.18 },
-  { label: "Output", x: "60%", y: "70%", brand: false, delay: 0.24 },
+  {
+    id: "trigger",
+    icon: <Zap />,
+    label: "Webhook",
+    subtitle: "POST /chat",
+    accentColor: "var(--color-warning)",
+    style: { left: "1%", top: "7%" },
+  },
+  {
+    id: "agent",
+    icon: <Bot />,
+    label: "AI Agent",
+    subtitle: "gpt-4o · tools",
+    accentColor: "var(--accent-primary)",
+    brand: true,
+    style: { left: "36%", top: "26%" },
+  },
+  {
+    id: "output",
+    icon: <ArrowRight />,
+    label: "Output",
+    subtitle: "→ response",
+    accentColor: "var(--color-success)",
+    style: { left: "72%", top: "7%" },
+  },
+  {
+    id: "model",
+    icon: <Brain />,
+    label: "GPT-4o",
+    subtitle: "model",
+    accentColor: "var(--color-info)",
+    style: { left: "1%", top: "67%" },
+  },
+  {
+    id: "search",
+    icon: <Search />,
+    label: "Web Search",
+    subtitle: "tool",
+    accentColor: "var(--color-forest-300)",
+    style: { left: "36%", top: "67%" },
+  },
+  {
+    id: "memory",
+    icon: <Database />,
+    label: "Memory",
+    subtitle: "buffer",
+    accentColor: "#a78bfa",
+    style: { left: "70%", top: "67%" },
+  },
+];
+
+// Each edge: { path (SVG d attr in 0-100 space), color, dashLen+gap = period }
+const AI_EDGES = [
+  // Webhook right → AI Agent left
+  {
+    d: "M 19 12.5 C 27 12.5 28 34 36 34",
+    color: "var(--color-warning)",
+    delay: 0,
+  },
+  // AI Agent right → Output left
+  {
+    d: "M 55 34 C 63 34 64 12.5 72 12.5",
+    color: "var(--color-success)",
+    delay: 0.4,
+  },
+  // GPT-4o top-center → AI Agent bottom-left
+  {
+    d: "M 11 67 C 11 53 42 49 42 44",
+    color: "var(--color-info)",
+    delay: 0.15,
+  },
+  // Search top-center → AI Agent bottom-center
+  {
+    d: "M 46.5 67 C 46.5 56 46 50 46 44",
+    color: "var(--color-forest-300)",
+    delay: 0.25,
+  },
+  // Memory top-center → AI Agent bottom-right
+  {
+    d: "M 80 67 C 80 55 52 50 52 44",
+    color: "#a78bfa",
+    delay: 0.35,
+  },
 ];
 
 function AIVisual() {
   const { ref, hovered } = useGroupHover<HTMLDivElement>();
+
   return (
     <BentoVisual>
       <div ref={ref} className="absolute inset-0">
-        {/* Soft glow that rises on hover */}
+        {/* Brand glow behind AI Agent node */}
         <motion.div
           aria-hidden
-          animate={{ opacity: hovered ? 0.35 : 0 }}
-          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-          className="absolute inset-0 blur-2xl"
+          animate={{ opacity: hovered ? 0.45 : 0.18, scale: hovered ? 1.1 : 1 }}
+          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          className="pointer-events-none absolute"
           style={{
+            left: "36%",
+            top: "26%",
+            width: 200,
+            height: 140,
+            transform: "translate(-20%, -15%)",
             background:
-              "radial-gradient(ellipse 60% 50% at 50% 60%, var(--accent-primary), transparent 70%)",
+              "radial-gradient(ellipse at 40% 50%, var(--accent-primary), transparent 68%)",
+            filter: "blur(28px)",
           }}
         />
 
-        {/* Connections */}
+        {/* SVG connection edges */}
         <svg
           className="absolute inset-0 h-full w-full"
-          viewBox="0 0 400 200"
+          viewBox="0 0 100 100"
           preserveAspectRatio="none"
         >
-          <g fill="none" strokeWidth="1.5" className="text-border-strong">
-            <motion.path
-              d="M 60 40 Q 140 40 165 100"
-              stroke="currentColor"
-              animate={{ opacity: hovered ? 1 : 0.5 }}
-              transition={{ duration: 0.4 }}
-            />
-            <motion.path
-              d="M 280 40 Q 240 40 220 100"
-              stroke="currentColor"
-              strokeDasharray="4 3"
-              animate={{
-                opacity: hovered ? 1 : 0.5,
-                strokeDashoffset: hovered ? -28 : 0,
-              }}
-              transition={{
-                opacity: { duration: 0.4 },
-                strokeDashoffset: {
-                  duration: 1.4,
-                  ease: "linear",
-                  repeat: hovered ? Infinity : 0,
-                },
-              }}
-              className={hovered ? "text-accent-primary" : ""}
-            />
-            <motion.path
-              d="M 165 130 Q 140 160 100 165"
-              stroke="currentColor"
-              animate={{ opacity: hovered ? 1 : 0.5 }}
-              transition={{ duration: 0.4 }}
-            />
-            <motion.path
-              d="M 220 130 Q 240 160 280 165"
-              stroke="currentColor"
-              animate={{ opacity: hovered ? 1 : 0.5 }}
-              transition={{ duration: 0.4 }}
-            />
-          </g>
+          {AI_EDGES.map((edge, i) => (
+            <g key={i}>
+              {/* Static track */}
+              <path
+                d={edge.d}
+                fill="none"
+                stroke="rgba(255,255,255,0.07)"
+                strokeWidth="0.55"
+              />
+              {/* Animated flow dots */}
+              <motion.path
+                d={edge.d}
+                fill="none"
+                stroke={edge.color}
+                strokeWidth="0.55"
+                strokeLinecap="round"
+                strokeDasharray="3 7"
+                initial={{ strokeDashoffset: 0, strokeOpacity: 0.4 }}
+                animate={{
+                  strokeDashoffset: -100,
+                  strokeOpacity: hovered ? 0.95 : 0.45,
+                }}
+                transition={{
+                  strokeDashoffset: {
+                    duration: hovered ? 1.4 : 3.5,
+                    repeat: Infinity,
+                    ease: "linear",
+                    delay: edge.delay,
+                  },
+                  strokeOpacity: { duration: 0.35 },
+                }}
+              />
+            </g>
+          ))}
         </svg>
 
-        {/* Nodes */}
-        {AI_NODES.map((n) => (
+        {/* Mini nodes */}
+        {AI_NODES.map((node, i) => (
           <motion.div
-            key={n.label}
-            animate={hovered ? { y: -3, scale: 1.02 } : { y: 0, scale: 1 }}
+            key={node.id}
+            initial={{ opacity: 0, scale: 0.82 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
             transition={{
-              duration: 0.5,
+              delay: i * 0.07,
+              duration: 0.4,
               ease: [0.16, 1, 0.3, 1],
-              delay: hovered ? n.delay : 0,
             }}
-            className={`border-text-primary dark:border-border-stamp absolute flex items-center gap-1.5 border-[1.5px] px-2.5 py-1.5 text-[11px] font-semibold shadow-[2px_2px_0_0_var(--hard-shadow-color)] select-none ${n.brand ? "bg-accent-primary text-accent-on" : "bg-bg-elevated text-text-primary"}`}
-            style={{ left: n.x, top: n.y }}
+            className="absolute"
+            style={node.style}
           >
-            <motion.span
-              animate={
-                n.brand && hovered
-                  ? { scale: [1, 1.4, 1], opacity: [1, 0.6, 1] }
-                  : {}
-              }
+            <MiniNode
+              icon={node.icon}
+              label={node.label}
+              subtitle={node.subtitle}
+              accentColor={node.accentColor}
+              brand={node.brand}
+              animate={{ y: hovered ? -3 : 0 }}
               transition={{
-                duration: 1.2,
-                repeat: hovered ? Infinity : 0,
-                ease: "easeInOut",
+                duration: 0.5,
+                ease: [0.16, 1, 0.3, 1],
+                delay: hovered ? i * 0.04 : 0,
               }}
-              className={`size-1.5 rounded-full ${n.brand ? "bg-accent-on" : "bg-text-brand"}`}
+              style={
+                node.brand && hovered
+                  ? {
+                      boxShadow: `inset 2px 0 0 0 ${node.accentColor}, 2px 2px 0 0 var(--hard-shadow-color), 0 0 20px 3px rgba(79,201,122,0.35)`,
+                    }
+                  : undefined
+              }
             />
-            {n.label}
           </motion.div>
         ))}
       </div>
@@ -184,79 +377,172 @@ function AIVisual() {
 }
 
 /* ──────────────────────────────────────────── */
-/*  Card 2: Agents — orb breathes, tools ping   */
-/*  Hover: ping cycle accelerates, orb glows.   */
+/*  Card 2 — Agents                             */
+/*  Tool-call log — shows the agent loop:       */
+/*  each iteration lights up a tool call row.   */
 /* ──────────────────────────────────────────── */
 
-const AGENT_TOOLS = ["⌘", "@", "⊘", "⚡", null, "▣", "{ }", "db", "π"] as const;
-const PING_ORDER = [0, 2, 6, 8, 1, 3, 5, 7];
+const TOOL_CALLS = [
+  {
+    icon: <Search />,
+    tool: "web_search",
+    arg: "latest GPT benchmarks",
+    status: "done",
+    ms: "312ms",
+  },
+  {
+    icon: <Code2 />,
+    tool: "run_code",
+    arg: "parse_json(response)",
+    status: "done",
+    ms: "18ms",
+  },
+  {
+    icon: <Globe />,
+    tool: "http_request",
+    arg: "POST /v1/summarise",
+    status: "running",
+    ms: "…",
+  },
+  {
+    icon: <Database />,
+    tool: "memory_write",
+    arg: "store context[3]",
+    status: "pending",
+    ms: "",
+  },
+  {
+    icon: <ArrowRight />,
+    tool: "respond",
+    arg: "stream reply to user",
+    status: "pending",
+    ms: "",
+  },
+] as const;
 
 function AgentsVisual() {
   const { ref, hovered } = useGroupHover<HTMLDivElement>();
-  const [activeIdx, setActiveIdx] = useState(0);
+  const [activeIdx, setActiveIdx] = useState(2);
 
   useEffect(() => {
-    const ms = hovered ? 480 : 1200;
+    const ms = hovered ? 600 : 1400;
     const iv = setInterval(
-      () => setActiveIdx((i) => (i + 1) % PING_ORDER.length),
+      () => setActiveIdx((i) => (i + 1) % TOOL_CALLS.length),
       ms
     );
     return () => clearInterval(iv);
   }, [hovered]);
 
-  const activeTool = PING_ORDER[activeIdx];
-
   return (
-    <BentoVisual className="flex items-center justify-center">
-      <div ref={ref} className="relative z-10 grid grid-cols-3 gap-3">
-        {AGENT_TOOLS.map((tool, i) =>
-          tool === null ? (
-            <div key="orb" className="flex items-center justify-center">
-              <motion.div
-                animate={{
-                  scale: hovered ? [1, 1.12, 1] : [1, 1.06, 1],
-                  boxShadow: hovered
-                    ? "0 0 24px 4px var(--accent-glow)"
-                    : "0 0 0 0 transparent",
-                }}
-                transition={{
-                  scale: {
-                    duration: hovered ? 1 : 1.5,
-                    repeat: Infinity,
-                    ease: "easeInOut",
-                  },
-                  boxShadow: { duration: 0.4 },
-                }}
-                className="bg-accent-primary border-text-primary dark:border-border-stamp flex size-12 items-center justify-center rounded-full border-2"
-              >
-                <span className="bg-accent-on size-4 rounded-full" />
-              </motion.div>
-            </div>
-          ) : (
+    <BentoVisual className="flex flex-col">
+      {/* Agent header strip */}
+      <div className="border-border-default bg-bg-surface flex shrink-0 items-center gap-2 border-b px-4 py-2.5">
+        <motion.div
+          animate={{
+            scale: hovered ? [1, 1.25, 1] : [1, 1.1, 1],
+            backgroundColor: hovered
+              ? [
+                  "var(--accent-primary)",
+                  "var(--color-success)",
+                  "var(--accent-primary)",
+                ]
+              : ["var(--accent-primary)"],
+          }}
+          transition={{
+            duration: hovered ? 1 : 2,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+          className="size-2 rounded-full"
+          style={{ backgroundColor: "var(--accent-primary)" }}
+        />
+        <span className="text-text-secondary font-mono text-[11px] font-semibold">
+          AI Agent
+        </span>
+        <span className="text-text-muted ml-auto font-mono text-[10px]">
+          loop · iter {activeIdx + 1}
+        </span>
+      </div>
+
+      {/* Tool call rows — flex-1 so they fill remaining visual height */}
+      <div ref={ref} className="flex flex-1 flex-col">
+        {TOOL_CALLS.map((call, i) => {
+          const isActive = i === activeIdx;
+          const isPast = i < activeIdx;
+          return (
             <motion.div
               key={i}
-              animate={
-                activeTool === i
-                  ? {
-                      scale: 1.12,
-                      backgroundColor: "var(--accent-primary)",
-                      color: "var(--accent-on)",
-                      y: -2,
-                    }
-                  : {
-                      scale: 1,
-                      backgroundColor: "var(--bg-elevated)",
-                      color: "var(--text-secondary)",
-                      y: 0,
-                    }
-              }
+              animate={{
+                backgroundColor: isActive
+                  ? "rgba(79,201,122,0.06)"
+                  : "transparent",
+                x: isActive ? 3 : 0,
+              }}
               transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-              className="border-text-primary dark:border-border-stamp flex size-12 items-center justify-center border-[1.5px] font-mono text-sm shadow-[2px_2px_0_0_var(--hard-shadow-color)]"
+              className="border-border-subtle flex flex-1 items-center gap-2.5 border-b px-4 last:border-b-0"
             >
-              {tool}
+              {/* Status dot */}
+              <motion.span
+                animate={{
+                  scale:
+                    call.status === "running" && isActive ? [1, 1.5, 1] : 1,
+                  opacity: call.status === "pending" && !isActive ? 0.3 : 1,
+                }}
+                transition={{
+                  duration: 0.7,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+                className="size-1.5 shrink-0 rounded-full"
+                style={{
+                  backgroundColor: isPast
+                    ? "var(--color-success)"
+                    : isActive
+                      ? "var(--accent-primary)"
+                      : "var(--color-border-strong)",
+                }}
+              />
+
+              {/* Tool chip */}
+              <span
+                className={cn(
+                  "flex shrink-0 items-center gap-1 rounded-[3px] border px-1.5 py-0.5 font-mono text-[9px] font-bold",
+                  "[&_svg]:size-2.5",
+                  isActive || isPast
+                    ? "border-border-default bg-bg-elevated text-text-primary"
+                    : "border-border-subtle text-text-disabled bg-transparent"
+                )}
+              >
+                {call.icon}
+                {call.tool}
+              </span>
+
+              {/* Arg */}
+              <span
+                className={cn(
+                  "min-w-0 flex-1 truncate font-mono text-[10px]",
+                  isActive
+                    ? "text-text-primary"
+                    : isPast
+                      ? "text-text-secondary"
+                      : "text-text-disabled"
+                )}
+              >
+                {call.arg}
+              </span>
+
+              {/* Timing */}
+              <span
+                className={cn(
+                  "shrink-0 font-mono text-[9px]",
+                  isPast ? "text-success" : "text-text-muted"
+                )}
+              >
+                {isPast ? call.ms : isActive ? "…" : ""}
+              </span>
             </motion.div>
-          )
-        )}
+          );
+        })}
       </div>
     </BentoVisual>
   );
@@ -264,8 +550,6 @@ function AgentsVisual() {
 
 /* ──────────────────────────────────────────── */
 /*  Card 3: API Orchestration                   */
-/*  Hover: rows highlight sequentially with     */
-/*  smooth shift-right + verb glow.             */
 /* ──────────────────────────────────────────── */
 
 const API_ROWS = [
@@ -321,7 +605,10 @@ function APIVisual() {
 
   return (
     <BentoVisual>
-      <div ref={ref} className="flex h-full flex-col gap-1.5 font-mono">
+      <div
+        ref={ref}
+        className="flex h-full flex-col justify-evenly p-5 font-mono"
+      >
         {API_ROWS.map((row, i) => (
           <motion.div
             key={i}
@@ -334,7 +621,6 @@ function APIVisual() {
               backgroundColor:
                 activeRow === i ? "var(--accent-subtle)" : "transparent",
             }}
-            style={{ transition: "background-color 200ms" }}
             className="flex cursor-default items-center gap-3 px-2 py-1.5"
           >
             <span
@@ -357,14 +643,13 @@ function APIVisual() {
 
 /* ──────────────────────────────────────────── */
 /*  Card 4: Schedule / Cron                     */
-/*  Hover: dial cycles presets w/ smooth ease.  */
 /* ──────────────────────────────────────────── */
 
 const CRON_LINES = [
   { expr: "0 * * * *", label: "hourly", hour: 30, minute: 0 },
-  { expr: "*/15 * * * *", label: "every 15min", hour: 45, minute: 90 },
-  { expr: "0 9 * * 1-5", label: "weekdays 9am", hour: 270, minute: 0 },
-  { expr: "0 0 1 * *", label: "monthly", hour: 0, minute: 180 },
+  { expr: "*/15 * * * *", label: "every 15min", hour: 45, minute: 30 },
+  { expr: "0 9 * * 1-5", label: "weekdays 9am", hour: 20, minute: 40 },
+  { expr: "0 0 1 * *", label: "monthly", hour: 0, minute: 80 },
 ] as const;
 
 function CronVisual() {
@@ -376,20 +661,20 @@ function CronVisual() {
       setActiveIdx(0);
       return;
     }
-    const t = setInterval(() => {
-      setActiveIdx((i) => (i + 1) % CRON_LINES.length);
-    }, 1400);
+    const t = setInterval(
+      () => setActiveIdx((i) => (i + 1) % CRON_LINES.length),
+      1400
+    );
     return () => clearInterval(t);
   }, [hovered]);
 
   const active = CRON_LINES[activeIdx];
 
   return (
-    <BentoVisual className="flex items-center gap-5">
+    <BentoVisual className="flex items-center gap-5 p-6">
       <div ref={ref} className="contents">
-        {/* Mini clock */}
         <div className="relative size-24 shrink-0">
-          <div className="border-text-primary dark:border-border-stamp bg-bg-elevated absolute inset-0 rounded-full border-[3px]" />
+          <div className="border-text-primary dark:border-border-default bg-bg-elevated absolute inset-0 rounded-full border-2" />
           {[0, 90, 180, 270].map((deg) => (
             <span
               key={deg}
@@ -413,10 +698,9 @@ function CronVisual() {
             animate={{ rotate: active.minute }}
             transition={{ duration: 1.8, ease: [0.4, 0, 0.2, 1] }}
           />
-          <div className="bg-accent-primary border-text-primary dark:border-border-stamp absolute top-1/2 left-1/2 size-2 -translate-x-1/2 -translate-y-1/2 rounded-full border-2" />
+          <div className="bg-accent-primary border-text-primary dark:border-border-default absolute top-1/2 left-1/2 size-2 -translate-x-1/2 -translate-y-1/2 rounded-full border-2" />
         </div>
 
-        {/* Cron expressions */}
         <div className="flex-1 space-y-2 overflow-hidden">
           {CRON_LINES.map((line, i) => (
             <motion.div
@@ -429,20 +713,12 @@ function CronVisual() {
               className="flex items-center gap-2"
             >
               <span
-                className={`w-28 shrink-0 truncate font-mono text-[10px] font-semibold transition-colors duration-[200ms] ${
-                  hovered && i === activeIdx
-                    ? "text-accent-primary"
-                    : "text-text-brand"
-                }`}
+                className={`w-28 shrink-0 truncate font-mono text-[10px] font-semibold transition-colors duration-200ms ${hovered && i === activeIdx ? "text-accent-primary" : "text-text-brand"}`}
               >
                 {line.expr}
               </span>
               <span
-                className={`truncate text-[10px] transition-colors duration-[200ms] ${
-                  hovered && i === activeIdx
-                    ? "text-text-primary"
-                    : "text-text-muted"
-                }`}
+                className={`truncate text-[10px] transition-colors duration-200ms ${hovered && i === activeIdx ? "text-text-primary" : "text-text-muted"}`}
               >
                 {line.label}
               </span>
@@ -456,8 +732,6 @@ function CronVisual() {
 
 /* ──────────────────────────────────────────── */
 /*  Card 5: Email Automation                    */
-/*  Hover: steps light up sequentially with     */
-/*  connecting line filling left-to-right.      */
 /* ──────────────────────────────────────────── */
 
 const EMAIL_STEPS = [
@@ -487,7 +761,7 @@ function EmailVisual() {
   }, [hovered]);
 
   return (
-    <BentoVisual className="flex items-center justify-between gap-1">
+    <BentoVisual className="flex items-center justify-between gap-1 p-6">
       <div ref={ref} className="flex w-full items-start justify-between">
         {EMAIL_STEPS.map((step, i) => (
           <div
@@ -514,7 +788,7 @@ function EmailVisual() {
                       scale: 1,
                     }
               }
-              className="border-text-primary dark:border-border-stamp flex size-10 flex-col items-center justify-center border-[1.5px] text-base shadow-[2px_2px_0_0_var(--hard-shadow-color)] transition-[box-shadow] duration-[200ms]"
+              className="border-text-primary dark:border-border-default flex size-10 flex-col items-center justify-center border-[1.5px] text-base shadow-[2px_2px_0_0_var(--hard-shadow-color)] transition-[box-shadow] duration-[200ms]"
             >
               {step.icon}
             </motion.div>
@@ -537,8 +811,6 @@ function EmailVisual() {
 
 /* ──────────────────────────────────────────── */
 /*  Card 6: Data Pipelines (wide)               */
-/*  Hover: stages fill with accent left→right,  */
-/*  arrows pulse, items highlight.              */
 /* ──────────────────────────────────────────── */
 
 const PIPELINE_STAGES = [
@@ -567,7 +839,7 @@ function PipelineVisual() {
   }, [hovered]);
 
   return (
-    <BentoVisual>
+    <BentoVisual className="p-5">
       <div ref={ref} className="flex h-full items-stretch gap-3">
         {PIPELINE_STAGES.map((stage, i) => (
           <div key={stage.label} className="flex flex-1 items-center gap-3">
@@ -578,21 +850,13 @@ function PipelineVisual() {
               transition={{ delay: i * 0.08, duration: 0.4 }}
               animate={
                 activeStage === i
-                  ? {
-                      backgroundColor: "var(--accent-primary)",
-                      y: -3,
-                    }
-                  : {
-                      backgroundColor: "var(--bg-elevated)",
-                      y: 0,
-                    }
+                  ? { backgroundColor: "var(--accent-primary)", y: -3 }
+                  : { backgroundColor: "var(--bg-elevated)", y: 0 }
               }
-              className="border-text-primary dark:border-border-stamp flex-1 border-[1.5px] p-3 shadow-[2px_2px_0_0_var(--hard-shadow-color)] transition-[box-shadow] duration-[250ms]"
+              className="border-text-primary dark:border-border-default flex-1 border-[1.5px] p-3 shadow-[2px_2px_0_0_var(--hard-shadow-color)] transition-[box-shadow] duration-[250ms]"
             >
               <p
-                className={`mb-2 text-[9px] font-bold tracking-wider uppercase transition-colors duration-[250ms] ${
-                  activeStage === i ? "text-accent-on" : "text-text-muted"
-                }`}
+                className={`mb-2 text-[9px] font-bold tracking-wider uppercase transition-colors duration-[250ms] ${activeStage === i ? "text-accent-on" : "text-text-muted"}`}
               >
                 {stage.label}
               </p>
@@ -600,11 +864,7 @@ function PipelineVisual() {
                 {stage.items.map((item) => (
                   <div
                     key={item}
-                    className={`truncate font-mono text-[10px] transition-colors duration-[250ms] ${
-                      activeStage === i
-                        ? "text-accent-on/80"
-                        : "text-text-secondary"
-                    }`}
+                    className={`truncate font-mono text-[10px] transition-colors duration-[250ms] ${activeStage === i ? "text-accent-on/80" : "text-text-secondary"}`}
                   >
                     {item}
                   </div>
@@ -620,8 +880,8 @@ function PipelineVisual() {
                 transition={{ duration: 0.3 }}
                 className="flex shrink-0 flex-col items-center gap-0.5"
               >
-                <div className="bg-text-primary dark:bg-border-stamp h-px w-4" />
-                <div className="border-l-text-primary dark:border-l-border-stamp h-0 w-0 border-y-[3px] border-l-[5px] border-y-transparent" />
+                <div className="bg-text-primary dark:bg-border-default h-px w-4" />
+                <div className="border-l-text-primary dark:border-l-border-default h-0 w-0 border-y-[3px] border-l-[5px] border-y-transparent" />
               </motion.div>
             )}
           </div>
@@ -632,7 +892,7 @@ function PipelineVisual() {
 }
 
 /* ──────────────────────────────────────────── */
-/*  Card body template                          */
+/*  Card body                                   */
 /* ──────────────────────────────────────────── */
 
 function CardBody({
@@ -640,24 +900,31 @@ function CardBody({
   num,
   title,
   desc,
+  mutedDesc = false,
 }: {
   eyebrow: string;
   num: string;
   title: string;
   desc: string;
+  mutedDesc?: boolean;
 }) {
   return (
-    <div className="border-text-primary dark:border-border-stamp mt-auto border-t-[1.5px] px-7 py-6">
-      <p className="text-text-muted mb-3 inline-flex items-center gap-2 font-mono text-[10px] font-semibold tracking-[0.12em] uppercase">
+    <div className="border-text-primary dark:border-border-default shrink-0 border-t-[1.5px] px-7 py-5">
+      <p className="text-text-muted mb-2.5 inline-flex items-center gap-2 font-mono text-[10px] font-semibold tracking-[0.12em] uppercase">
         <span className="bg-accent-primary text-accent-on border-border-stamp border px-1.5 py-0.5 font-bold">
           {num}
         </span>
         {eyebrow}
       </p>
-      <h3 className="text-text-primary mb-2 text-[22px] leading-[1.15] font-semibold tracking-[-0.02em]">
+      <h3 className="text-text-primary mb-1.5 text-[20px] leading-[1.15] font-semibold tracking-[-0.02em]">
         {title}
       </h3>
-      <p className="text-body-md text-text-secondary max-w-md leading-relaxed">
+      <p
+        className={cn(
+          "text-body-sm line-clamp-2 leading-relaxed",
+          mutedDesc ? "text-text-muted" : "text-text-secondary"
+        )}
+      >
         {desc}
       </p>
     </div>
@@ -670,9 +937,8 @@ function CardBody({
 
 export default function BentoFeatures() {
   return (
-    <section className="bg-bg-canvas py-24">
+    <section className="py-24">
       <div className="section-container">
-        {/* Section header */}
         <div className="mb-14 flex flex-col gap-8 md:flex-row md:items-end">
           <div className="flex-1">
             <p className="text-text-primary mb-5 inline-flex items-center gap-2.5 text-[11px] font-semibold tracking-[0.12em] uppercase">
@@ -691,7 +957,6 @@ export default function BentoFeatures() {
           </p>
         </div>
 
-        {/* Bento grid — 12-col system */}
         <div className="grid grid-cols-1 gap-4 md:grid-cols-12">
           <BentoCard className="md:col-span-8">
             <AIVisual />
@@ -749,7 +1014,8 @@ export default function BentoFeatures() {
               num="06"
               eyebrow="Data pipelines"
               title="Ingest, transform, enrich, and load."
-              desc="Build end-to-end data pipelines with visual branching, parallel execution, retries, and built-in observability. Replace your brittle ETL scripts with flows that actually tell you when they break."
+              desc="End-to-end pipelines with branching, parallel execution, retries, and built-in observability."
+              mutedDesc
             />
           </BentoCard>
         </div>

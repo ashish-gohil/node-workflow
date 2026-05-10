@@ -41,9 +41,9 @@ function toTyped(type: ValueType, raw: string): unknown {
 }
 
 function fromTyped(value: unknown): { type: ValueType; raw: string } {
-  if (typeof value === "number") return { type: "number", raw: String(value) };
+  if (typeof value === "number") {return { type: "number", raw: String(value) };}
   if (typeof value === "boolean")
-    return { type: "boolean", raw: value ? "true" : "false" };
+    {return { type: "boolean", raw: value ? "true" : "false" };}
   if (typeof value === "string") {
     const isExpr = value.includes("{{");
     return { type: isExpr ? "expression" : "string", raw: value };
