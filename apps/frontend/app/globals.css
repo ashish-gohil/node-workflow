@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* Exclude documentation files so Tailwind v4 doesn't scan example class names in them */
+@source not "../design-system";
+
 /* Dark mode via data-theme attribute */
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 

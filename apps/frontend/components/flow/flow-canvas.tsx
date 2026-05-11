@@ -32,6 +32,7 @@ type Props = {
   initialNodes?: FlowNode[];
   initialEdges?: FlowEdge[];
   readOnly?: boolean;
+  locked?: boolean;
   onConnectEnd?: OnConnectEnd;
   fitView?: boolean;
   className?: string;
@@ -62,6 +63,7 @@ export default function FlowCanvas({
   initialNodes,
   initialEdges,
   readOnly = false,
+  locked = false,
   onConnectEnd,
   fitView = true,
   className,
@@ -123,10 +125,16 @@ export default function FlowCanvas({
         fitViewOptions={fitViewOptions}
         defaultEdgeOptions={defaultEdgeOptions}
         {...eventHandlers}
+        nodesDraggable={!readOnly && !locked}
+        nodesConnectable={!readOnly && !locked}
+        panOnDrag={!locked}
+        zoomOnScroll={!locked}
+        elementsSelectable={!locked}
       >
         <Background
-          gap={10}
-          color="var(--color-bg-muted)"
+          gap={20}
+          size={1.5}
+          color="var(--border-default)"
           variant={BackgroundVariant.Dots}
         />
 

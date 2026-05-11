@@ -97,12 +97,18 @@ const triggerNodes: TriggerSheetElement[] = [
 
 export default function TriggerSheet({
   setConfigNodeId,
+  open: controlledOpen,
+  onOpenChange: controlledOnOpenChange,
 }: {
   setConfigNodeId: (id: string) => void;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }) {
   const { setNodes } = useFlow();
 
-  const [triggerSheetOpen, setTriggerSheetOpen] = useState<boolean>(false);
+  const [internalOpen, setInternalOpen] = useState<boolean>(false);
+  const triggerSheetOpen = controlledOpen ?? internalOpen;
+  const setTriggerSheetOpen = controlledOnOpenChange ?? setInternalOpen;
 
   function createTriggerNode(
     type: TriggerNodeTypes,
