@@ -1,34 +1,187 @@
 # Cursor rules — FLOW design system
 
-You are a senior product designer + engineer working in Cursor on a project that uses the FLOW design system.
+You are a senior product engineer working on a node-based workflow automation platform that uses the **FLOW design system**: Swiss-style, dark-mode-first, boxy, monospace-technical.
 
-## Before generating any UI
-1. Read `design-system/CLAUDE.md` — full agent rules
-2. Read `design-system/DESIGN_SYSTEM.md` — foundations
-3. Read the matching `design-system/components/*.md` and `design-system/patterns/*.md`
-4. Use tokens from `design-system/tailwind.config.js` (or `tokens.css`)
+---
+
+## Before generating any UI — always read
+
+1. `design-system/CLAUDE.md` — full agent rules and constraints
+2. `design-system/DESIGN_SYSTEM.md` — color, type, spacing, motion foundations
+3. `app/globals.css` — all CSS custom properties + `@utility` classes
+4. Relevant `design-system/components/*.md` and `design-system/patterns/*.md`
+5. `components/ui/` — existing components (reuse, never reinvent)
+
+---
+
+## The two most critical code rules
+
+### 1. No style tags. No inline styles. Tailwind only.
+```tsx
+// WRONG
+<div style={{ backgroundColor: 'var(--bg-canvas)' }}>
+// CORRECT
+<div className="bg-bg-canvas">
+```
+
+### 2. Never use `[var(--...)]` syntax — use semantic class names
+Tailwind v4 maps `--color-*` properties directly to utilities.
+```tsx
+// WRONG
+<div className="bg-[var(--color-accent-primary)]">
+<p className="text-[var(--color-text-muted)]">
+
+// CORRECT
+<div className="bg-accent-primary">
+<p className="text-text-muted">
+```
+
+---
+
+## Semantic token → Tailwind class reference
+
+### Backgrounds (theme-aware)
+- `bg-bg-canvas` — page base / canvas
+- `bg-bg-surface` — cards, panels, sidebars
+- `bg-bg-elevated` — dropdowns, popovers, raised cards
+- `bg-bg-overlay` — modals, drawers
+- `bg-bg-inset` — inputs, code blocks, inset wells
+
+### Text (theme-aware)
+- `text-text-primary` — body copy, headings
+- `text-text-secondary` — labels, descriptions
+- `text-text-muted` — placeholders, timestamps, icon labels
+- `text-text-disabled` — disabled state text
+- `text-text-brand` — brand-colored text, links
+
+### Borders (theme-aware)
+- `border-border-subtle` — dividers, faint breaks
+- `border-border-default` — default borders
+- `border-border-strong` — emphasized / active borders
+- `border-border-focus` — focus rings
+- `border-border-stamp` — stamp button / card borders
+
+### Accent (theme-aware)
+- `bg-accent-primary` — CTA fill
+- `bg-accent-hover` — hover state fill
+- `bg-accent-press` — pressed state fill
+- `bg-accent-subtle` — tinted bg for selected / hover rows
+- `text-accent-primary` — brand icon or text
+- `text-accent-on` — text on top of accent fill
+
+### Shadows (theme-aware)
+- `shadow-sm/md/lg/xl` — elevation system
+- `shadow-glow-brand` — active / selected glow
+- `shadow-card` — card with 2px left-edge accent inset
+- `shadow-overlay` — drawer/sheet depth + accent
+
+### Status colors (static)
+- `text-success` / `bg-success-surface`
+- `text-error` / `bg-error-surface`
+- `text-warning` / `bg-warning-surface`
+- `text-info` / `bg-info-surface`
+
+---
+
+## Custom @utility classes (use as plain classes)
+
+| Class                 | Use                                           |
+|-----------------------|-----------------------------------------------|
+| `card-surface`        | Elevated card with hard shadow                |
+| `overlay-surface`     | Modal/drawer surface with hard shadow         |
+| `btn-stamp`           | Base Swiss hard-shadow button                 |
+| `btn-stamp-hover`     | Button hover state                            |
+| `btn-stamp-active`    | Button pressed state                          |
+| `btn-stamp-primary`   | Accent fill button                            |
+| `btn-stamp-ghost`     | Transparent button                            |
+| `stamp-lg`            | 6px hard shadow                               |
+| `stamp-xl`            | 8px hard shadow                               |
+| `section-container`   | 1280px max-width container                    |
+| `rounded-node`        | 4px — workflow canvas nodes ONLY              |
+| `bento-card`          | Marketing card with shadow hover              |
+| `landing-eyebrow`     | Uppercase eyebrow in brand color              |
+| `cta-panel`           | Dark CTA section bg                           |
+
+---
+
+## Typography
+
+| Class           | Size | Use                                      |
+|-----------------|------|------------------------------------------|
+| `text-display-xl` | 56px | Hero headlines                         |
+| `text-display-lg` | 44px | Section headlines                      |
+| `text-h1–h4`    | 32–17px | Page/section/card titles             |
+| `text-h5`       | 14px | Compact headings                         |
+| `text-h6`       | 12px | Eyebrow labels — `+ uppercase tracking-wider` |
+| `text-body-md`  | 14px | Default body                             |
+| `text-body-sm`  | 13px | Secondary / caption                      |
+| `text-mono-md`  | 13px | IDs, env vars — `+ font-mono`            |
+| `text-mono-sm`  | 12px | Hashes, versions — `+ font-mono`         |
+
+- `font-sans` (Inter) for all UI text
+- `font-mono` (JetBrains Mono) for IDs, numbers in tables, code, hashes
+- `tabular-nums` on all aligned numeric columns
+
+---
+
+## Three themes
+
+| Theme         | `data-theme`      | Canvas bg   | Accent          | Borders                 |
+|---------------|-------------------|-------------|-----------------|-------------------------|
+| **Dark**      | `"dark"` (default)| `#0A0E0C`   | `#4FC97A` mint  | 1px white-alpha         |
+| **Light**     | `"light"`         | `#F2EDE0`   | `#4FC97A` mint  | 1px dark-alpha          |
+| **Brutalist** | `"brutalist"`     | `#F5EFE0`   | `#C5F4A5` lime  | 2px solid black         |
+
+All semantic token classes switch automatically — no `dark:` prefixes needed in component code.
+
+---
 
 ## Hard rules
-- Boxy: radius ≤ 4px on UI, ≤ 8px marketing, 0–2px brutalist
-- Three themes: dark (default app), light, brutalist (marketing)
-- Forest green + cream + neutrals + lime (brutalist only); never blue, never gradients (except shimmer)
-- 1px white-alpha borders (dark) or 2px solid black (brutalist) — never gray fills
-- Inter for UI, JetBrains Mono for IDs/numbers/code, always tabular-nums on numerics
-- Subtle shadows for app UI, hard offset (`stamp`) shadows for brutalist — never mix on one page
-- Lucide icons, 1.5px stroke
-- Swiss layout: left-align text, right-align numbers
-- Active states use 2px accent (left edge nav, bottom border tabs, inset shadow cards)
 
-## Defaults
-- React 18+ functional components, hooks
-- Tailwind CSS using project's `tailwind.config.js`
-- Real content (workflow automation domain), no Lorem ipsum
-- All states included (default + hover + active + disabled)
-- Accessibility built in (semantic HTML, ARIA, keyboard support)
+- **Boxy:** `rounded-none` on all UI. `rounded-node` (4px) nodes only. `rounded-full` notification dots + avatars only.
+- **Color:** Forest green + cream + neutrals + semantic status. Lime = brutalist only. Never Tailwind blue / indigo / purple / gray.
+- **Borders:** Dark/light = 1px white/dark alpha tokens. Brutalist = 2px solid black. Never `border-gray-*`.
+- **Shadows:** Subtle multi-layer for dark/light. Hard offset (no blur) for brutalist. Never mix on one page.
+- **Layout:** Left-align text, right-align numeric columns. Never `text-center` in dashboard / list content.
+- **Icons:** Lucide only. `size-4` (16px) or `size-5` (20px). `strokeWidth={1.5}`. No emoji as icons.
+- **Active nav:** 2px left-edge accent sidebar. 2px bottom border tabs.
+- **Card accent:** `box-shadow: inset 2px 0 0 0 <color>` — never `border-left`.
 
-## Don't
-- Don't use Tailwind default colors (blue, indigo, purple)
-- Don't use `rounded-full`/`rounded-2xl` (only for the notification dot)
-- Don't add framer-motion or other heavy libs
-- Don't use emoji as functional icons
-- Don't generate code that doesn't reference the design system
+---
+
+## Hard no-list
+
+| Never                                      | Always                              |
+|--------------------------------------------|-------------------------------------|
+| `style={{ color: 'var(--...)' }}`          | `className="text-text-primary"`     |
+| `bg-[var(--color-accent-primary)]`         | `bg-accent-primary`                 |
+| `<style>` tags                             | `@utility` in globals.css           |
+| `rounded-lg`, `rounded-xl`, `rounded-2xl` | `rounded-none` / `rounded-node`     |
+| `rounded-full` on buttons                  | Only notification dots              |
+| `bg-blue-500`, `text-indigo-*`             | `bg-accent-primary`, `text-forest-*`|
+| Hardcoded hex in `className`               | Named token class                   |
+| `shadow-2xl`, heavy soft shadows           | `shadow-lg`, `shadow-overlay`       |
+| Gradient card backgrounds                  | Flat surface + border               |
+| `text-center` in lists/dashboards          | `text-left` (text), `text-right` (numbers) |
+| Framer Motion / GSAP                       | CSS transitions `duration-fast/base/slow` |
+
+---
+
+## Component selection
+
+| Need                    | Component                                        |
+|-------------------------|--------------------------------------------------|
+| Primary action          | `<Button variant="primary">`                    |
+| Toolbar action          | `<Button variant="ghost">`                      |
+| Destructive             | `<Button variant="destructive">`                |
+| KPI / metric            | `<StatCard>` with `font-mono tabular-nums`       |
+| Resource list item      | `<ListCard>`                                    |
+| Confirmation            | `<Dialog>`                                      |
+| Inspect panel           | `<Sheet>` (right drawer)                        |
+| Status pill             | `<Badge variant="success|error|warning|running">` |
+| ID / version / hash     | `<Badge variant="mono">`                        |
+| Keyboard shortcut       | `<Badge variant="kbd">`                         |
+| Dropdown picker         | `<Select>`                                      |
+| Marketing feature card  | `<StampCard>`                                   |
+| Settings section        | `<SettingsCard>`                                |
+| Empty / first-run       | `<EmptyCard>`                                   |
