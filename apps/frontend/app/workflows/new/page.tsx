@@ -89,7 +89,7 @@ function NavItem({
       type="button"
       onClick={onClick}
       className={cn(
-        "flex w-full items-center gap-2.5 px-2.5 py-[7px] text-left text-[13px] font-medium transition-colors duration-[120ms]",
+        "flex w-full items-center gap-2.5 px-2.5 py-[7px] text-left text-[13px] font-medium transition-colors duration-120ms",
         active
           ? "border-l-2 border-accent-primary bg-bg-canvas pl-[9px] text-text-primary"
           : "text-text-secondary hover:bg-bg-canvas/60 hover:text-text-primary"
@@ -370,13 +370,10 @@ export default function NewWorkflow() {
             aria-label="Workflow name"
             className="h-7 max-w-60 border border-transparent bg-transparent px-2 text-[13px] font-semibold text-text-primary outline-none transition-colors duration-[120ms] hover:border-border-subtle hover:bg-bg-elevated focus:border-border-subtle focus:bg-bg-elevated"
           />
-          <span className="inline-flex h-6 items-center border border-[rgba(79,201,122,0.25)] bg-[rgba(79,201,122,0.08)] px-2 font-mono text-[11px] font-semibold uppercase tracking-[0.04em] text-text-brand">
-            draft
-          </span>
         </div>
 
         {/* ── Center: tabs floating over the header/canvas seam ── */}
-        <div className="pointer-events-auto absolute bottom-[-19px] left-1/2 z-[51] -translate-x-1/2">
+        <div className="pointer-events-auto absolute bottom-[-19px] left-1/2 z-51 -translate-x-1/2">
           <div
             role="tablist"
             aria-label="Workflow view"
@@ -402,14 +399,14 @@ export default function NewWorkflow() {
               aria-selected={activeTab === "executions"}
               onClick={() => setActiveTab("executions")}
               className={cn(
-                "inline-flex h-full items-center gap-2 px-5 text-[13px] font-semibold transition-colors duration-[120ms]",
+                "inline-flex h-full items-center gap-2 px-5 text-[13px] font-semibold transition-colors duration-120ms",
                 activeTab === "executions"
                   ? "bg-accent-primary text-accent-on"
                   : "text-text-muted hover:text-text-primary"
               )}
             >
               Executions
-              <span className="inline-grid h-[18px] min-w-[20px] place-items-center border border-border-default bg-bg-canvas px-1.5 font-mono text-[11px] font-semibold text-text-muted">
+              <span className="flex h-[18px] min-w-[20px] place-items-center border border-border-default bg-bg-canvas px-1.5 font-mono text-[11px] font-semibold text-text-muted ">
                 0
               </span>
             </button>
@@ -437,7 +434,7 @@ export default function NewWorkflow() {
                 aria-haspopup="menu"
                 aria-expanded={saveMenuOpen}
                 aria-label="More save options"
-                className="inline-flex w-8 items-center justify-center border-l border-[rgba(10,14,12,0.35)] transition-colors duration-[120ms] hover:bg-accent-hover"
+                className="inline-flex w-8 items-center justify-center border-l border-[rgba(10,14,12,0.35)] transition-colors duration-120ms hover:bg-accent-hover"
               >
                 <ChevronDown className="size-3" />
               </button>
@@ -446,7 +443,7 @@ export default function NewWorkflow() {
             {saveMenuOpen && (
               <div
                 role="menu"
-                className="absolute right-0 top-[calc(100%+8px)] z-[100] min-w-[280px] border-[1.5px] border-border-stamp bg-bg-elevated p-1.5 shadow-[4px_4px_0_0_var(--hard-shadow-color)]"
+                className="absolute right-0 top-[calc(100%+8px)] z-100 min-w-[280px] border-[1.5px] border-border-stamp bg-bg-elevated p-1.5 shadow-[4px_4px_0_0_var(--hard-shadow-color)]"
               >
                 <p className="px-2.5 pb-1 pt-1.5 font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-text-muted">
                   Save options
@@ -716,7 +713,7 @@ export default function NewWorkflow() {
             theme === "dark" ? "Switch to light mode" : "Switch to dark mode"
           }
           onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-          className="btn-stamp hover:btn-stamp-hover active:btn-stamp-active fixed bottom-6 right-6 z-[60] inline-grid size-10 place-items-center shadow-[3px_3px_0_0_var(--hard-shadow-color)]"
+          className="btn-stamp hover:btn-stamp-hover active:btn-stamp-active fixed bottom-6 right-6 z-60 inline-grid size-10 place-items-center shadow-[3px_3px_0_0_var(--hard-shadow-color)]"
         >
           {theme === "dark" ? (
             <Sun className="size-4" />

@@ -218,6 +218,9 @@
   /* Brand accent glow — used for hover/spotlight effects */
   --accent-glow: rgba(79, 201, 122, 0.18);
 
+  /* Landing page dot grid — very subtle, below aurora */
+  --page-dot-color: rgba(255, 255, 255, 0.045);
+
   --ds-shadow-sm:
     0 1px 0 0 rgba(255, 255, 255, 0.04) inset, 0 1px 2px rgba(0, 0, 0, 0.5);
   --ds-shadow-md:
@@ -279,6 +282,9 @@
   /* Brand accent glow — used for hover/spotlight effects */
   --accent-glow: rgba(79, 201, 122, 0.3);
 
+  /* Landing page dot grid */
+  --page-dot-color: rgba(14, 43, 28, 0.06);
+
   --ds-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.06);
   --ds-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.04);
   --ds-shadow-lg:
@@ -324,6 +330,9 @@
   --accent-hover: #a8e47c;
   --accent-press: #84c95d;
   --accent-subtle: #f0fbe4;
+
+  /* Landing page dot grid */
+  --page-dot-color: rgba(14, 43, 28, 0.07);
 
   --ds-shadow-sm: 2px 2px 0 0 #000;
   --ds-shadow-md: 4px 4px 0 0 #000;
@@ -526,10 +535,21 @@
 /* CTA panel — dark stamped section used in landing CTA. Theme-scoped here
    instead of leaking into global theme tokens. */
 @utility cta-panel {
-  background-color: #050b08;
+  background: linear-gradient(135deg, #061611 0%, #0b1f17 55%, #102b21 100%);
+  --cta-ring-color: rgba(79, 201, 122, 0.2);
 }
 [data-theme="light"] .cta-panel {
-  background-color: #1f4d38;
+  background: linear-gradient(135deg, #0a2e22 0%, #0f3d2e 55%, #134a39 100%);
+  --cta-ring-color: rgba(79, 201, 122, 0.28);
+}
+
+@utility page-dot-grid {
+  background-image: radial-gradient(
+    circle,
+    var(--page-dot-color) 1px,
+    transparent 1px
+  );
+  background-size: 22px 22px;
 }
 
 /* ============================================================
@@ -647,7 +667,7 @@
   }
 }
 .animate-aurora {
-  animation: aurora-drift 60s ease-in-out infinite;
+  animation: aurora-drift 12s ease-in-out infinite;
 }
 
 @keyframes aurora-drift-2 {
@@ -665,7 +685,7 @@
   }
 }
 .animate-aurora-2 {
-  animation: aurora-drift-2 75s ease-in-out infinite;
+  animation: aurora-drift-2 15s ease-in-out infinite;
 }
 
 /* CTA grid drift — animated grid panel backdrop */

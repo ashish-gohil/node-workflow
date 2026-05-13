@@ -239,7 +239,8 @@ export default function CTAStrip() {
           transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
           className="cta-panel group border-border-stamp text-cream-50 relative overflow-hidden border-[1.5px]"
           style={{
-            boxShadow: "8px 8px 0 0 var(--hard-shadow-color)",
+            boxShadow:
+              "8px 8px 0 0 var(--hard-shadow-color), inset 0 0 0 1px var(--cta-ring-color, rgba(79,201,122,0.2))",
           }}
         >
           {/* Mouse-following spotlight */}

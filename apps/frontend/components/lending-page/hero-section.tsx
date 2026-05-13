@@ -2,17 +2,20 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, Play } from "lucide-react";
+import { ArrowRight, Calendar, Home, MessageSquare, Play, Save, Wallet } from "lucide-react";
 import { motion } from "motion/react";
 
-/* ── animation variants ── */
+import Collaborators from "@/components/ui/collaborators";
+import { HeroFlowCanvas } from "./hero-canvas";
+
+/* ── Animation variants ── */
 const fadeUp = {
   hidden: { opacity: 0, y: 28 },
   visible: { opacity: 1, y: 0 },
 };
 const stagger = { visible: { transition: { staggerChildren: 0.1 } } };
 
-/* ── Animated word-swap headline — typewriter erase + retype with tilt ── */
+/* ── Animated word-swap headline ── */
 const SWAP_WORDS = ["think", "work"] as const;
 
 function AnimatedWord() {
@@ -53,14 +56,10 @@ function AnimatedWord() {
   return (
     <span
       className="bg-accent-primary text-accent-on relative mx-2 inline-block px-3 py-0.5 align-middle not-italic"
-      style={{
-        transform: "rotate(-2.5deg)",
-        transformOrigin: "left center",
-      }}
+      style={{ transform: "rotate(-2.5deg)", transformOrigin: "left center" }}
     >
       <span className="inline-block min-w-[3.2ch] whitespace-nowrap">
         {visible}
-        {/* Caret — solid while typing/erasing, blinks during hold */}
         <span
           aria-hidden
           className={
@@ -73,406 +72,251 @@ function AnimatedWord() {
   );
 }
 
-/* ── Mockup node data ── */
-const NODES = [
-  {
-    id: "webhook",
-    label: "Webhook",
-    sub: "POST /api/orders",
-    status: "success",
-    color: "info",
-    style: { left: "5%", top: "18%" },
-  },
-  {
-    id: "validate",
-    label: "Validate Schema",
-    sub: "order.json · v3",
-    status: "success",
-    color: "warning",
-    style: { left: "34%", top: "18%" },
-  },
-  {
-    id: "classify",
-    label: "Classify with AI",
-    sub: "gpt-4o · temp 0.2",
-    status: "running",
-    color: "forest",
-    style: { left: "34%", top: "47%" },
-  },
-  {
-    id: "ifhigh",
-    label: "If high-value",
-    sub: "amount > $500",
-    status: "branch",
-    color: "info",
-    style: { left: "5%", top: "47%" },
-  },
-  {
-    id: "postgres",
-    label: "Postgres",
-    sub: "INSERT orders",
-    status: "success",
-    color: "success",
-    style: { left: "34%", top: "75%" },
-  },
-  {
-    id: "slack",
-    label: "Slack alert",
-    sub: "#orders-priority",
-    status: "idle",
-    color: "info",
-    style: { left: "72%", top: "18%" },
-  },
-  {
-    id: "email",
-    label: "Send email",
-    sub: "template_v3",
-    status: "queued",
-    color: "error",
-    style: { left: "72%", top: "75%" },
-  },
-] as const;
-
-type NodeColor = "info" | "warning" | "forest" | "success" | "error";
-type NodeStatus = "success" | "running" | "branch" | "idle" | "queued";
-
-const COLOR_MAP: Record<NodeColor, string> = {
-  info: "bg-info-surface text-info",
-  warning: "bg-warning-surface text-warning",
-  forest: "bg-forest-500/20 text-forest-300",
-  success: "bg-success-surface text-success",
-  error: "bg-error-surface text-error",
-};
-
-const STATUS_MAP: Record<NodeStatus, { dot: string; label: string }> = {
-  success: { dot: "bg-success", label: "Success" },
-  running: { dot: "bg-info animate-pulse-status", label: "Running" },
-  branch: { dot: "bg-warning", label: "Branch" },
-  idle: { dot: "bg-neutral-500", label: "Idle" },
-  queued: { dot: "bg-neutral-500", label: "Queued" },
-};
-
-function MockupNode({
+/* ── Sidebar nav row ── */
+function NavRow({
+  icon: Icon,
   label,
-  sub,
-  status,
-  color,
+  active,
+  badge,
 }: {
+  icon: React.ElementType;
   label: string;
-  sub: string;
-  status: NodeStatus;
-  color: NodeColor;
+  active?: boolean;
+  badge?: string;
 }) {
-  const s = STATUS_MAP[status];
   return (
-    <div className="absolute w-[148px] rounded-sm border border-neutral-300/50 bg-neutral-200 shadow-sm select-none">
-      <div className="flex items-center gap-1.5 border-b border-neutral-300/40 px-2.5 py-2">
-        <span
-          className={`inline-flex size-5 shrink-0 items-center justify-center rounded-xs text-[9px] ${COLOR_MAP[color]}`}
-        >
-          <svg
-            width="9"
-            height="9"
-            viewBox="0 0 12 12"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.5"
-          >
-            <circle cx="6" cy="6" r="4" />
-          </svg>
+    <div
+      className={[
+        "flex cursor-default items-center gap-2.5 py-[6px] text-[12px] font-medium transition-colors duration-[120ms]",
+        active
+          ? "text-text-primary border-l-2 border-accent-primary pl-[8px] bg-bg-canvas"
+          : "text-text-secondary border-l-2 border-transparent pl-[9px] hover:text-text-primary",
+      ].join(" ")}
+    >
+      <Icon
+        size={13}
+        className={active ? "text-text-brand" : "text-text-muted"}
+        strokeWidth={1.8}
+      />
+      <span className="flex-1 truncate">{label}</span>
+      {badge && (
+        <span className="font-mono text-[9px] font-semibold uppercase tracking-[0.06em] text-info bg-info/10 border border-info/25 px-1.5 py-px">
+          {badge}
         </span>
-        <span className="truncate text-[10px] leading-none font-semibold text-neutral-800">
-          {label}
-        </span>
-      </div>
-      <div className="px-2.5 py-1.5">
-        <p className="mb-1.5 truncate font-mono text-[9px] text-neutral-600">
-          {sub}
-        </p>
-        <div className="flex items-center gap-1">
-          <span className={`size-1.5 shrink-0 rounded-full ${s.dot}`} />
-          <span className="text-[9px] text-neutral-600">{s.label}</span>
-        </div>
-      </div>
+      )}
     </div>
   );
 }
 
-function AppMockup() {
+/* ── Sidebar inside the mockup ── */
+function MockupSidebar({ open }: { open: boolean }) {
+  if (!open) return null;
   return (
-    /* Force dark colors inside the mockup regardless of page theme */
-    <div
-      data-theme="dark"
-      className="border-border-stamp overflow-hidden border-[1.5px] bg-neutral-50"
-      style={{
-        boxShadow:
-          "8px 8px 0 0 var(--hard-shadow-color), 0 32px 80px rgba(0,0,0,0.45)",
-      }}
-    >
-      {/* ── Window chrome ── */}
-      <div className="flex items-center gap-3 border-b-2 border-neutral-200/60 bg-neutral-100 px-4 py-2.5">
-        {/* Traffic lights */}
-        <div className="flex shrink-0 items-center gap-1.5">
-          <span className="bg-mac-red size-2.5 rounded-full" />
-          <span className="bg-mac-yellow size-2.5 rounded-full" />
-          <span className="bg-mac-green size-2.5 rounded-full" />
-        </div>
+    <aside className="flex w-[172px] shrink-0 flex-col gap-0.5 border-r border-border-stamp bg-bg-elevated px-2.5 py-3">
+      <p className="mb-1 px-2.5 font-mono text-[9px] font-bold uppercase tracking-[0.08em] text-text-muted">
+        Workspace
+      </p>
+      <NavRow icon={Home} label="Overview" />
+      <NavRow icon={Wallet} label="Personal" active />
+      <NavRow icon={MessageSquare} label="Chat" badge="Preview" />
 
-        {/* Breadcrumb */}
-        <div className="flex items-center gap-1 overflow-hidden font-mono text-[10px] text-neutral-700">
-          <span className="truncate text-neutral-600">northwind</span>
-          <span className="shrink-0 text-neutral-500">/</span>
-          <span className="truncate font-bold text-neutral-800">
-            Order processing
-          </span>
-          <span className="shrink-0 text-neutral-500">/</span>
-          <span className="shrink-0 text-neutral-500">v.142</span>
-        </div>
+      <p className="mt-3.5 mb-1 px-2.5 font-mono text-[9px] font-bold uppercase tracking-[0.08em] text-text-muted">
+        Workflow
+      </p>
+      <NavRow icon={Wallet} label="Credentials" />
+      <NavRow icon={Calendar} label="Schedules" />
 
-        {/* Status pills */}
-        <div className="ml-auto flex shrink-0 items-center gap-1.5">
-          <span className="bg-success/10 border-success/20 text-success flex items-center gap-1 rounded-xs border px-2 py-0.5 text-[9px] font-semibold">
-            <span className="bg-success animate-pulse-status size-1.5 rounded-full" />
-            Running
-          </span>
-          <span className="flex items-center gap-1 rounded-xs border border-neutral-300/40 bg-neutral-200/60 px-2 py-0.5 text-[9px] font-medium text-neutral-600">
-            <span className="size-1.5 rounded-full bg-neutral-500" />
-            Saved
+      <div className="mt-auto border-t border-border-subtle pt-2">
+        <div className="flex items-center px-2.5">
+          <span className="font-mono text-[10px] text-text-muted">v2.14.0</span>
+          <span className="ml-auto flex items-center gap-1.5 font-mono text-[10px] text-text-muted">
+            <span
+              className="size-1.5 rounded-full bg-success"
+              style={{ boxShadow: "0 0 0 2px rgba(82,183,136,0.18)" }}
+            />
+            synced
           </span>
         </div>
       </div>
+    </aside>
+  );
+}
 
-      {/* ── App body ── */}
-      <div className="flex" style={{ height: 340 }}>
-        {/* Sidebar */}
-        <div className="w-[130px] shrink-0 overflow-hidden border-r-2 border-neutral-200/60 bg-neutral-100 p-3">
-          <p className="mb-2 text-[9px] font-bold tracking-wider text-neutral-600 uppercase">
-            Workflow
-          </p>
-          {["Order processing", "Refund pipeline", "Customer sync"].map(
-            (w, i) => (
-              <div
-                key={w}
-                className={`mb-0.5 flex items-center gap-1.5 truncate rounded-xs px-2 py-1.5 text-[10px] ${i === 0 ? "bg-accent-primary/20 text-forest-300 font-semibold" : "text-neutral-600 hover:bg-neutral-200/50"}`}
-              >
-                <span
-                  className={`size-1.5 shrink-0 rounded-full ${i === 0 ? "bg-forest-400" : "bg-neutral-500"}`}
-                />
-                {w}
-              </div>
-            )
-          )}
-          <p className="mt-4 mb-2 text-[9px] font-bold tracking-wider text-neutral-600 uppercase">
-            Library
-          </p>
-          {["Triggers", "HTTP", "AI / LLM", "Database", "Logic"].map((l) => (
-            <div
-              key={l}
-              className="mb-0.5 flex cursor-default items-center gap-1.5 truncate rounded-xs px-2 py-1.5 text-[10px] text-neutral-600 hover:bg-neutral-200/50"
-            >
-              <span className="size-1.5 shrink-0 rounded-full bg-neutral-500/60" />
-              {l}
-            </div>
-          ))}
+/* ── Editor header inside the MacBook ── */
+function EditorWindowChrome({ sidebarOpen, onToggleSidebar }: { sidebarOpen: boolean; onToggleSidebar: () => void }) {
+  return (
+    <header className="relative flex h-[46px] shrink-0 items-stretch border-b border-border-stamp bg-bg-canvas">
+      {/* Logo square */}
+      <div className="flex w-11 shrink-0 items-center justify-center border-r border-border-subtle">
+        <div
+          className="flex size-5 items-center justify-center bg-accent-primary text-accent-on border-[1.5px] border-border-stamp"
+          style={{ boxShadow: "1.5px 1.5px 0 0 var(--hard-shadow-color)" }}
+        >
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+          </svg>
+        </div>
+      </div>
+
+      {/* Workflow name + draft pill */}
+      <div className="flex flex-1 items-center gap-2.5 px-3 min-w-0">
+        <span className="text-[12px] font-semibold text-text-primary">Order routing</span>
+        <span className="font-mono text-[9px] font-semibold uppercase tracking-[0.04em] text-text-brand bg-accent-primary/10 border border-accent-primary/25 px-1.5 py-px">
+          draft
+        </span>
+      </div>
+
+      {/* Center tabs — float below header */}
+      <div
+        className="absolute bottom-[-14px] left-1/2 z-10 flex h-[26px] -translate-x-1/2 border-[1.5px] border-border-stamp bg-bg-elevated"
+        style={{ boxShadow: "2px 2px 0 0 var(--hard-shadow-color)" }}
+      >
+        <button className="flex h-full items-center gap-1.5 border-r border-border-stamp bg-accent-primary px-3 text-[11px] font-semibold text-accent-on">
+          Editor
+        </button>
+        <button className="flex h-full items-center gap-1.5 px-3 text-[11px] font-semibold text-text-muted">
+          Executions
+          <span className="font-mono text-[9px] font-semibold bg-bg-canvas border border-border-default px-1 text-text-muted">
+            0
+          </span>
+        </button>
+      </div>
+
+      {/* Right controls */}
+      <div className="flex shrink-0 items-center gap-2 pr-3">
+        {/* Sidebar toggle */}
+        <button
+          onClick={onToggleSidebar}
+          className="flex size-[26px] items-center justify-center border-[1.5px] border-border-stamp bg-bg-elevated text-text-secondary"
+          style={{ boxShadow: "1.5px 1.5px 0 0 var(--hard-shadow-color)" }}
+          title={sidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
+        >
+          <svg
+            width="10"
+            height="10"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            style={{
+              transform: sidebarOpen ? "rotate(0deg)" : "rotate(180deg)",
+              transition: "transform 200ms ease",
+            }}
+          >
+            <polyline points="15 18 9 12 15 6" />
+          </svg>
+        </button>
+
+        {/* Save split button */}
+        <div
+          className="flex h-[26px] items-stretch border-[1.5px] border-border-stamp bg-accent-primary text-accent-on"
+          style={{ boxShadow: "2px 2px 0 0 var(--hard-shadow-color)" }}
+        >
+          <span className="flex items-center gap-1.5 px-2.5 text-[11px] font-bold">
+            <Save size={10} />
+            Save
+          </span>
+          <span className="flex w-5 items-center justify-center border-l border-accent-on/30">
+            <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </span>
         </div>
 
-        {/* Canvas */}
-        <div className="relative flex-1 overflow-hidden bg-neutral-50">
-          {/* Dot grid */}
-          <div className="canvas-grid absolute inset-0 opacity-30" />
-
-          {/* SVG connections */}
-          <svg
-            className="pointer-events-none absolute inset-0 h-full w-full"
-            viewBox="0 0 800 340"
-            preserveAspectRatio="none"
-          >
-            {/* Webhook → Validate */}
-            <path
-              d="M 174 80 C 230 80, 230 80, 270 80"
-              fill="none"
-              strokeWidth="1.5"
-              strokeOpacity="0.8"
-              className="conn-animate stroke-forest-400"
-            />
-            {/* Validate → AI */}
-            <path
-              d="M 430 80 C 490 80, 490 160, 270 160"
-              fill="none"
-              strokeWidth="1.5"
-              strokeOpacity="0.8"
-              className="conn-animate stroke-forest-400"
-              style={{ animationDelay: "0.3s" }}
-            />
-            {/* AI → Postgres */}
-            <path
-              d="M 430 160 C 490 160, 490 254, 270 254"
-              fill="none"
-              strokeWidth="1.5"
-              strokeOpacity="0.6"
-              strokeDasharray="5 3"
-              className="stroke-success"
-            />
-            {/* Postgres → Slack */}
-            <path
-              d="M 430 254 C 530 254, 530 80, 578 80"
-              fill="none"
-              strokeWidth="1.5"
-              strokeOpacity="0.4"
-              className="stroke-neutral-700"
-            />
-            {/* AI → Slack (branch) */}
-            <path
-              d="M 430 160 C 530 160, 530 80, 578 80"
-              fill="none"
-              strokeWidth="1.5"
-              strokeOpacity="0.4"
-              className="stroke-neutral-700"
-            />
+        {/* More button */}
+        <button
+          className="flex size-[26px] items-center justify-center border-[1.5px] border-border-stamp bg-bg-elevated text-text-primary"
+          style={{ boxShadow: "2px 2px 0 0 var(--hard-shadow-color)" }}
+        >
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+            <circle cx="5" cy="12" r="1.5" />
+            <circle cx="12" cy="12" r="1.5" />
+            <circle cx="19" cy="12" r="1.5" />
           </svg>
+        </button>
+      </div>
+    </header>
+  );
+}
 
-          {/* Nodes */}
-          {NODES.map((node) => (
-            <div key={node.id} className="absolute" style={node.style}>
-              <MockupNode
-                label={node.label}
-                sub={node.sub}
-                status={node.status}
-                color={node.color}
+/* ── MacBook outer wrapper ── */
+function MacBookMockup() {
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+
+  return (
+    <div
+      className="relative overflow-hidden border-[1.5px] border-border-stamp bg-bg-canvas"
+      style={{
+        boxShadow: "10px 10px 0 0 var(--hard-shadow-color), 0 32px 80px rgba(0,0,0,0.45)",
+      }}
+    >
+      {/* ── macOS title bar (outer "bezel" row) ── */}
+      <div className="flex h-8 shrink-0 items-center gap-2 border-b border-border-subtle bg-bg-elevated px-3.5">
+        {/* Traffic lights */}
+        <div className="group flex items-center gap-1.5">
+          <button className="size-3 rounded-full bg-mac-red transition-opacity hover:opacity-80" title="Close" />
+          <button className="size-3 rounded-full bg-mac-yellow transition-opacity hover:opacity-80" title="Minimize" />
+          <button className="size-3 rounded-full bg-mac-green transition-opacity hover:opacity-80" title="Fullscreen" />
+        </div>
+
+        {/* Window title */}
+        <span className="mx-auto font-mono text-[10px] font-semibold text-text-muted">
+          FLOW — Order Routing
+        </span>
+
+        {/* Live status dot (right) */}
+        <span className="flex items-center gap-1.5 font-mono text-[9px] text-text-muted">
+          <span
+            className="size-1.5 rounded-full bg-success"
+            style={{ boxShadow: "0 0 0 2px rgba(82,183,136,0.18)" }}
+          />
+          running
+        </span>
+      </div>
+
+      {/* ── Editor chrome ── */}
+      <EditorWindowChrome
+        sidebarOpen={sidebarOpen}
+        onToggleSidebar={() => setSidebarOpen((v) => !v)}
+      />
+
+      {/* ── Body: sidebar + canvas ── */}
+      <div className="flex" style={{ height: 520 }}>
+        <MockupSidebar open={sidebarOpen} />
+
+        {/* Canvas area */}
+        <div className="relative flex-1 overflow-hidden">
+          {/* Collaborators + live badge top-right */}
+          <div className="absolute top-2.5 right-3 z-10 flex items-center gap-2">
+            <Collaborators />
+            <div
+              className="flex items-center gap-1.5 border-[1.5px] border-border-stamp bg-bg-elevated px-2 py-[3px] font-mono text-[10px] font-semibold uppercase tracking-[0.06em] text-text-brand"
+              style={{ boxShadow: "2px 2px 0 0 var(--hard-shadow-color)" }}
+            >
+              <span
+                className="size-1.5 rounded-full bg-success"
+                style={{ boxShadow: "0 0 0 3px rgba(82,183,136,0.18)" }}
               />
-            </div>
-          ))}
-
-          {/* Collaborator avatars */}
-          <div className="absolute top-2 right-3 flex items-center -space-x-1.5">
-            {(
-              [
-                ["M", "bg-forest-600"],
-                ["J", "bg-warning"],
-                ["A", "bg-info"],
-              ] as [string, string][]
-            ).map(([initials, bg], i) => (
-              <div
-                key={i}
-                className={`flex size-6 items-center justify-center rounded-full border-2 border-neutral-50 text-[9px] font-bold text-neutral-50 ${bg}`}
-              >
-                {initials}
-              </div>
-            ))}
-            <div className="flex size-6 items-center justify-center rounded-full border-2 border-dashed border-neutral-100 bg-neutral-200 text-[9px] font-bold text-neutral-600">
-              +
+              live
             </div>
           </div>
 
-          {/* Live cursor A */}
-          <motion.div
-            animate={{
-              x: ["55%", "42%", "55%", "60%", "55%"],
-              y: ["30%", "36%", "44%", "30%", "30%"],
-            }}
-            transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-            className="pointer-events-none absolute flex items-center gap-1"
-          >
-            <svg
-              width="12"
-              height="12"
-              viewBox="0 0 16 16"
-              fill="none"
-              className="fill-info stroke-cream-50"
-            >
-              <path d="M2 2L14 8L8 9L7 14L2 2Z" strokeWidth="0.8" />
-            </svg>
-            <span className="bg-info text-cream-50 rounded-xs px-1 py-0.5 text-[9px] font-medium">
-              Mira
-            </span>
-          </motion.div>
-
-          {/* Live cursor B */}
-          <motion.div
-            animate={{
-              x: ["62%", "70%", "55%", "62%", "68%"],
-              y: ["60%", "72%", "68%", "52%", "64%"],
-            }}
-            transition={{
-              duration: 9,
-              repeat: Infinity,
-              ease: "linear",
-              delay: 1,
-            }}
-            className="pointer-events-none absolute flex items-center gap-1"
-          >
-            <svg
-              width="12"
-              height="12"
-              viewBox="0 0 16 16"
-              fill="none"
-              className="fill-warning stroke-cream-50"
-            >
-              <path d="M2 2L14 8L8 9L7 14L2 2Z" strokeWidth="0.8" />
-            </svg>
-            <span className="bg-warning text-neutral-0 rounded-xs px-1 py-0.5 text-[9px] font-medium">
-              Jonas
-            </span>
-          </motion.div>
+          {/* ReactFlow canvas */}
+          <HeroFlowCanvas />
         </div>
-
-        {/* Inspector panel */}
-        <div className="w-[148px] shrink-0 overflow-hidden border-l-2 border-neutral-200/60 bg-neutral-100 p-3">
-          <p className="mb-3 truncate text-[10px] font-bold text-neutral-800">
-            Classify with AI
-          </p>
-
-          {[
-            { label: "Model", value: "gpt-4o", highlight: true },
-            {
-              label: "Prompt",
-              value: "Categorize: {{ $json.items }}",
-              multiline: true,
-            },
-            { label: "Temp", value: "0.2" },
-            { label: "Output", value: "{ category, score }", highlight: true },
-          ].map(({ label, value, highlight, multiline }) => (
-            <div key={label} className="mb-2">
-              <p className="mb-0.5 text-[8px] font-semibold tracking-wider text-neutral-600 uppercase">
-                {label}
-              </p>
-              <div
-                className={`rounded-xs border px-1.5 py-1 font-mono text-[9px] leading-tight ${highlight ? "border-forest-500/40 bg-forest-500/10 text-forest-300" : "border-neutral-300/40 bg-neutral-200/60 text-neutral-700"} ${multiline ? "line-clamp-2" : "truncate"}`}
-              >
-                {value}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* ── Status bar ── */}
-      <div className="flex items-center gap-4 border-t-2 border-neutral-200/60 bg-neutral-100 px-4 py-2">
-        <span className="font-mono text-[9px] text-neutral-600">7 nodes</span>
-        <span className="text-neutral-500">·</span>
-        <span className="font-mono text-[9px] text-neutral-600">
-          Last run: 2s ago
-        </span>
-        <span className="text-neutral-500">·</span>
-        <span className="font-mono text-[9px] text-neutral-600">
-          142 executions today
-        </span>
-        <span className="text-success ml-auto flex items-center gap-1 font-mono text-[9px] font-bold">
-          <span className="bg-success animate-pulse-status size-1.5 rounded-full" />
-          Active
-        </span>
       </div>
     </div>
   );
 }
 
+/* ── Main Hero export ── */
 export default function Hero() {
   const router = useRouter();
 
   return (
-    <section className="relative pt-32 pb-24">
+    <section className="relative pt-28 pb-20">
       <div className="section-container relative">
-        {/* ── Hero copy (centered) ── */}
+        {/* ── Hero copy ── */}
         <motion.div
           className="mx-auto max-w-4xl text-center"
           initial="hidden"
@@ -544,15 +388,13 @@ export default function Hero() {
             <span className="bg-border-default size-1 rounded-full" />
             <span className="text-warning">★★★★★</span>
             <span>
-              <span className="text-text-primary font-mono font-semibold">
-                4.9
-              </span>{" "}
+              <span className="text-text-primary font-mono font-semibold">4.9</span>{" "}
               · 1.2k reviews
             </span>
           </motion.div>
         </motion.div>
 
-        {/* ── MacBook mockup (full-width, below copy) ── */}
+        {/* ── MacBook mockup ── */}
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
@@ -566,14 +408,15 @@ export default function Hero() {
               background:
                 "radial-gradient(ellipse 70% 100% at 50% 100%, var(--accent-press), transparent)",
             }}
+            aria-hidden
           />
 
-          {/* Subtle floating */}
+          {/* Subtle float */}
           <motion.div
             animate={{ y: [0, -6, 0] }}
             transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
           >
-            <AppMockup />
+            <MacBookMockup />
           </motion.div>
         </motion.div>
       </div>

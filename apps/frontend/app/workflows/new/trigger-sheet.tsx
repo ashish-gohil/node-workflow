@@ -157,7 +157,7 @@ export default function TriggerSheet({
       <SheetTrigger asChild>
         <Button
           variant="ghost"
-          className="bg-bg-surface hover:bg-bg-overlay border-border-strong hover:border-border-intense text-text-secondary hover:text-text-primary relative z-30 rounded-sm border-2 border-dashed p-10 transition-colors duration-[150ms]"
+          className="bg-bg-surface hover:bg-bg-overlay border-border-strong hover:translate-none hover:transform-none hover:border-border-intense text-text-secondary hover:text-text-primary relative z-30 rounded-sm border-2 border-dashed p-10 transition-colors duration-[150ms]"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
