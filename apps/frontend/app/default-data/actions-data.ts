@@ -23,6 +23,8 @@ export const DEFAULT_HTTP_REQUEST_NODE_DATA: HttpRequestNodeData = {
     headers: {},
     query: {},
     auth: { type: "none" },
+    bodyContentType: "none",
+    body: undefined,
   },
 };
 

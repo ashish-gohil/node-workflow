@@ -1,3 +1,4 @@
+export * from "./nodes/field-meta";
 export * from "./nodes/HttpRequestSchema";
 export * from "./nodes/IfNodeSchema";
 export * from "./nodes/ManualSchema";

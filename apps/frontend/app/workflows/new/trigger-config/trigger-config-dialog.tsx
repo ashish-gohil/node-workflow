@@ -1,7 +1,8 @@
 "use client";
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import { Clock, Webhook } from "lucide-react";
 
+import useExecutionStore from "@/app/store/execution-store";
 import {
   TriggerNode,
   TriggerNodesDataTypes,
@@ -53,6 +54,20 @@ export default function TriggerConfigDialog({
     node.data
   );
 
+  const storedOutput = useExecutionStore((s) => s.outputs[node.id]?.data);
+  const isPinned = useExecutionStore((s) => s.pinnedNodeIds.includes(node.id));
+  const pinNodeOutput = useExecutionStore((s) => s.pinNodeOutput);
+  const unpinNodeOutput = useExecutionStore((s) => s.unpinNodeOutput);
+
+  const handlePin = useCallback(
+    (value: unknown) => pinNodeOutput(node.id, value),
+    [node.id, pinNodeOutput]
+  );
+  const handleUnpin = useCallback(
+    () => unpinNodeOutput(node.id),
+    [node.id, unpinNodeOutput]
+  );
+
   if (!ConfigComponent) {
     return null;
   }
@@ -70,10 +85,15 @@ export default function TriggerConfigDialog({
       icon={triggerIconMap[node.type as TriggerNodeTypes]}
       // Triggers are the entry point — there's never input data.
       showInput={false}
-      outputData={outputData}
+      outputData={storedOutput ?? outputData}
       outputPanel={{
         emptyHint:
-          "Execute this trigger to see the data it will pass to the next step.",
+          "Execute this trigger, or paste a sample payload in the Pinned tab to test downstream nodes without firing it.",
+        pin: {
+          isPinned,
+          onPin: handlePin,
+          onUnpin: handleUnpin,
+        },
       }}
       onSave={() => onSave(tempConfigData)}
       onCancel={onClose}

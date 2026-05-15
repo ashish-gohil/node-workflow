@@ -1,3 +1,4 @@
+import type { HttpRequest } from "@repo/types";
 import { Node } from "@xyflow/react";
 
 import { ExecutionStatus } from "./tirggers";
@@ -24,27 +25,17 @@ export type BaseActionNodeData = {
   label: string;
   description?: string;
   onEdit?: (id: string) => void;
+  /** Last captured output from this node's most recent execution. */
+  output?: unknown;
 };
 
 /* ------------------------------------------------------------------ */
 /*  HTTP Request Node                                                  */
 /* ------------------------------------------------------------------ */
 
-export type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
-
-export type HttpAuth =
-  | { type: "none" }
-  | { type: "apiKey"; headerName: string; value: string }
-  | { type: "bearer"; token: string };
-
-export type HttpRequestConfig = {
-  method: HttpMethod;
-  url: string;
-  headers?: Record<string, string>;
-  query?: Record<string, string>;
-  body?: unknown;
-  auth?: HttpAuth;
-};
+export type HttpMethod = HttpRequest["method"];
+export type HttpAuth = NonNullable<HttpRequest["auth"]>;
+export type HttpRequestConfig = HttpRequest;
 
 export type HttpRequestNodeData = BaseActionNodeData & {
   type: ActionNodeTypes.HttpRequest;

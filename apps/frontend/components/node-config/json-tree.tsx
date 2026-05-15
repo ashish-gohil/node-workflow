@@ -13,11 +13,15 @@ import { cn } from "@/lib/utils";
    for keys).
    ============================================================ */
 
+export type JsonPathSegment = string | number;
+
 type JsonTreeProps = {
   data: unknown;
   rootLabel?: string;
   defaultExpandedDepth?: number;
   className?: string;
+  /** Fired when a primitive leaf is clicked, with its dotted/indexed path. */
+  onLeafClick?: (path: JsonPathSegment[]) => void;
 };
 
 export function JsonTree({
@@ -25,6 +29,7 @@ export function JsonTree({
   rootLabel,
   defaultExpandedDepth = 2,
   className,
+  onLeafClick,
 }: JsonTreeProps) {
   return (
     <div
@@ -38,6 +43,8 @@ export function JsonTree({
         value={data}
         depth={0}
         defaultExpandedDepth={defaultExpandedDepth}
+        path={[]}
+        onLeafClick={onLeafClick}
         isLast
       />
     </div>
@@ -50,12 +57,16 @@ function Node({
   depth,
   defaultExpandedDepth,
   isLast,
+  path,
+  onLeafClick,
 }: {
   nodeKey?: string | number;
   value: unknown;
   depth: number;
   defaultExpandedDepth: number;
   isLast: boolean;
+  path: JsonPathSegment[];
+  onLeafClick?: (path: JsonPathSegment[]) => void;
 }) {
   const isObject =
     value !== null && typeof value === "object" && !Array.isArray(value);
@@ -72,11 +83,27 @@ function Node({
     );
 
   if (!isExpandable) {
-    return (
-      <div className="flex items-start gap-1 pl-5">
+    const leafContent = (
+      <>
         {keyLabel}
         {keyLabel && <span className="text-text-muted">:</span>}
         <PrimitiveValue value={value} />
+      </>
+    );
+    return (
+      <div className="flex items-start gap-1 pl-5">
+        {onLeafClick ? (
+          <button
+            type="button"
+            onClick={() => onLeafClick(path)}
+            title="Insert as expression"
+            className="hover:bg-accent-subtle hover:text-accent-on flex items-center gap-1 rounded-sm px-1 py-0.5 transition-colors"
+          >
+            {leafContent}
+          </button>
+        ) : (
+          <div className="flex items-center gap-1">{leafContent}</div>
+        )}
         {!isLast && <span className="text-text-muted">,</span>}
       </div>
     );
@@ -122,6 +149,8 @@ function Node({
               value={v}
               depth={depth + 1}
               defaultExpandedDepth={defaultExpandedDepth}
+              path={[...path, k]}
+              onLeafClick={onLeafClick}
               isLast={i === entries.length - 1}
             />
           ))}

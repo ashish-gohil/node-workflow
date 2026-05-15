@@ -1,18 +1,18 @@
 "use client";
 
 import React, { useState } from "react";
-import { Globe, Shuffle } from "lucide-react";
+import { Shuffle } from "lucide-react";
 
 import {
   ActionNodeDataTypes,
   ActionNodeTypes,
-  HttpRequestNodeData,
   SetNodeData,
 } from "@/app/types/actions";
 import { FlowNode } from "@/app/types/flow";
 import { NodeConfigDialog } from "@/components/node-config/node-config-dialog";
+import { getNodeRegistryEntry } from "@/components/node-config/node-registry";
+import { SchemaNodeConfigDialog } from "@/components/node-config/schema-node-config-dialog";
 
-import { HttpRequestConfig } from "./http-request-config";
 import { SetNodeConfig } from "./set-node-config";
 
 interface ActionConfigDialogProps {
@@ -24,7 +24,6 @@ interface ActionConfigDialogProps {
 }
 
 const actionIconMap: Partial<Record<ActionNodeTypes, React.ReactNode>> = {
-  [ActionNodeTypes.HttpRequest]: <Globe className="size-5" />,
   [ActionNodeTypes.Set]: <Shuffle className="size-5" />,
 };
 
@@ -35,28 +34,63 @@ export default function ActionConfigDialog({
   inputData,
   outputData,
 }: ActionConfigDialogProps) {
+  const nodeType = node.type as ActionNodeTypes;
+  const registryEntry = getNodeRegistryEntry(nodeType);
+
+  // Schema-driven nodes route through SchemaNodeConfigDialog. Anything not yet
+  // migrated falls back to the legacy hand-written dispatcher below.
+  if (registryEntry) {
+    return (
+      <SchemaNodeConfigDialog
+        nodeId={node.id}
+        nodeType={nodeType}
+        data={node.data as ActionNodeDataTypes}
+        onSave={(next) => onSave(next as ActionNodeDataTypes)}
+        onClose={onClose}
+        outputData={outputData}
+      />
+    );
+  }
+
+  return (
+    <LegacyActionConfigDialog
+      node={node}
+      onSave={onSave}
+      onClose={onClose}
+      inputData={inputData}
+      outputData={outputData}
+      iconMap={actionIconMap}
+    />
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/*  Legacy hand-written dispatcher — pending migration of remaining   */
+/*  node types (Set/If/Code/Delay/Merge) to the schema-driven form.   */
+/* ------------------------------------------------------------------ */
+
+function LegacyActionConfigDialog({
+  node,
+  onSave,
+  onClose,
+  inputData,
+  outputData,
+  iconMap,
+}: ActionConfigDialogProps & {
+  iconMap: Partial<Record<ActionNodeTypes, React.ReactNode>>;
+}) {
   const [tempConfigData, setTempConfigData] = useState<ActionNodeDataTypes>(
     node.data as ActionNodeDataTypes
   );
-
   const nodeType = node.type as ActionNodeTypes;
-  const data = tempConfigData as ActionNodeDataTypes & { label?: string; description?: string };
+  const data = tempConfigData as ActionNodeDataTypes & {
+    label?: string;
+    description?: string;
+  };
 
-  let configContent: React.ReactNode = null;
+  let configContent: React.ReactNode;
 
   switch (nodeType) {
-    case ActionNodeTypes.HttpRequest:
-      configContent = (
-        <HttpRequestConfig
-          configData={tempConfigData as HttpRequestNodeData}
-          setConfigData={
-            setTempConfigData as React.Dispatch<
-              React.SetStateAction<HttpRequestNodeData>
-            >
-          }
-        />
-      );
-      break;
     case ActionNodeTypes.Set:
       configContent = (
         <SetNodeConfig
@@ -75,18 +109,16 @@ export default function ActionConfigDialog({
 
   return (
     <NodeConfigDialog
-      open={true}
+      open
       onOpenChange={(open) => {
         if (!open) {onClose();}
       }}
       title={data.label ?? nodeType}
       subtitle={data.description}
-      icon={actionIconMap[nodeType]}
+      icon={iconMap[nodeType]}
       inputData={inputData}
       outputData={outputData}
-      outputPanel={{
-        emptyHint: "Run this node to see its output data.",
-      }}
+      outputPanel={{ emptyHint: "Run this node to see its output data." }}
       onSave={() => onSave(tempConfigData)}
       onCancel={onClose}
     >

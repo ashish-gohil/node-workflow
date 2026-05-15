@@ -2,9 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { OnConnectEnd, useReactFlow, useViewport } from "@xyflow/react";
-import { useShallow } from "zustand/react/shallow";
 import { useTheme } from "next-themes";
+import { OnConnectEnd, useReactFlow, useViewport } from "@xyflow/react";
 import {
   Calendar,
   ChevronDown,
@@ -32,6 +31,7 @@ import {
   XCircle,
   Zap,
 } from "lucide-react";
+import { useShallow } from "zustand/react/shallow";
 
 import useFlow, { FlowState } from "@/app/store/flow-store";
 import {
@@ -276,7 +276,7 @@ export default function NewWorkflow() {
 
   const onConnectEnd: OnConnectEnd = useCallback(
     (event, connectionState) => {
-      if (!connectionState.isValid) return;
+      if (!connectionState.isValid) {return;}
       const { clientX, clientY } =
         event instanceof TouchEvent
           ? event.changedTouches[0]

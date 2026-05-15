@@ -13,7 +13,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import { ActionConfigProps } from "./http-request-config";
+export interface ActionConfigProps<T> {
+  configData: T;
+  setConfigData: React.Dispatch<React.SetStateAction<T>>;
+}
 
 /* ------------------------------------------------------------------ */
 /*  Internal row type                                                  */

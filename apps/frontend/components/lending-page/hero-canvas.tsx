@@ -2,6 +2,8 @@
 
 import { memo, useCallback, useEffect, useState } from "react";
 import {
+  applyEdgeChanges,
+  applyNodeChanges,
   Background,
   BackgroundVariant,
   type Edge,
@@ -9,17 +11,16 @@ import {
   type Node,
   type NodeChange,
   type NodeProps,
+  type OnEdgesChange,
   Panel,
   Position,
   ReactFlow,
   ReactFlowProvider,
-  applyEdgeChanges,
-  applyNodeChanges,
-  type OnEdgesChange,
   useReactFlow,
   useViewport,
 } from "@xyflow/react";
 import { GitBranch, Globe, LayoutList, Shuffle, Timer } from "lucide-react";
+
 import { cn } from "@/lib/utils";
 
 import "@xyflow/react/dist/style.css";
@@ -474,9 +475,9 @@ function HeroFlowInner() {
       setNodes((prev) =>
         prev.map((n) => {
           if (n.id === currentId)
-            return { ...n, data: { ...n.data, status: "running" as HeroStatus } };
+            {return { ...n, data: { ...n.data, status: "running" as HeroStatus } };}
           if (snapshotDone.includes(n.id))
-            return { ...n, data: { ...n.data, status: "success" as HeroStatus } };
+            {return { ...n, data: { ...n.data, status: "success" as HeroStatus } };}
           return { ...n, data: { ...n.data, status: "idle" as HeroStatus } };
         }),
       );
@@ -485,7 +486,7 @@ function HeroFlowInner() {
       setEdges((prev) =>
         prev.map((e) => {
           const target = EDGE_TARGET_NODE[e.id];
-          if (!target) return e; // e6, e7 are static, leave them alone
+          if (!target) {return e;} // e6, e7 are static, leave them alone
           if (target === currentId) {
             return {
               ...e,

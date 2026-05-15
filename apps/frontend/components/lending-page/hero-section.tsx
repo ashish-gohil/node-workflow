@@ -6,6 +6,7 @@ import { ArrowRight, Calendar, Home, MessageSquare, Play, Save, Wallet } from "l
 import { motion } from "motion/react";
 
 import Collaborators from "@/components/ui/collaborators";
+
 import { HeroFlowCanvas } from "./hero-canvas";
 
 /* ── Animation variants ── */
@@ -110,7 +111,7 @@ function NavRow({
 
 /* ── Sidebar inside the mockup ── */
 function MockupSidebar({ open }: { open: boolean }) {
-  if (!open) return null;
+  if (!open) {return null;}
   return (
     <aside className="flex w-[172px] shrink-0 flex-col gap-0.5 border-r border-border-stamp bg-bg-elevated px-2.5 py-3">
       <p className="mb-1 px-2.5 font-mono text-[9px] font-bold uppercase tracking-[0.08em] text-text-muted">

@@ -1,5 +1,11 @@
 import * as z from "zod";
 
+import type { NodeUIMeta } from "./field-meta";
+
+/* ------------------------------------------------------------------ */
+/*  Body variants                                                      */
+/* ------------------------------------------------------------------ */
+
 const JsonBodySchema = z.object({
   bodyContentType: z.literal("json"),
   body: z.unknown().optional().describe("JSON body"),
@@ -36,6 +42,35 @@ const BodyVariants = z.discriminatedUnion("bodyContentType", [
   NoBodySchema,
 ]);
 
+/* ------------------------------------------------------------------ */
+/*  Auth variants                                                      */
+/* ------------------------------------------------------------------ */
+
+const NoAuthSchema = z.object({
+  type: z.literal("none"),
+});
+
+const BearerAuthSchema = z.object({
+  type: z.literal("bearer"),
+  token: z.string().min(1, "Token is required"),
+});
+
+const ApiKeyAuthSchema = z.object({
+  type: z.literal("apiKey"),
+  headerName: z.string().min(1, "Header name is required"),
+  value: z.string().min(1, "Value is required"),
+});
+
+const AuthSchema = z.discriminatedUnion("type", [
+  NoAuthSchema,
+  BearerAuthSchema,
+  ApiKeyAuthSchema,
+]);
+
+/* ------------------------------------------------------------------ */
+/*  Root schema                                                        */
+/* ------------------------------------------------------------------ */
+
 export const HttpRequestSchema = z
   .object({
     url: z.url().describe("The endpoint URL to call"),
@@ -44,6 +79,11 @@ export const HttpRequestSchema = z
       .record(z.string(), z.string())
       .optional()
       .describe("Request headers as key-value pairs"),
+    query: z
+      .record(z.string(), z.string())
+      .optional()
+      .describe("Query string parameters as key-value pairs"),
+    auth: AuthSchema.optional().describe("Authentication strategy"),
     timeoutMs: z
       .number()
       .min(100)
@@ -55,18 +95,21 @@ export const HttpRequestSchema = z
 
 export type HttpRequest = z.infer<typeof HttpRequestSchema>;
 
-// UI metadata — separate from the schema, used only by frontend
-export const HttpRequestUIMeta = {
+/* ------------------------------------------------------------------ */
+/*  UI metadata — separate from the schema, used only by frontend     */
+/* ------------------------------------------------------------------ */
+
+export const HttpRequestUIMeta: NodeUIMeta = {
   nodeType: "httpRequest",
   displayName: "HTTP Request",
   icon: "Globe",
   category: "action",
   description: "Make an HTTP request to any URL",
   fields: {
-    url: { widget: "text", label: "URL", placeholder: "https://api.example.com/users" },
     method: {
       widget: "select",
       label: "Method",
+      width: "third",
       default: "GET",
       options: [
         { label: "GET", value: "GET" },
@@ -76,18 +119,62 @@ export const HttpRequestUIMeta = {
         { label: "DELETE", value: "DELETE" },
       ],
     },
+    url: {
+      widget: "text",
+      label: "URL",
+      width: "twoThirds",
+      placeholder: "https://api.example.com/users",
+    },
+    auth: {
+      widget: "object",
+      label: "Authentication",
+      fields: {
+        type: {
+          widget: "select",
+          label: "Strategy",
+          default: "none",
+          options: [
+            { label: "None", value: "none" },
+            { label: "Bearer Token", value: "bearer" },
+            { label: "API Key (Header)", value: "apiKey" },
+          ],
+        },
+        token: {
+          widget: "text",
+          label: "Token",
+          inputType: "password",
+          placeholder: "eyJhbGci...",
+          showWhen: { field: "type", in: ["bearer"] },
+        },
+        headerName: {
+          widget: "text",
+          label: "Header Name",
+          width: "half",
+          placeholder: "X-Api-Key",
+          showWhen: { field: "type", in: ["apiKey"] },
+        },
+        value: {
+          widget: "text",
+          label: "Value",
+          inputType: "password",
+          width: "half",
+          placeholder: "secret",
+          showWhen: { field: "type", in: ["apiKey"] },
+        },
+      },
+    },
     headers: { widget: "keyValueList", label: "Headers" },
+    query: { widget: "keyValueList", label: "Query Parameters" },
     bodyContentType: {
       widget: "select",
+      label: "Body content type",
+      default: "none",
       options: [
         { label: "None", value: "none" },
         { label: "JSON", value: "json" },
         { label: "Raw", value: "raw" },
         { label: "URL Encoded", value: "urlencoded" },
-        { label: "Form data", value: "form-data" },
       ],
-      default: "none",
-      label: "Body content type",
     },
     body: {
       label: "Body",
@@ -98,7 +185,6 @@ export const HttpRequestUIMeta = {
         json: "jsonEditor",
         raw: "textArea",
         urlencoded: "keyValueList",
-        "form-data": "formDataEditor",
       },
     },
     timeoutMs: { widget: "number", label: "Timeout MS", default: 30000 },

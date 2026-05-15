@@ -40,6 +40,8 @@ export type BaseTriggerData<TConfig> = {
   description?: string;
   onEdit?: (id: string) => void;
   config: TConfig;
+  /** Last captured output from this trigger's most recent execution. */
+  output?: unknown;
 };
 
 /* ------------------------------------------------------------------ */

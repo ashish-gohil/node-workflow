@@ -12,9 +12,11 @@ import {
   DialogPortal,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { buildExpression } from "@/lib/expression";
 import { cn } from "@/lib/utils";
 
-import { DataPanel, DataPanelProps } from "./data-panel";
+import { DataPanel, type DataPanelProps, type InputNode } from "./data-panel";
+import { useFocusContext } from "./focus-context";
 
 
 
@@ -73,6 +75,8 @@ export type NodeConfigDialogProps = {
 
   /* Left / right panel data and overrides */
   inputData?: unknown;
+  /** Multi-upstream view: one collapsible section per ancestor node. */
+  inputNodes?: InputNode[];
   outputData?: unknown;
   inputPanel?: Partial<Omit<DataPanelProps, "kind">>;
   outputPanel?: Partial<Omit<DataPanelProps, "kind">>;
@@ -104,6 +108,7 @@ export function NodeConfigDialog({
   subtitle,
   icon,
   inputData,
+  inputNodes,
   outputData,
   inputPanel,
   outputPanel,
@@ -119,6 +124,12 @@ export function NodeConfigDialog({
   children,
   contentClassName,
 }: NodeConfigDialogProps) {
+  const focus = useFocusContext();
+
+  const handleLeafClick = (nodeLabel: string, path: (string | number)[]) => {
+    if (!focus?.hasFocusTarget()) {return;}
+    focus.insertAtCursor(buildExpression(nodeLabel, path));
+  };
   const handleCancel = () => {
     onCancel?.();
     onOpenChange(false);
@@ -186,7 +197,13 @@ export function NodeConfigDialog({
           {/* ---------------- Three-pane body ---------------- */}
           <div className={cn("grid min-h-0 flex-1 gap-3 p-3", cols)}>
             {showInput && (
-              <DataPanel kind="input" data={inputData} {...inputPanel} />
+              <DataPanel
+                kind="input"
+                data={inputData}
+                nodes={inputNodes}
+                onLeafClick={handleLeafClick}
+                {...inputPanel}
+              />
             )}
 
             {/* Center: parameters */}
