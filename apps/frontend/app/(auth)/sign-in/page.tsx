@@ -1,6 +1,6 @@
 "use client";
 
-import { type FormEvent, useState } from "react";
+import { type FormEvent, Suspense, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
@@ -13,7 +13,18 @@ import { Input } from "@/components/ui/input";
 import { isValidEmail } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 
+/* `useSearchParams` triggers Next.js's CSR bailout during prerender unless
+ * it lives inside a Suspense boundary. The page export is the boundary; the
+ * actual form lives in a child component. */
 export default function SignInPage() {
+  return (
+    <Suspense fallback={null}>
+      <SignInForm />
+    </Suspense>
+  );
+}
+
+function SignInForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") ?? "/";
