@@ -98,10 +98,18 @@ export function DataPanel({
   const showPinTab = kind === "output" && !!pin;
 
   const itemCount = useMemo(() => {
-    if (isMulti) {return nodes!.length;}
-    if (!hasData) {return 0;}
-    if (Array.isArray(data)) {return data.length;}
-    if (typeof data === "object") {return Object.keys(data as object).length;}
+    if (isMulti) {
+      return nodes!.length;
+    }
+    if (!hasData) {
+      return 0;
+    }
+    if (Array.isArray(data)) {
+      return data.length;
+    }
+    if (typeof data === "object") {
+      return Object.keys(data as object).length;
+    }
     return 1;
   }, [data, hasData, isMulti, nodes]);
 
@@ -131,7 +139,7 @@ export function DataPanel({
             </span>
           )}
           {showPinTab && pin?.isPinned && (
-            <span className="text-accent-on bg-accent-subtle border-border-brand text-mono-sm inline-flex items-center gap-1 border px-1.5 py-0.5">
+            <span className="text-text-muted bg-accent-subtle border-border-brand text-mono-sm inline-flex items-center gap-1 border px-1.5 py-0.5">
               <Pin className="size-3" />
               pinned
             </span>
@@ -173,7 +181,12 @@ export function DataPanel({
         {showPinTab && outputTab === "pinned" ? (
           <PinDataEditor pin={pin!} />
         ) : !hasContentOverall ? (
-          <EmptyState kind={kind} hint={emptyHint} multi={isMulti} nodes={nodes} />
+          <EmptyState
+            kind={kind}
+            hint={emptyHint}
+            multi={isMulti}
+            nodes={nodes}
+          />
         ) : isMulti ? (
           <div className="flex flex-col">
             {nodes!.map((node) => (
@@ -200,7 +213,9 @@ export function DataPanel({
 }
 
 function hasContent(value: unknown): boolean {
-  if (value === undefined || value === null) {return false;}
+  if (value === undefined || value === null) {
+    return false;
+  }
   if (typeof value === "object" && Object.keys(value as object).length === 0) {
     return false;
   }
@@ -245,7 +260,9 @@ function UpstreamSection({
               <JsonTree
                 data={node.data}
                 onLeafClick={
-                  onLeafClick ? (path) => onLeafClick(node.label, path) : undefined
+                  onLeafClick
+                    ? (path) => onLeafClick(node.label, path)
+                    : undefined
                 }
               />
             ) : (
@@ -345,20 +362,22 @@ function PinDataEditor({ pin }: { pin: PinControls }) {
   return (
     <div className="flex h-full min-h-0 flex-col gap-3 p-3">
       <p className="text-text-muted text-body-sm">
-        Paste any JSON value to use as this node&apos;s output while
-        you iterate downstream. Pinned data persists across page reloads
-        and survives real runs until you unpin it.
+        Paste any JSON value to use as this node&apos;s output while you iterate
+        downstream. Pinned data persists across page reloads and survives real
+        runs until you unpin it.
       </p>
       <textarea
         value={draft}
         onChange={(e) => {
           setDraft(e.target.value);
-          if (error) {setError(null);}
+          if (error) {
+            setError(null);
+          }
         }}
         spellCheck={false}
         placeholder={'{\n  "userId": 42,\n  "name": "Rahul"\n}'}
         className={cn(
-          "bg-bg-inset border-border-default text-text-primary text-mono-sm flex-1 min-h-[180px] resize-none border p-2 font-mono leading-[18px] outline-none",
+          "bg-bg-inset border-border-default text-text-primary text-mono-sm min-h-[180px] flex-1 resize-none border p-2 font-mono leading-[18px] outline-none",
           "focus:border-border-focus",
           error && "border-error"
         )}

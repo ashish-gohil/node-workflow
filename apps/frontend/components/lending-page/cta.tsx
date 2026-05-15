@@ -167,7 +167,7 @@ function Terminal() {
   return (
     <div
       className="border-border-stamp bg-neutral-0 relative w-full shrink-0 overflow-hidden border-[1.5px] font-mono text-[12px] lg:w-[420px]"
-      style={{ boxShadow: "4px 4px 0 0 var(--hard-shadow-color)" }}
+      style={{ boxShadow: "3px 3px 0 0 var(--hard-shadow-color)" }}
     >
       {/* Header */}
       <div className="flex items-center gap-1.5 border-b border-white/10 bg-neutral-50 px-3.5 py-2.5">
@@ -239,8 +239,9 @@ export default function CTAStrip() {
           transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
           className="cta-panel group border-border-stamp text-cream-50 relative overflow-hidden border-[1.5px]"
           style={{
+            // Match bento family (3px stamp) + lighter inset accent ring.
             boxShadow:
-              "8px 8px 0 0 var(--hard-shadow-color), inset 0 0 0 1px var(--cta-ring-color, rgba(79,201,122,0.2))",
+              "3px 3px 0 0 var(--hard-shadow-color), inset 0 0 0 1px var(--cta-ring-color, rgba(79,201,122,0.12))",
           }}
         >
           {/* Mouse-following spotlight */}
@@ -300,17 +301,17 @@ export default function CTAStrip() {
             <div>
               <p className="text-cream-50/70 mb-5 inline-flex items-center gap-2.5 font-mono text-[11px] font-semibold tracking-[0.12em] uppercase">
                 <span className="bg-accent-primary animate-pulse-status size-1.5 rounded-full" />
-                Deploy today
+                Open source · npx-ready
               </p>
               <h2 className="text-cream-50 mb-5 text-[clamp(32px,4.4vw,52px)] leading-[1.0] font-semibold tracking-[-0.04em]">
-                Ship the workflow,
+                One terminal
                 <br />
-                not the boilerplate.
+                to your first workflow.
               </h2>
               <p className="text-body-md text-cream-50/70 mb-7 max-w-md leading-relaxed">
-                Spin up FLOW in one command, or use our managed cloud. Either
-                way, your workflows are version-controlled, observable, and
-                built to scale.
+                Run it on your laptop, your team&apos;s box, or click into the
+                hosted version. Same editor, same engine, same workflows
+                round-tripping through git.
               </p>
 
               <div className="flex flex-wrap gap-3.5">

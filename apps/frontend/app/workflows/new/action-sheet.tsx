@@ -121,14 +121,27 @@ export default function ActionSheet({
   setConfigNodeId,
   sourceHandleId,
   sourceNode,
+  open: controlledOpen,
+  onOpenChange: controlledOnOpenChange,
+  dropPosition,
 }: {
   setConfigNodeId: (id: string) => void;
   sourceNode: FlowNode;
   sourceHandleId?: string;
+  /** Optional controlled-open props. Used when opened from page-level
+   * onConnectEnd (drag handle → drop on empty canvas). */
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  /** Flow-coordinate position to place the new node. When omitted, the
+   * sheet falls back to placing the node relative to `sourceNode`. */
+  dropPosition?: { x: number; y: number };
 }) {
   const { setNodes, setEdges } = useFlow();
 
-  const [open, setOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
+  const isControlled = controlledOpen !== undefined;
+  const open = controlledOpen ?? internalOpen;
+  const setOpen = controlledOnOpenChange ?? setInternalOpen;
 
   function createActionNode(
     type: ActionNodeTypes,
@@ -158,9 +171,11 @@ export default function ActionSheet({
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger asChild>
-        <PlusCircle className="text-border-strong group-hover:text-text-secondary size-3 hover:cursor-pointer" />
-      </SheetTrigger>
+      {!isControlled && (
+        <SheetTrigger asChild>
+          <PlusCircle className="text-border-strong group-hover:text-text-secondary size-3 hover:cursor-pointer" />
+        </SheetTrigger>
+      )}
 
       <SheetContent>
         <SheetHeader>
@@ -176,12 +191,13 @@ export default function ActionSheet({
                 onClick={() => {
                   setOpen(false);
 
-                  const newNode = createActionNode(node.type, {
+                  const position = dropPosition ?? {
                     x:
                       sourceNode.position.x +
                       (sourceNode?.width ? sourceNode.width + 50 : 250),
                     y: sourceNode.position.y,
-                  });
+                  };
+                  const newNode = createActionNode(node.type, position);
 
                   const newEdge: Edge = {
                     id: `${sourceNode.id}-${newNode.id}`,

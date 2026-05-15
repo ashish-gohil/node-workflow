@@ -34,11 +34,7 @@ import {
 import { useShallow } from "zustand/react/shallow";
 
 import useFlow, { FlowState } from "@/app/store/flow-store";
-import {
-  ActionNodeDataTypes,
-  ActionNodeTypes,
-  DelayNodeType,
-} from "@/app/types/actions";
+import { ActionNodeDataTypes } from "@/app/types/actions";
 import { FlowNode } from "@/app/types/flow";
 import { TriggerNode } from "@/app/types/tirggers";
 import FlowCanvas from "@/components/flow/flow-canvas";
@@ -47,6 +43,7 @@ import { api } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
 import ActionConfigDialog from "./action-config/action-config-dialog";
+import ActionSheet from "./action-sheet";
 import TriggerConfigDialog from "./trigger-config/trigger-config-dialog";
 import TriggerSheet from "./trigger-sheet";
 
@@ -60,7 +57,6 @@ const selector = (state: FlowState) => ({
   nodes: state.nodes,
   edges: state.edges,
   setNodes: state.setNodes,
-  setEdges: state.setEdges,
   editingActionNodeId: state.editingActionNodeId,
   setEditingActionNodeId: state.setEditingActionNodeId,
 });
@@ -89,9 +85,9 @@ function NavItem({
       type="button"
       onClick={onClick}
       className={cn(
-        "flex w-full items-center gap-2.5 px-2.5 py-[7px] text-left text-[13px] font-medium transition-colors duration-120ms",
+        "duration-120ms flex w-full items-center gap-2.5 px-2.5 py-[7px] text-left text-[13px] font-medium transition-colors",
         active
-          ? "border-l-2 border-accent-primary bg-bg-canvas pl-[9px] text-text-primary"
+          ? "border-accent-primary bg-bg-canvas text-text-primary border-l-2 pl-[9px]"
           : "text-text-secondary hover:bg-bg-canvas/60 hover:text-text-primary"
       )}
     >
@@ -103,7 +99,7 @@ function NavItem({
       />
       <span className="flex-1">{label}</span>
       {badge && (
-        <span className="inline-flex items-center border border-[rgba(94,177,239,0.3)] bg-[rgba(94,177,239,0.14)] px-1.5 py-px font-mono text-[9px] font-bold uppercase tracking-wider text-info">
+        <span className="text-info inline-flex items-center border border-[rgba(94,177,239,0.3)] bg-[rgba(94,177,239,0.14)] px-1.5 py-px font-mono text-[9px] font-bold tracking-wider uppercase">
           {badge}
         </span>
       )}
@@ -129,7 +125,7 @@ function MenuItem({
       type="button"
       onClick={onClick}
       className={cn(
-        "flex w-full items-center gap-3 px-2.5 py-2 text-left text-[13px] font-medium transition-colors duration-[120ms]",
+        "flex w-full items-center gap-3 px-2.5 py-2 text-left text-[13px] font-medium transition-colors duration-120",
         destructive
           ? "text-error hover:bg-[rgba(229,72,77,0.06)]"
           : "text-text-primary hover:bg-bg-inset"
@@ -147,7 +143,7 @@ function MenuItem({
           {kbd.map((k) => (
             <kbd
               key={k}
-              className="inline-grid h-[18px] min-w-[18px] place-items-center border border-border-default bg-bg-inset px-1 font-mono text-[10px] text-text-secondary"
+              className="border-border-default bg-bg-inset text-text-secondary inline-grid h-[18px] min-w-[18px] place-items-center border px-1 font-mono text-[10px]"
             >
               {k}
             </kbd>
@@ -166,12 +162,12 @@ function ExecutionsPanel({ hasTrigger }: { hasTrigger: boolean }) {
   return (
     <div className="flex h-full flex-col">
       {/* toolbar */}
-      <div className="flex items-center gap-3 border-b border-border-subtle px-6 py-3">
-        <span className="text-[13px] font-semibold text-text-primary">
+      <div className="border-border-subtle flex items-center gap-3 border-b px-6 py-3">
+        <span className="text-text-primary text-[13px] font-semibold">
           Execution history
         </span>
-        <span className="ml-auto inline-flex items-center gap-1.5 font-mono text-[11px] text-text-muted">
-          <span className="size-1.5 rounded-full bg-text-disabled" />
+        <span className="text-text-muted ml-auto inline-flex items-center gap-1.5 font-mono text-[11px]">
+          <span className="bg-text-disabled size-1.5 rounded-full" />
           inactive
         </span>
       </div>
@@ -179,13 +175,13 @@ function ExecutionsPanel({ hasTrigger }: { hasTrigger: boolean }) {
       {/* body */}
       <div className="flex flex-1 flex-col items-center justify-center gap-5 p-8">
         <div className="btn-stamp inline-grid size-16 place-items-center">
-          <ListOrdered className="size-7 text-text-muted" />
+          <ListOrdered className="text-text-muted size-7" />
         </div>
         <div className="text-center">
-          <p className="text-[15px] font-semibold text-text-primary">
+          <p className="text-text-primary text-[15px] font-semibold">
             No executions yet
           </p>
-          <p className="mt-1 max-w-xs text-[13px] text-text-muted">
+          <p className="text-text-muted mt-1 max-w-xs text-[13px]">
             {hasTrigger
               ? "Save and activate this workflow to start seeing execution history here."
               : "Add a trigger node to your workflow, then save and activate it."}
@@ -217,12 +213,23 @@ export default function NewWorkflow() {
     nodes,
     edges,
     setNodes,
-    setEdges,
     editingActionNodeId,
     setEditingActionNodeId,
   } = useFlow(useShallow(selector));
 
   const [configNodeId, setConfigNodeId] = useState<string | null>(null);
+
+  /**
+   * When the user drags from a node's source handle and drops on empty
+   * canvas, capture the source + drop coords here. Opening the action
+   * sheet driven off this state spawns the chosen node at `position`
+   * already wired up to `sourceNodeId`.
+   */
+  const [pendingConnection, setPendingConnection] = useState<{
+    sourceNodeId: string;
+    sourceHandleId?: string;
+    position: { x: number; y: number };
+  } | null>(null);
 
   /* editor UI */
   const [workflowName, setWorkflowName] = useState("My workflow");
@@ -276,35 +283,38 @@ export default function NewWorkflow() {
 
   const onConnectEnd: OnConnectEnd = useCallback(
     (event, connectionState) => {
-      if (!connectionState.isValid) {return;}
+      // If the drag landed on a valid handle, ReactFlow's onConnect already
+      // wired the edge — nothing for us to do here.
+      if (connectionState.isValid) {
+        return;
+      }
+
+      // Dropped on empty canvas → open the action sheet so the user can
+      // pick which node to spawn at the cursor position.
+      const fromNode = connectionState.fromNode;
+      if (!fromNode) {
+        return;
+      }
+
       const { clientX, clientY } =
-        event instanceof TouchEvent
+        "changedTouches" in event
           ? event.changedTouches[0]
           : (event as MouseEvent);
-      const nodeId = crypto.randomUUID();
-      const newNode: DelayNodeType = {
-        id: nodeId,
+
+      setPendingConnection({
+        sourceNodeId: fromNode.id,
+        sourceHandleId: connectionState.fromHandle?.id ?? undefined,
         position: screenToFlowPosition({ x: clientX, y: clientY }),
-        data: {
-          type: ActionNodeTypes.Delay,
-          label: "Delay",
-          config: { mode: "seconds", seconds: 20 },
-        },
-        origin: [0.5, 0.0],
-        type: ActionNodeTypes.Delay,
-      };
-      setNodes((nds) => [...nds, newNode]);
-      setEdges((eds) =>
-        eds.concat({
-          id: `edge-${crypto.randomUUID()}`,
-          source: connectionState.fromNode!.id,
-          target: nodeId,
-          sourceHandle: connectionState.fromHandle?.id,
-        })
-      );
+      });
     },
-    [screenToFlowPosition, setNodes, setEdges]
+    [screenToFlowPosition]
   );
+
+  /* Resolve the source node for the pending connection. If the source
+   * disappeared (deleted while sheet was open), close the sheet. */
+  const pendingSourceNode = pendingConnection
+    ? (nodes.find((n) => n.id === pendingConnection.sourceNodeId) ?? null)
+    : null;
 
   const updateNodeData = (id: string, data: FlowNode["data"]) => {
     setNodes((nds) =>
@@ -345,17 +355,15 @@ export default function NewWorkflow() {
   /* ─────────────────────────────────────────────────────────────── */
 
   return (
-    <div className="flex h-screen flex-col bg-bg-canvas">
-
+    <div className="bg-bg-canvas flex h-screen flex-col">
       {/* ════════════════════════════════ HEADER ════════════════════════════════ */}
-      <header className="relative z-50 flex h-16 shrink-0 items-stretch border-b-[1.5px] border-border-stamp bg-bg-canvas">
-
+      <header className="border-border-stamp bg-bg-canvas relative z-50 flex h-16 shrink-0 items-stretch border-b-[1.5px]">
         {/* Logo */}
         <div className="flex h-16 w-16 shrink-0 items-center justify-center">
           <button
             type="button"
             onClick={() => router.push("/")}
-            className="btn-stamp inline-grid size-7 place-items-center bg-accent-primary text-accent-on shadow-[2px_2px_0_0_var(--hard-shadow-color)] hover:btn-stamp-hover"
+            className="btn-stamp bg-accent-primary text-accent-on hover:btn-stamp-hover inline-grid size-7 place-items-center shadow-[2px_2px_0_0_var(--hard-shadow-color)]"
             aria-label="Go home"
           >
             <Zap className="size-3.5 fill-current" />
@@ -368,7 +376,7 @@ export default function NewWorkflow() {
             value={workflowName}
             onChange={(e) => setWorkflowName(e.target.value)}
             aria-label="Workflow name"
-            className="h-7 max-w-60 border border-transparent bg-transparent px-2 text-[13px] font-semibold text-text-primary outline-none transition-colors duration-[120ms] hover:border-border-subtle hover:bg-bg-elevated focus:border-border-subtle focus:bg-bg-elevated"
+            className="text-text-primary hover:border-border-subtle hover:bg-bg-elevated focus:border-border-subtle focus:bg-bg-elevated h-7 max-w-60 border border-transparent bg-transparent px-2 text-[13px] font-semibold transition-colors duration-[120ms] outline-none"
           />
         </div>
 
@@ -377,7 +385,7 @@ export default function NewWorkflow() {
           <div
             role="tablist"
             aria-label="Workflow view"
-            className="inline-flex h-[38px] items-stretch border-[1.5px] border-border-stamp bg-bg-elevated shadow-[3px_3px_0_0_var(--hard-shadow-color)]"
+            className="border-border-stamp bg-bg-elevated inline-flex h-[38px] items-stretch border-[1.5px] shadow-[3px_3px_0_0_var(--hard-shadow-color)]"
           >
             <button
               type="button"
@@ -385,7 +393,7 @@ export default function NewWorkflow() {
               aria-selected={activeTab === "editor"}
               onClick={() => setActiveTab("editor")}
               className={cn(
-                "inline-flex h-full items-center border-r-[1.5px] border-border-stamp px-5 text-[13px] font-semibold transition-colors duration-[120ms]",
+                "border-border-stamp inline-flex h-full items-center border-r-[1.5px] px-5 text-[13px] font-semibold transition-colors duration-[120ms]",
                 activeTab === "editor"
                   ? "bg-accent-primary text-accent-on"
                   : "text-text-muted hover:text-text-primary"
@@ -399,14 +407,14 @@ export default function NewWorkflow() {
               aria-selected={activeTab === "executions"}
               onClick={() => setActiveTab("executions")}
               className={cn(
-                "inline-flex h-full items-center gap-2 px-5 text-[13px] font-semibold transition-colors duration-120ms",
+                "duration-120ms inline-flex h-full items-center gap-2 px-5 text-[13px] font-semibold transition-colors",
                 activeTab === "executions"
                   ? "bg-accent-primary text-accent-on"
                   : "text-text-muted hover:text-text-primary"
               )}
             >
               Executions
-              <span className="flex h-[18px] min-w-[20px] place-items-center border border-border-default bg-bg-canvas px-1.5 font-mono text-[11px] font-semibold text-text-muted ">
+              <span className="border-border-default bg-bg-canvas text-text-muted flex h-[18px] min-w-[20px] place-items-center border px-1.5 font-mono text-[11px] font-semibold">
                 0
               </span>
             </button>
@@ -415,15 +423,14 @@ export default function NewWorkflow() {
 
         {/* ── Right: save + more ── */}
         <div className="flex shrink-0 items-center gap-2 px-4">
-
           {/* Save split button */}
           <div ref={saveMenuRef} className="relative">
-            <div className="inline-flex h-9 items-stretch border-[1.5px] border-border-stamp bg-accent-primary text-accent-on shadow-[3px_3px_0_0_var(--hard-shadow-color)] transition-[transform,box-shadow] duration-[120ms] hover:translate-x-px hover:translate-y-px hover:shadow-[2px_2px_0_0_var(--hard-shadow-color)] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none">
+            <div className="border-border-stamp bg-accent-primary text-accent-on inline-flex h-9 items-stretch border-[1.5px] shadow-[3px_3px_0_0_var(--hard-shadow-color)] transition-[transform,box-shadow] duration-[120ms] hover:translate-x-px hover:translate-y-px hover:shadow-[2px_2px_0_0_var(--hard-shadow-color)] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none">
               <button
                 type="button"
                 onClick={handleSave}
                 disabled={nodes.length < 2}
-                className="inline-flex items-center gap-2 px-4 text-[13px] font-bold transition-colors duration-[120ms] hover:bg-accent-hover disabled:opacity-50"
+                className="hover:bg-accent-hover inline-flex items-center gap-2 px-4 text-[13px] font-bold transition-colors duration-[120ms] disabled:opacity-50"
               >
                 <Save className="size-3.5" />
                 Save workflow
@@ -434,7 +441,7 @@ export default function NewWorkflow() {
                 aria-haspopup="menu"
                 aria-expanded={saveMenuOpen}
                 aria-label="More save options"
-                className="inline-flex w-8 items-center justify-center border-l border-[rgba(10,14,12,0.35)] transition-colors duration-120ms hover:bg-accent-hover"
+                className="duration-120ms hover:bg-accent-hover inline-flex w-8 items-center justify-center border-l border-[rgba(10,14,12,0.35)] transition-colors"
               >
                 <ChevronDown className="size-3" />
               </button>
@@ -443,9 +450,9 @@ export default function NewWorkflow() {
             {saveMenuOpen && (
               <div
                 role="menu"
-                className="absolute right-0 top-[calc(100%+8px)] z-100 min-w-[280px] border-[1.5px] border-border-stamp bg-bg-elevated p-1.5 shadow-[4px_4px_0_0_var(--hard-shadow-color)]"
+                className="border-border-stamp bg-bg-elevated absolute top-[calc(100%+8px)] right-0 z-100 min-w-[280px] border-[1.5px] p-1.5 shadow-[4px_4px_0_0_var(--hard-shadow-color)]"
               >
-                <p className="px-2.5 pb-1 pt-1.5 font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-text-muted">
+                <p className="text-text-muted px-2.5 pt-1.5 pb-1 font-mono text-[10px] font-semibold tracking-[0.08em] uppercase">
                   Save options
                 </p>
                 <MenuItem
@@ -466,7 +473,7 @@ export default function NewWorkflow() {
                   kbd={["⌘", "U"]}
                   onClick={() => setSaveMenuOpen(false)}
                 />
-                <div className="my-1 h-px bg-border-subtle" />
+                <div className="bg-border-subtle my-1 h-px" />
                 <MenuItem
                   icon={Copy}
                   label="Duplicate workflow"
@@ -497,7 +504,7 @@ export default function NewWorkflow() {
             {moreMenuOpen && (
               <div
                 role="menu"
-                className="absolute right-0 top-[calc(100%+8px)] z-[100] min-w-[240px] border-[1.5px] border-border-stamp bg-bg-elevated p-1.5 shadow-[4px_4px_0_0_var(--hard-shadow-color)]"
+                className="border-border-stamp bg-bg-elevated absolute top-[calc(100%+8px)] right-0 z-[100] min-w-[240px] border-[1.5px] p-1.5 shadow-[4px_4px_0_0_var(--hard-shadow-color)]"
               >
                 <MenuItem
                   icon={Settings}
@@ -514,7 +521,7 @@ export default function NewWorkflow() {
                   label="Share workflow"
                   onClick={() => setMoreMenuOpen(false)}
                 />
-                <div className="my-1 h-px bg-border-subtle" />
+                <div className="bg-border-subtle my-1 h-px" />
                 <MenuItem
                   icon={Upload}
                   label="Import from file"
@@ -525,7 +532,7 @@ export default function NewWorkflow() {
                   label="Help & shortcuts"
                   onClick={() => setMoreMenuOpen(false)}
                 />
-                <div className="my-1 h-px bg-border-subtle" />
+                <div className="bg-border-subtle my-1 h-px" />
                 <MenuItem
                   icon={Trash2}
                   label="Delete workflow"
@@ -540,16 +547,15 @@ export default function NewWorkflow() {
 
       {/* ══════════════════════════════ BODY ════════════════════════════════ */}
       <div className="relative flex min-h-0 flex-1">
-
         {/* ── Sidebar ── */}
         <aside
           aria-label="Workspace navigation"
           className={cn(
-            "flex shrink-0 flex-col overflow-hidden border-r-[1.5px] border-border-stamp bg-bg-elevated transition-[width,padding] duration-200",
+            "border-border-stamp bg-bg-elevated flex shrink-0 flex-col overflow-hidden border-r-[1.5px] transition-[width,padding] duration-200",
             sidebarOpen ? "w-60 gap-1 px-3 py-4" : "w-0 border-r-0"
           )}
         >
-          <p className="px-2.5 pb-1 pt-1 font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-text-muted">
+          <p className="text-text-muted px-2.5 pt-1 pb-1 font-mono text-[10px] font-semibold tracking-[0.08em] uppercase">
             Workspace
           </p>
           <NavItem
@@ -560,7 +566,7 @@ export default function NewWorkflow() {
           <NavItem icon={User} label="Personal" active />
           <NavItem icon={MessageSquare} label="Chat" badge="Preview" />
 
-          <p className="mt-3 px-2.5 pb-1 pt-1 font-mono text-[10px] font-semibold uppercase tracking-[0.08em] text-text-muted">
+          <p className="text-text-muted mt-3 px-2.5 pt-1 pb-1 font-mono text-[10px] font-semibold tracking-[0.08em] uppercase">
             Workflow
           </p>
           <NavItem icon={CreditCard} label="Credentials" />
@@ -571,12 +577,12 @@ export default function NewWorkflow() {
             onClick={() => setActiveTab("executions")}
           />
 
-          <div className="mt-auto flex items-center gap-2 border-t border-border-subtle px-1 pt-3">
-            <span className="font-mono text-[11px] text-text-muted">
+          <div className="border-border-subtle mt-auto flex items-center gap-2 border-t px-1 pt-3">
+            <span className="text-text-muted font-mono text-[11px]">
               v2.14.0
             </span>
-            <span className="ml-auto inline-flex items-center gap-1.5 font-mono text-[11px] text-text-muted">
-              <span className="size-1.5 rounded-full bg-success shadow-[0_0_0_3px_rgba(82,183,136,0.15)]" />
+            <span className="text-text-muted ml-auto inline-flex items-center gap-1.5 font-mono text-[11px]">
+              <span className="bg-success size-1.5 rounded-full shadow-[0_0_0_3px_rgba(82,183,136,0.15)]" />
               synced
             </span>
           </div>
@@ -589,7 +595,7 @@ export default function NewWorkflow() {
           aria-label={sidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
           aria-expanded={sidebarOpen}
           className={cn(
-            "absolute top-3.5 z-40 inline-grid size-7 place-items-center border-[1.5px] border-border-stamp bg-bg-elevated text-text-secondary shadow-[2px_2px_0_0_var(--hard-shadow-color)] transition-all duration-200 hover:-translate-y-px hover:text-text-primary active:translate-x-px active:translate-y-px active:shadow-none",
+            "border-border-stamp bg-bg-elevated text-text-secondary hover:text-text-primary absolute top-3.5 z-40 inline-grid size-7 place-items-center border-[1.5px] shadow-[2px_2px_0_0_var(--hard-shadow-color)] transition-all duration-200 hover:-translate-y-px active:translate-x-px active:translate-y-px active:shadow-none",
             sidebarOpen ? "left-[226px]" : "left-3"
           )}
         >
@@ -602,8 +608,7 @@ export default function NewWorkflow() {
         </button>
 
         {/* ── Canvas / Executions area ── */}
-        <div className="relative flex-1 overflow-hidden bg-bg-canvas">
-
+        <div className="bg-bg-canvas relative flex-1 overflow-hidden">
           {activeTab === "editor" ? (
             <>
               <ThemeHydrated>
@@ -630,14 +635,22 @@ export default function NewWorkflow() {
               </ThemeHydrated>
 
               {/* ── Zoom controls (bottom-left) — wired to ReactFlow API ── */}
-              <div className="absolute bottom-6 left-6 z-10 inline-flex items-stretch border-[1.5px] border-border-stamp bg-bg-elevated shadow-[3px_3px_0_0_var(--hard-shadow-color)]">
+              <div className="border-border-stamp bg-bg-elevated absolute bottom-6 left-6 z-10 inline-flex items-stretch border-[1.5px] shadow-[3px_3px_0_0_var(--hard-shadow-color)]">
                 <button
                   type="button"
                   aria-label="Zoom out"
                   onClick={() => zoomOut({ duration: 200 })}
-                  className="inline-grid size-[34px] place-items-center border-r border-border-subtle text-text-secondary transition-colors duration-[120ms] hover:bg-bg-canvas hover:text-text-primary"
+                  className="border-border-subtle text-text-secondary hover:bg-bg-canvas hover:text-text-primary inline-grid size-[34px] place-items-center border-r transition-colors duration-[120ms]"
                 >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                  >
                     <line x1="5" y1="12" x2="19" y2="12" />
                   </svg>
                 </button>
@@ -647,10 +660,8 @@ export default function NewWorkflow() {
                   type="button"
                   aria-label="Reset zoom to 100%"
                   title="Reset to 100%"
-                  onClick={() =>
-                    fitView({ duration: 300, padding: 0.15 })
-                  }
-                  className="inline-flex w-12 items-center justify-center border-r border-border-subtle font-mono text-[11px] text-text-secondary transition-colors duration-[120ms] hover:bg-bg-canvas hover:text-text-primary"
+                  onClick={() => fitView({ duration: 300, padding: 0.15 })}
+                  className="border-border-subtle text-text-secondary hover:bg-bg-canvas hover:text-text-primary inline-flex w-12 items-center justify-center border-r font-mono text-[11px] transition-colors duration-[120ms]"
                 >
                   {zoomPercent}%
                 </button>
@@ -659,7 +670,7 @@ export default function NewWorkflow() {
                   type="button"
                   aria-label="Zoom in"
                   onClick={() => zoomIn({ duration: 200 })}
-                  className="inline-grid size-[34px] place-items-center border-r border-border-subtle text-text-secondary transition-colors duration-[120ms] hover:bg-bg-canvas hover:text-text-primary"
+                  className="border-border-subtle text-text-secondary hover:bg-bg-canvas hover:text-text-primary inline-grid size-[34px] place-items-center border-r transition-colors duration-[120ms]"
                 >
                   <Plus className="size-3.5" />
                 </button>
@@ -669,9 +680,16 @@ export default function NewWorkflow() {
                   aria-label="Fit view"
                   title="Fit all nodes in view"
                   onClick={() => fitView({ duration: 400, padding: 0.2 })}
-                  className="inline-grid size-[34px] place-items-center border-r border-border-subtle text-text-secondary transition-colors duration-[120ms] hover:bg-bg-canvas hover:text-text-primary"
+                  className="border-border-subtle text-text-secondary hover:bg-bg-canvas hover:text-text-primary inline-grid size-[34px] place-items-center border-r transition-colors duration-[120ms]"
                 >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.75"
+                  >
                     <polyline points="4 14 4 20 10 20" />
                     <polyline points="20 10 20 4 14 4" />
                     <line x1="14" y1="10" x2="21" y2="3" />
@@ -684,10 +702,14 @@ export default function NewWorkflow() {
                   type="button"
                   aria-label={canvasLocked ? "Unlock canvas" : "Lock canvas"}
                   aria-pressed={canvasLocked}
-                  title={canvasLocked ? "Unlock canvas" : "Lock canvas (disable dragging & panning)"}
+                  title={
+                    canvasLocked
+                      ? "Unlock canvas"
+                      : "Lock canvas (disable dragging & panning)"
+                  }
                   onClick={() => setCanvasLocked((v) => !v)}
                   className={cn(
-                    "inline-grid size-[34px] place-items-center text-text-secondary transition-colors duration-[120ms] hover:bg-bg-canvas hover:text-text-primary",
+                    "text-text-secondary hover:bg-bg-canvas hover:text-text-primary inline-grid size-[34px] place-items-center transition-colors duration-[120ms]",
                     canvasLocked && "bg-accent-subtle text-text-brand"
                   )}
                 >
@@ -713,7 +735,7 @@ export default function NewWorkflow() {
             theme === "dark" ? "Switch to light mode" : "Switch to dark mode"
           }
           onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-          className="btn-stamp hover:btn-stamp-hover active:btn-stamp-active fixed bottom-6 right-6 z-60 inline-grid size-10 place-items-center shadow-[3px_3px_0_0_var(--hard-shadow-color)]"
+          className="btn-stamp hover:btn-stamp-hover active:btn-stamp-active fixed right-6 bottom-6 z-60 inline-grid size-10 place-items-center shadow-[3px_3px_0_0_var(--hard-shadow-color)]"
         >
           {theme === "dark" ? (
             <Sun className="size-4" />
@@ -746,6 +768,23 @@ export default function NewWorkflow() {
             />
           ) : null;
         })()}
+
+      {/* ──── Controlled action sheet for "drag handle → drop on canvas" ──── */}
+      {pendingConnection && pendingSourceNode && (
+        <ActionSheet
+          open
+          onOpenChange={(o) => {
+            if (!o) {setPendingConnection(null);}
+          }}
+          sourceNode={pendingSourceNode}
+          sourceHandleId={pendingConnection.sourceHandleId}
+          dropPosition={pendingConnection.position}
+          setConfigNodeId={(id) => {
+            setEditingActionNodeId(id);
+            setPendingConnection(null);
+          }}
+        />
+      )}
     </div>
   );
 }

@@ -81,8 +81,8 @@ export default function LandingFooter() {
             </div>
 
             <p className="text-body-sm text-text-secondary mb-6 leading-relaxed">
-              Subscribe for changelogs, deep dives, and the occasional new node
-              release.
+              Release notes and the occasional &ldquo;we shipped this&rdquo;
+              email. About once a month, never more.
             </p>
 
             {/* Email subscribe */}

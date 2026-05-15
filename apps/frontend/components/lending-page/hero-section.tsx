@@ -17,7 +17,7 @@ const fadeUp = {
 const stagger = { visible: { transition: { staggerChildren: 0.1 } } };
 
 /* ── Animated word-swap headline ── */
-const SWAP_WORDS = ["think", "work"] as const;
+const SWAP_WORDS = ["think", "decide", "run"] as const;
 
 function AnimatedWord() {
   const [wordIdx, setWordIdx] = useState(0);
@@ -169,8 +169,8 @@ function EditorWindowChrome({ sidebarOpen, onToggleSidebar }: { sidebarOpen: boo
 
       {/* Center tabs — float below header */}
       <div
-        className="absolute bottom-[-14px] left-1/2 z-10 flex h-[26px] -translate-x-1/2 border-[1.5px] border-border-stamp bg-bg-elevated"
-        style={{ boxShadow: "2px 2px 0 0 var(--hard-shadow-color)" }}
+        className="absolute bottom-[-14px] left-1/2 z-10 flex h-[26px] -translate-x-1/2 border border-border-default bg-bg-elevated"
+        style={{ boxShadow: "0 2px 6px rgba(0,0,0,0.18)" }}
       >
         <button className="flex h-full items-center gap-1.5 border-r border-border-stamp bg-accent-primary px-3 text-[11px] font-semibold text-accent-on">
           Editor
@@ -246,9 +246,11 @@ function MacBookMockup() {
 
   return (
     <div
-      className="relative overflow-hidden border-[1.5px] border-border-stamp bg-bg-canvas"
+      className="bento-card relative overflow-hidden bg-bg-canvas"
       style={{
-        boxShadow: "10px 10px 0 0 var(--hard-shadow-color), 0 32px 80px rgba(0,0,0,0.45)",
+        // Match bento family (3px 3px stamp) + a soft diffused drop for lift.
+        boxShadow:
+          "3px 3px 0 0 var(--hard-shadow-color), 0 18px 50px rgba(0,0,0,0.22)",
       }}
     >
       {/* ── macOS title bar (outer "bezel" row) ── */}
@@ -332,7 +334,7 @@ export default function Hero() {
             style={{ boxShadow: "3px 3px 0 0 var(--hard-shadow-color)" }}
           >
             <span className="bg-accent-primary animate-pulse-status size-2 rounded-full shadow-[0_0_0_3px_color-mix(in_oklab,var(--accent-primary)_30%,transparent)]" />
-            v2.4 Shipped · 12 new nodes
+            v2.4 · 11 new nodes shipped
           </motion.div>
 
           {/* Headline */}
@@ -352,9 +354,9 @@ export default function Hero() {
             transition={{ duration: 0.4, ease: "easeOut" }}
             className="text-body-lg text-text-secondary mx-auto mb-10 max-w-2xl leading-relaxed"
           >
-            FLOW is a node-based automation platform for engineers. Compose
-            APIs, LLM agents, and data pipelines on a single canvas —
-            version-controlled, observable, and self-hosted.
+            A visual editor for the jobs that run your product in the
+            background. Pin sample data on any node, run one step at a time,
+            then check the whole graph into git.
           </motion.p>
 
           {/* CTAs */}
@@ -383,14 +385,14 @@ export default function Hero() {
             transition={{ duration: 0.3, ease: "easeOut" }}
             className="text-body-sm text-text-muted mb-16 flex flex-wrap items-center justify-center gap-3"
           >
+            <span className="font-mono">MIT licensed</span>
+            <span className="bg-border-default size-1 rounded-full" />
             <span className="font-mono">No credit card</span>
             <span className="bg-border-default size-1 rounded-full" />
-            <span className="font-mono">Self-host or cloud</span>
-            <span className="bg-border-default size-1 rounded-full" />
-            <span className="text-warning">★★★★★</span>
+            <span className="text-warning">★</span>
             <span>
-              <span className="text-text-primary font-mono font-semibold">4.9</span>{" "}
-              · 1.2k reviews
+              <span className="text-text-primary font-mono font-semibold">1.2k</span>{" "}
+              on GitHub
             </span>
           </motion.div>
         </motion.div>

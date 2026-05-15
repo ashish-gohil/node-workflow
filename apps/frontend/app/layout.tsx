@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import { ThemeProvider } from "next-themes";
 import { ReactFlowProvider } from "@xyflow/react";
 
+import { NextAuthSessionProvider } from "@/components/providers/session-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
 import "./globals.css";
@@ -81,11 +82,13 @@ export default function RootLayout({
       className={jetBrainsMono.className}
     >
       <body>
-        <ThemeProvider attribute="data-theme" defaultTheme="dark">
-          <ReactFlowProvider>
-            <TooltipProvider>{children}</TooltipProvider>
-          </ReactFlowProvider>
-        </ThemeProvider>
+        <NextAuthSessionProvider>
+          <ThemeProvider attribute="data-theme" defaultTheme="dark">
+            <ReactFlowProvider>
+              <TooltipProvider>{children}</TooltipProvider>
+            </ReactFlowProvider>
+          </ThemeProvider>
+        </NextAuthSessionProvider>
       </body>
     </html>
   );
