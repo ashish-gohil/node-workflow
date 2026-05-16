@@ -19,8 +19,23 @@ import {
   useReactFlow,
   useViewport,
 } from "@xyflow/react";
-import { GitBranch, Globe, LayoutList, Shuffle, Timer } from "lucide-react";
+import {
+  GitBranch,
+  Globe,
+  LayoutList,
+  Mail,
+  MessageSquare,
+  Shuffle,
+  Sparkles,
+  Timer,
+  Webhook,
+} from "lucide-react";
 
+import {
+  BaseNode,
+  BaseNodeBadge,
+  BaseNodeIcon,
+} from "@/components/nodes/base-node";
 import { cn } from "@/lib/utils";
 
 import "@xyflow/react/dist/style.css";
@@ -28,85 +43,87 @@ import "@xyflow/react/dist/style.css";
 /* ── Types ── */
 type HeroStatus = "idle" | "running" | "success";
 
+type HeroIcon =
+  | "timer"
+  | "globe"
+  | "shuffle"
+  | "branch"
+  | "sheet"
+  | "webhook"
+  | "ai"
+  | "slack"
+  | "email";
+
 interface HeroData extends Record<string, unknown> {
   label: string;
   sub?: string;
   status: HeroStatus;
-  iconColor: string;
-  icon: "timer" | "globe" | "shuffle" | "branch" | "sheet";
+  icon: HeroIcon;
   isTrigger?: boolean;
-  warning?: boolean;
+  badge?: string;
   outputs?: { id: string; label?: string }[];
 }
 
 /* ── Icon map ── */
-const ICON_MAP = {
+const ICON_MAP: Record<HeroIcon, React.ComponentType<{ className?: string }>> = {
   timer: Timer,
   globe: Globe,
   shuffle: Shuffle,
   branch: GitBranch,
   sheet: LayoutList,
-} as const;
+  webhook: Webhook,
+  ai: Sparkles,
+  slack: MessageSquare,
+  email: Mail,
+};
 
-/* ── Zap SVG (error/trigger indicator) ── */
-function ZapIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      fill="currentColor"
-      className={className}
-    >
-      <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
-    </svg>
-  );
+/* ── Tone per icon — matches the action/trigger families in the editor. ── */
+function toneFor(d: HeroData): "trigger" | "branch" | "ai" | "action" {
+  if (d.isTrigger) {return "trigger";}
+  if (d.icon === "branch") {return "branch";}
+  if (d.icon === "ai") {return "ai";}
+  return "action";
 }
 
-/* ── Warning badge ── */
-function WarnBadge() {
-  return (
-    <span className="absolute -right-2 -bottom-2 text-error">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M12 3 L22 20 L2 20 Z" />
-        <line x1="12" y1="10" x2="12" y2="14" stroke="#0a0e0c" strokeWidth="2" />
-        <circle cx="12" cy="17.5" r="1" fill="#0a0e0c" />
-      </svg>
-    </span>
-  );
-}
-
-/* ── Hero node — shared visual for all nodes in the demo canvas ── */
+/* ── Hero node — wraps the real BaseNode so the marketing canvas matches
+       the editor 1:1 (label-below-tile, tone stripe, status corner dot,
+       stamp shadow). ── */
 const HeroNode = memo(function HeroNode({ data }: NodeProps) {
   const d = data as HeroData;
   const Icon = ICON_MAP[d.icon] ?? Globe;
   const outputs = d.outputs ?? [{ id: "out" }];
-  const isRunning = d.status === "running";
-  const isDone = d.status === "success";
 
-  const bodyBox = cn(
-    "relative flex h-[90px] w-[96px] items-center justify-center rounded-node border bg-bg-elevated",
-    "transition-all duration-[200ms]",
-    d.isTrigger && "rounded-l-[48px]",
-    isRunning && "border-forest-300",
-    isDone && "border-border-default",
-    !isRunning && !isDone && "border-border-default",
-  );
+  const baseStatus: "default" | "running" | "success" =
+    d.status === "running"
+      ? "running"
+      : d.status === "success"
+        ? "success"
+        : "default";
 
   return (
-    <div className="flex flex-col items-center">
-      {/* Input port */}
+    <BaseNode
+      status={baseStatus}
+      tone={toneFor(d)}
+      label={d.label}
+      subtitle={d.sub}
+      badge={d.badge ? <BaseNodeBadge>{d.badge}</BaseNodeBadge> : undefined}
+    >
+      <BaseNodeIcon>
+        <Icon />
+      </BaseNodeIcon>
+
+      {/* Input port — left edge, vertically centered on the 80px tile. */}
       {!d.isTrigger && (
         <Handle
           type="target"
           position={Position.Left}
           id="in"
-          style={{ top: "38px" }}
+          style={{ top: "50%" }}
           className="!size-2.5 !rounded-full !border-[1.5px] !border-border-strong !bg-bg-canvas"
         />
       )}
 
-      {/* Output ports */}
+      {/* Output ports — single: centered. Multi: spread along right edge. */}
       {outputs.map((o, i) => (
         <Handle
           key={o.id}
@@ -116,58 +133,30 @@ const HeroNode = memo(function HeroNode({ data }: NodeProps) {
           style={{
             top:
               outputs.length === 1
-                ? "38px"
-                : i === 0
-                  ? "22px"
-                  : "56px",
+                ? "50%"
+                : `${28 + (i * (72 - 28)) / (outputs.length - 1)}%`,
           }}
           className="!size-2.5 !rounded-full !border-[1.5px] !border-border-strong !bg-bg-canvas"
         />
       ))}
 
-      {/* Node body */}
-      <div
-        className={bodyBox}
-        style={{
-          boxShadow: isRunning
-            ? "inset 2px 0 0 0 var(--accent-primary), 0 0 0 2px rgba(79,201,122,0.18), 0 1px 3px rgba(0,0,0,0.4)"
-            : isDone
-              ? "inset 2px 0 0 0 var(--color-success), 0 1px 2px rgba(0,0,0,0.4)"
-              : "0 1px 2px rgba(0,0,0,0.4)",
-        }}
-      >
-        <Icon size={34} strokeWidth={1.5} style={{ color: d.iconColor }} />
-
-        {/* Zap indicator on running trigger */}
-        {isRunning && d.isTrigger && (
-          <span className="absolute -left-5 top-1/2 -translate-y-1/2 text-error">
-            <ZapIcon />
-          </span>
-        )}
-
-        {d.warning && <WarnBadge />}
-
-        {/* Pulse ring when running */}
-        {isRunning && (
-          <span
-            className="pointer-events-none absolute -inset-px rounded-node border border-forest-300 animate-pulse"
-            aria-hidden
-          />
-        )}
-      </div>
-
-      {/* Label + subtitle below */}
-      <div className="mt-2 w-[130px] text-center">
-        <div className="truncate text-[11px] font-semibold leading-tight text-text-primary">
-          {d.label}
+      {/* Inline mono labels next to multi-output handles (true / false). */}
+      {outputs.length > 1 && (
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-y-0 -right-1 flex flex-col justify-around"
+        >
+          {outputs.map((o) => (
+            <span
+              key={`${o.id}-lbl`}
+              className="text-text-muted translate-x-full pl-3 font-mono text-[9px] font-semibold tracking-[0.06em] uppercase whitespace-nowrap"
+            >
+              {o.label ?? o.id}
+            </span>
+          ))}
         </div>
-        {d.sub && (
-          <div className="mt-0.5 truncate font-mono text-[9px] text-text-muted">
-            {d.sub}
-          </div>
-        )}
-      </div>
-    </div>
+      )}
+    </BaseNode>
   );
 });
 
@@ -200,200 +189,229 @@ const PlusNode = memo(function PlusNode() {
 
 const nodeTypes = { heroNode: HeroNode, plus: PlusNode };
 
-/* ── Execution animation ── */
-const EXEC_ORDER = ["sched", "fetch", "transform", "check", "sheet_a", "sheet_b"];
-const STEP_MS = 1200;
-const PAUSE_MS = 2000;
+/* ── Execution animation — runs the "paid plan" branch end-to-end, then
+       loops. The "free plan" branch is left idle (subtle animated edges)
+       so the demo communicates: "this is a real, branching workflow." ── */
+const EXEC_ORDER = [
+  "webhook",
+  "fetch",
+  "ai",
+  "set",
+  "if_plan",
+  "slack",
+  "crm",
+  "sheet_p",
+];
+const STEP_MS = 1100;
+const PAUSE_MS = 1800;
 
-/* Maps each animated edge to the target node it leads into */
+/* Maps each animated edge to the target node it leads into. Edges that
+   live on the dormant branch (e9, e10, e11) are intentionally absent —
+   they stay at their initial ambient style throughout the run. */
 const EDGE_TARGET_NODE: Record<string, string> = {
   e1: "fetch",
-  e2: "transform",
-  e3: "check",
-  e4: "sheet_a",
-  e5: "sheet_b",
+  e2: "ai",
+  e3: "set",
+  e4: "if_plan",
+  e5: "slack",
+  e6: "crm",
+  e7: "sheet_p",
 };
 
-/* ── Initial nodes ── */
+/* ── Initial nodes — multi-stage signup routing workflow.
+
+       Main path:  Webhook → Fetch user → AI classify → Set fields → If paid?
+       Yes branch: Slack #sales → Push to CRM → Add to Sheet (Premium) → +
+       No branch:  Delay 5m → Send welcome email → Add to Sheet (Free)  → + */
 type HeroFlowNode = Node<HeroData>;
 
 const INITIAL_NODES: HeroFlowNode[] = [
+  /* ── Main path ── */
   {
-    id: "sched",
+    id: "webhook",
     type: "heroNode",
-    position: { x: 0, y: 70 },
+    position: { x: 0, y: 120 },
     data: {
-      label: "Schedule Trigger",
-      sub: "Every 15 min",
-      icon: "timer",
-      iconColor: "#a1ada6",
+      label: "On Sign-up",
+      sub: "POST /webhook",
+      icon: "webhook",
       status: "idle",
       isTrigger: true,
+      badge: "HOOK",
       outputs: [{ id: "out" }],
     },
   },
   {
     id: "fetch",
     type: "heroNode",
-    position: { x: 230, y: 70 },
+    position: { x: 200, y: 120 },
     data: {
-      label: "Fetch Data",
-      sub: "GET: api.flow.dev/orders",
+      label: "Fetch User",
+      sub: "api.flow.dev/users",
       icon: "globe",
-      iconColor: "#7c8cff",
       status: "idle",
+      badge: "GET",
       outputs: [{ id: "out" }],
     },
   },
   {
-    id: "transform",
+    id: "ai",
     type: "heroNode",
-    position: { x: 460, y: 70 },
+    position: { x: 400, y: 120 },
     data: {
-      label: "Transform Data",
-      sub: "manual",
+      label: "Classify Intent",
+      sub: "GPT-4o · 3 labels",
+      icon: "ai",
+      status: "idle",
+      badge: "LLM",
+      outputs: [{ id: "out" }],
+    },
+  },
+  {
+    id: "set",
+    type: "heroNode",
+    position: { x: 600, y: 120 },
+    data: {
+      label: "Merge Fields",
+      sub: "user · intent · plan",
       icon: "shuffle",
-      iconColor: "#9b8cff",
       status: "idle",
       outputs: [{ id: "out" }],
     },
   },
   {
-    id: "check",
+    id: "if_plan",
     type: "heroNode",
-    position: { x: 690, y: 70 },
+    position: { x: 800, y: 120 },
     data: {
-      label: "Check Condition",
-      sub: "amount > $500",
+      label: "If Paid Plan",
+      sub: 'plan === "paid"',
       icon: "branch",
-      iconColor: "#4fc97a",
       status: "idle",
+      badge: "IF",
       outputs: [
-        { id: "true", label: "true" },
-        { id: "false", label: "false" },
+        { id: "yes", label: "yes" },
+        { id: "no", label: "no" },
       ],
     },
   },
+
+  /* ── Yes branch (top) ── */
   {
-    id: "sheet_a",
+    id: "slack",
     type: "heroNode",
-    position: { x: 950, y: -10 },
+    position: { x: 1040, y: 0 },
     data: {
-      label: "Add to Sheet A",
-      sub: "append: sheet",
-      icon: "sheet",
-      iconColor: "#34a853",
+      label: "Slack #sales",
+      sub: "Notify team",
+      icon: "slack",
       status: "idle",
-      warning: true,
+      badge: "OPS",
       outputs: [{ id: "out" }],
     },
   },
   {
-    id: "sheet_b",
+    id: "crm",
     type: "heroNode",
-    position: { x: 950, y: 155 },
+    position: { x: 1240, y: 0 },
     data: {
-      label: "Add to Sheet B",
-      sub: "append: sheet",
-      icon: "sheet",
-      iconColor: "#34a853",
+      label: "Push to CRM",
+      sub: "POST /contacts",
+      icon: "globe",
       status: "idle",
-      warning: true,
+      badge: "POST",
       outputs: [{ id: "out" }],
     },
   },
   {
-    id: "plus_a",
+    id: "sheet_p",
+    type: "heroNode",
+    position: { x: 1440, y: 0 },
+    data: {
+      label: "Log Premium",
+      sub: "Append: Sheet",
+      icon: "sheet",
+      status: "idle",
+      outputs: [{ id: "out" }],
+    },
+  },
+  {
+    id: "plus_p",
     type: "plus",
-    position: { x: 1098, y: 33 },
+    position: { x: 1582, y: 33 },
     data: {} as HeroData,
   },
+
+  /* ── No branch (bottom) ── */
   {
-    id: "plus_b",
+    id: "delay",
+    type: "heroNode",
+    position: { x: 1040, y: 240 },
+    data: {
+      label: "Wait 5 min",
+      sub: "Cool-off",
+      icon: "timer",
+      status: "idle",
+      badge: "WAIT",
+      outputs: [{ id: "out" }],
+    },
+  },
+  {
+    id: "email",
+    type: "heroNode",
+    position: { x: 1240, y: 240 },
+    data: {
+      label: "Send Welcome",
+      sub: "hi@flow.dev",
+      icon: "email",
+      status: "idle",
+      outputs: [{ id: "out" }],
+    },
+  },
+  {
+    id: "sheet_f",
+    type: "heroNode",
+    position: { x: 1440, y: 240 },
+    data: {
+      label: "Log Free Tier",
+      sub: "Append: Sheet",
+      icon: "sheet",
+      status: "idle",
+      outputs: [{ id: "out" }],
+    },
+  },
+  {
+    id: "plus_f",
     type: "plus",
-    position: { x: 1098, y: 198 },
+    position: { x: 1582, y: 273 },
     data: {} as HeroData,
   },
 ];
 
+const EDGE_BASE = {
+  stroke: "var(--border-strong)",
+  strokeWidth: 1.5,
+  strokeOpacity: 0.7,
+};
+
 const INITIAL_EDGES = [
-  {
-    id: "e1",
-    source: "sched",
-    sourceHandle: "out",
-    target: "fetch",
-    targetHandle: "in",
-    animated: true,
-    style: { stroke: "var(--border-strong)", strokeWidth: 1.5, strokeOpacity: 0.7 },
-  },
-  {
-    id: "e2",
-    source: "fetch",
-    sourceHandle: "out",
-    target: "transform",
-    targetHandle: "in",
-    animated: true,
-    style: { stroke: "var(--border-strong)", strokeWidth: 1.5, strokeOpacity: 0.7 },
-  },
-  {
-    id: "e3",
-    source: "transform",
-    sourceHandle: "out",
-    target: "check",
-    targetHandle: "in",
-    animated: true,
-    style: { stroke: "var(--border-strong)", strokeWidth: 1.5, strokeOpacity: 0.7 },
-  },
-  {
-    id: "e4",
-    source: "check",
-    sourceHandle: "true",
-    target: "sheet_a",
-    targetHandle: "in",
-    animated: true,
-    label: "true",
-    labelStyle: {
-      fill: "var(--color-text-muted)",
-      fontFamily: "JetBrains Mono, monospace",
-      fontSize: 10,
-    },
-    labelBgStyle: { fill: "transparent" },
-    style: { stroke: "var(--border-strong)", strokeWidth: 1.5, strokeOpacity: 0.7 },
-  },
-  {
-    id: "e5",
-    source: "check",
-    sourceHandle: "false",
-    target: "sheet_b",
-    targetHandle: "in",
-    animated: true,
-    label: "false",
-    labelStyle: {
-      fill: "var(--color-text-muted)",
-      fontFamily: "JetBrains Mono, monospace",
-      fontSize: 10,
-    },
-    labelBgStyle: { fill: "transparent" },
-    style: { stroke: "var(--border-strong)", strokeWidth: 1.5, strokeOpacity: 0.7 },
-  },
-  {
-    id: "e6",
-    source: "sheet_a",
-    sourceHandle: "out",
-    target: "plus_a",
-    targetHandle: "in",
-    animated: false,
-    style: { stroke: "var(--border-subtle)", strokeWidth: 1.5 },
-  },
-  {
-    id: "e7",
-    source: "sheet_b",
-    sourceHandle: "out",
-    target: "plus_b",
-    targetHandle: "in",
-    animated: false,
-    style: { stroke: "var(--border-subtle)", strokeWidth: 1.5 },
-  },
+  /* Main path */
+  { id: "e1", source: "webhook",  sourceHandle: "out", target: "fetch",   targetHandle: "in", animated: true, style: EDGE_BASE },
+  { id: "e2", source: "fetch",    sourceHandle: "out", target: "ai",      targetHandle: "in", animated: true, style: EDGE_BASE },
+  { id: "e3", source: "ai",       sourceHandle: "out", target: "set",     targetHandle: "in", animated: true, style: EDGE_BASE },
+  { id: "e4", source: "set",      sourceHandle: "out", target: "if_plan", targetHandle: "in", animated: true, style: EDGE_BASE },
+
+  /* Yes branch */
+  { id: "e5", source: "if_plan",  sourceHandle: "yes", target: "slack",   targetHandle: "in", animated: true, style: EDGE_BASE },
+  { id: "e6", source: "slack",    sourceHandle: "out", target: "crm",     targetHandle: "in", animated: true, style: EDGE_BASE },
+  { id: "e7", source: "crm",      sourceHandle: "out", target: "sheet_p", targetHandle: "in", animated: true, style: EDGE_BASE },
+  { id: "e8", source: "sheet_p",  sourceHandle: "out", target: "plus_p",  targetHandle: "in", animated: false, style: { stroke: "var(--border-subtle)", strokeWidth: 1.5 } },
+
+  /* No branch */
+  { id: "e9",  source: "if_plan", sourceHandle: "no",  target: "delay",   targetHandle: "in", animated: true, style: EDGE_BASE },
+  { id: "e10", source: "delay",   sourceHandle: "out", target: "email",   targetHandle: "in", animated: true, style: EDGE_BASE },
+  { id: "e11", source: "email",   sourceHandle: "out", target: "sheet_f", targetHandle: "in", animated: true, style: EDGE_BASE },
+  { id: "e12", source: "sheet_f", sourceHandle: "out", target: "plus_f",  targetHandle: "in", animated: false, style: { stroke: "var(--border-subtle)", strokeWidth: 1.5 } },
 ];
 
 /* ── Zoom panel (must be inside ReactFlowProvider) ── */
@@ -528,7 +546,7 @@ function HeroFlowInner() {
       onNodesChange={onNodesChange}
       onEdgesChange={onEdgesChange}
       fitView
-      fitViewOptions={{ padding: 0.28 }}
+      fitViewOptions={{ padding: 0.12 }}
       nodesDraggable
       nodesConnectable={false}
       panOnDrag

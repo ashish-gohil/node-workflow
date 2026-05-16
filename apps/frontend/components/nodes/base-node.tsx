@@ -76,11 +76,12 @@ export function BaseNode({
         "hover:border-border-strong",
         // Decorative tone stripe (only renders if tone provided).
         tone !== "default" && TONE_STRIPE[tone],
-        // Selected — brand-coloured stamp shadow.
+        // Selected — muted neutral stamp so it can't be mistaken
+        // for the green success/running states.
         selected && [
-          "border-accent-primary",
-          "shadow-[3px_3px_0_0_var(--accent-primary)]",
-          "hover:shadow-[3px_3px_0_0_var(--accent-primary)]",
+          "border-text-muted",
+          "shadow-[3px_3px_0_0_var(--text-muted)]",
+          "hover:shadow-[3px_3px_0_0_var(--text-muted)]",
         ],
         // Status states.
         status === "running" && [

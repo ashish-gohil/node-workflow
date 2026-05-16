@@ -2,8 +2,22 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, Calendar, GitBranch, Home, MessageSquare, Save, Wallet } from "lucide-react";
+import {
+  ArrowRight,
+  Calendar,
+  ChevronLeft,
+  Clock,
+  CreditCard,
+  GitBranch,
+  Home,
+  MessageSquare,
+  MoreHorizontal,
+  Save,
+  User,
+} from "lucide-react";
 import { motion } from "motion/react";
+
+import AppLogo from "@/components/ui/app-logo";
 
 import { HeroFlowCanvas } from "./hero-canvas";
 
@@ -71,7 +85,7 @@ function AnimatedWord() {
   );
 }
 
-/* ── Sidebar nav row ── */
+/* ── Sidebar nav row — mirrors EditorNavItem from the real editor. ── */
 function NavRow({
   icon: Icon,
   label,
@@ -86,20 +100,22 @@ function NavRow({
   return (
     <div
       className={[
-        "flex cursor-default items-center gap-2.5 py-[6px] text-[12px] font-medium transition-colors duration-[120ms]",
+        "flex w-full cursor-default items-center gap-2.5 px-2.5 py-[6px] text-[12px] font-medium transition-colors duration-[120ms]",
         active
-          ? "text-text-primary border-l-2 border-accent-primary pl-[8px] bg-bg-canvas"
-          : "text-text-secondary border-l-2 border-transparent pl-[9px] hover:text-text-primary",
+          ? "border-accent-primary bg-bg-canvas text-text-primary border-l-2 pl-[9px]"
+          : "text-text-secondary border-l-2 border-transparent hover:text-text-primary",
       ].join(" ")}
     >
       <Icon
-        size={13}
-        className={active ? "text-text-brand" : "text-text-muted"}
+        className={[
+          "size-[13px] shrink-0",
+          active ? "text-text-brand" : "text-text-muted",
+        ].join(" ")}
         strokeWidth={1.8}
       />
       <span className="flex-1 truncate">{label}</span>
       {badge && (
-        <span className="font-mono text-[9px] font-semibold uppercase tracking-[0.06em] text-info bg-info/10 border border-info/25 px-1.5 py-px">
+        <span className="text-info inline-flex items-center border border-[rgba(94,177,239,0.3)] bg-[rgba(94,177,239,0.14)] px-1.5 py-px font-mono text-[9px] font-bold tracking-wider uppercase">
           {badge}
         </span>
       )}
@@ -107,131 +123,129 @@ function NavRow({
   );
 }
 
-/* ── Sidebar inside the mockup ── */
+/* ── Sidebar inside the mockup — mirrors EditorSidebar (Workspace +
+       Workflow sections, same icon family, sync-status footer). ── */
 function MockupSidebar({ open }: { open: boolean }) {
   if (!open) {return null;}
   return (
-    <aside className="flex w-[172px] shrink-0 flex-col gap-0.5 border-r border-border-stamp bg-bg-elevated px-2.5 py-3">
-      <p className="mb-1 px-2.5 font-mono text-[9px] font-bold uppercase tracking-[0.08em] text-text-muted">
+    <aside className="border-border-stamp bg-bg-elevated flex w-[180px] shrink-0 flex-col gap-0.5 border-r-[1.5px] py-3">
+      <p className="text-text-muted px-2.5 pt-1 pb-1 font-mono text-[9px] font-bold tracking-[0.08em] uppercase">
         Workspace
       </p>
       <NavRow icon={Home} label="Overview" />
-      <NavRow icon={Wallet} label="Personal" active />
+      <NavRow icon={User} label="Personal" active />
       <NavRow icon={MessageSquare} label="Chat" badge="Preview" />
 
-      <p className="mt-3.5 mb-1 px-2.5 font-mono text-[9px] font-bold uppercase tracking-[0.08em] text-text-muted">
+      <p className="text-text-muted mt-3 px-2.5 pt-1 pb-1 font-mono text-[9px] font-bold tracking-[0.08em] uppercase">
         Workflow
       </p>
-      <NavRow icon={Wallet} label="Credentials" />
+      <NavRow icon={CreditCard} label="Credentials" />
       <NavRow icon={Calendar} label="Schedules" />
+      <NavRow icon={Clock} label="Logs" />
 
-      <div className="mt-auto border-t border-border-subtle pt-2">
-        <div className="flex items-center px-2.5">
-          <span className="font-mono text-[10px] text-text-muted">v2.14.0</span>
-          <span className="ml-auto flex items-center gap-1.5 font-mono text-[10px] text-text-muted">
-            <span
-              className="size-1.5 rounded-full bg-success"
-              style={{ boxShadow: "0 0 0 2px rgba(82,183,136,0.18)" }}
-            />
-            synced
-          </span>
-        </div>
+      <div className="border-border-subtle mt-auto flex items-center gap-2 border-t px-3 pt-2">
+        <span className="text-text-muted font-mono text-[10px]">v2.14.0</span>
+        <span className="text-text-muted ml-auto inline-flex items-center gap-1.5 font-mono text-[10px]">
+          <span
+            className="bg-success size-1.5 rounded-full"
+            style={{ boxShadow: "0 0 0 2px rgba(82,183,136,0.18)" }}
+          />
+          synced
+        </span>
       </div>
     </aside>
   );
 }
 
-/* ── Editor header inside the MacBook ── */
-function EditorWindowChrome({ sidebarOpen, onToggleSidebar }: { sidebarOpen: boolean; onToggleSidebar: () => void }) {
+/* ── Editor chrome — mirrors editor-header.tsx (scaled down for the mock).
+       Logo box · workflow-name field · floating Editor/Executions tab pill ·
+       split Save button · ⋯ more. ── */
+function EditorWindowChrome({
+  sidebarOpen,
+  onToggleSidebar,
+}: {
+  sidebarOpen: boolean;
+  onToggleSidebar: () => void;
+}) {
   return (
-    <header className="relative flex h-[46px] shrink-0 items-stretch border-b border-border-stamp bg-bg-canvas">
-      {/* Logo square */}
-      <div className="flex w-11 shrink-0 items-center justify-center border-r border-border-subtle">
-        <div
-          className="flex size-5 items-center justify-center bg-accent-primary text-accent-on border-[1.5px] border-border-stamp"
-          style={{ boxShadow: "1.5px 1.5px 0 0 var(--hard-shadow-color)" }}
-        >
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
-            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
-          </svg>
-        </div>
+    <header className="border-border-stamp bg-bg-canvas relative z-20 flex h-[52px] shrink-0 items-stretch border-b-[1.5px]">
+      {/* Logo box — same AppLogo as the real editor, scaled to fit. */}
+      <div className="flex w-[52px] shrink-0 items-center justify-center">
+        <AppLogo showWordmark={false} className="scale-[0.85]" />
       </div>
 
-      {/* Workflow name + draft pill */}
-      <div className="flex flex-1 items-center gap-2.5 px-3 min-w-0">
-        <span className="text-[12px] font-semibold text-text-primary">Order routing</span>
-        <span className="font-mono text-[9px] font-semibold uppercase tracking-[0.04em] text-text-brand bg-accent-primary/10 border border-accent-primary/25 px-1.5 py-px">
+      {/* Workflow name — visual stand-in for the editor's editable field. */}
+      <div className="flex min-w-0 flex-1 items-center gap-2.5 pr-3">
+        <span className="text-text-primary border border-transparent px-2 text-[12px] font-semibold">
+          Order routing
+        </span>
+        <span className="text-text-brand bg-accent-primary/10 border-accent-primary/25 border px-1.5 py-px font-mono text-[9px] font-semibold tracking-[0.04em] uppercase">
           draft
         </span>
       </div>
 
-      {/* Center tabs — float below header */}
-      <div
-        className="absolute bottom-[-14px] left-1/2 z-10 flex h-[26px] -translate-x-1/2 border border-border-default bg-bg-elevated"
-        style={{ boxShadow: "0 2px 6px rgba(0,0,0,0.18)" }}
-      >
-        <button className="flex h-full items-center gap-1.5 border-r border-border-stamp bg-accent-primary px-3 text-[11px] font-semibold text-accent-on">
-          Editor
-        </button>
-        <button className="flex h-full items-center gap-1.5 px-3 text-[11px] font-semibold text-text-muted">
-          Executions
-          <span className="font-mono text-[9px] font-semibold bg-bg-canvas border border-border-default px-1 text-text-muted">
-            0
+      {/* Center tabs — floating pill, stamp shadow (matches editor-header). */}
+      <div className="pointer-events-none absolute bottom-[-15px] left-1/2 z-30 -translate-x-1/2">
+        <div
+          role="tablist"
+          aria-label="Workflow view"
+          className="border-border-stamp bg-bg-elevated inline-flex h-[28px] items-stretch border-[1.5px] shadow-[2px_2px_0_0_var(--hard-shadow-color)]"
+        >
+          <span className="border-border-stamp bg-accent-primary text-accent-on inline-flex h-full items-center border-r-[1.5px] px-3 text-[11px] font-semibold">
+            Editor
           </span>
-        </button>
+          <span className="text-text-muted inline-flex h-full items-center gap-1.5 px-3 text-[11px] font-semibold">
+            Executions
+            <span className="border-border-default bg-bg-canvas text-text-muted inline-flex h-[14px] min-w-[16px] place-items-center border px-1 font-mono text-[9px] font-semibold">
+              0
+            </span>
+          </span>
+        </div>
       </div>
 
-      {/* Right controls */}
+      {/* Right controls — sidebar toggle, split Save, ⋯ more. */}
       <div className="flex shrink-0 items-center gap-2 pr-3">
-        {/* Sidebar toggle */}
         <button
+          type="button"
           onClick={onToggleSidebar}
-          className="flex size-[26px] items-center justify-center border-[1.5px] border-border-stamp bg-bg-elevated text-text-secondary"
-          style={{ boxShadow: "1.5px 1.5px 0 0 var(--hard-shadow-color)" }}
-          title={sidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
+          aria-label={sidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
+          aria-expanded={sidebarOpen}
+          className="border-border-stamp bg-bg-elevated text-text-secondary inline-grid size-[26px] place-items-center border-[1.5px] shadow-[2px_2px_0_0_var(--hard-shadow-color)]"
         >
-          <svg
-            width="10"
-            height="10"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            style={{
-              transform: sidebarOpen ? "rotate(0deg)" : "rotate(180deg)",
-              transition: "transform 200ms ease",
-            }}
-          >
-            <polyline points="15 18 9 12 15 6" />
-          </svg>
+          <ChevronLeft
+            className={[
+              "size-3 transition-transform duration-200",
+              sidebarOpen ? "" : "rotate-180",
+            ].join(" ")}
+          />
         </button>
 
-        {/* Save split button */}
-        <div
-          className="flex h-[26px] items-stretch border-[1.5px] border-border-stamp bg-accent-primary text-accent-on"
-          style={{ boxShadow: "2px 2px 0 0 var(--hard-shadow-color)" }}
-        >
-          <span className="flex items-center gap-1.5 px-2.5 text-[11px] font-bold">
-            <Save size={10} />
+        {/* Split save button — primary action + chevron, matches editor. */}
+        <div className="border-border-stamp bg-accent-primary text-accent-on inline-flex h-[28px] items-stretch border-[1.5px] shadow-[2px_2px_0_0_var(--hard-shadow-color)]">
+          <span className="inline-flex items-center gap-1.5 px-2.5 text-[11px] font-bold">
+            <Save className="size-3" />
             Save
           </span>
-          <span className="flex w-5 items-center justify-center border-l border-accent-on/30">
-            <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+          <span className="border-accent-on/30 inline-flex w-5 items-center justify-center border-l">
+            <svg
+              width="9"
+              height="9"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+            >
               <polyline points="6 9 12 15 18 9" />
             </svg>
           </span>
         </div>
 
-        {/* More button */}
         <button
-          className="flex size-[26px] items-center justify-center border-[1.5px] border-border-stamp bg-bg-elevated text-text-primary"
-          style={{ boxShadow: "2px 2px 0 0 var(--hard-shadow-color)" }}
+          type="button"
+          aria-label="More actions"
+          className="border-border-stamp bg-bg-elevated text-text-primary inline-grid size-[28px] place-items-center border-[1.5px] shadow-[2px_2px_0_0_var(--hard-shadow-color)]"
         >
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
-            <circle cx="5" cy="12" r="1.5" />
-            <circle cx="12" cy="12" r="1.5" />
-            <circle cx="19" cy="12" r="1.5" />
-          </svg>
+          <MoreHorizontal className="size-3.5" />
         </button>
       </div>
     </header>
