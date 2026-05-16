@@ -2,10 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, Calendar, Home, MessageSquare, Play, Save, Wallet } from "lucide-react";
+import { ArrowRight, Calendar, GitBranch, Home, MessageSquare, Save, Wallet } from "lucide-react";
 import { motion } from "motion/react";
-
-import Collaborators from "@/components/ui/collaborators";
 
 import { HeroFlowCanvas } from "./hero-canvas";
 
@@ -289,9 +287,8 @@ function MacBookMockup() {
 
         {/* Canvas area */}
         <div className="relative flex-1 overflow-hidden">
-          {/* Collaborators + live badge top-right */}
+          {/* Live preview badge top-right (UI-state badge, no fake team) */}
           <div className="absolute top-2.5 right-3 z-10 flex items-center gap-2">
-            <Collaborators />
             <div
               className="flex items-center gap-1.5 border-[1.5px] border-border-stamp bg-bg-elevated px-2 py-[3px] font-mono text-[10px] font-semibold uppercase tracking-[0.06em] text-text-brand"
               style={{ boxShadow: "2px 2px 0 0 var(--hard-shadow-color)" }}
@@ -300,7 +297,7 @@ function MacBookMockup() {
                 className="size-1.5 rounded-full bg-success"
                 style={{ boxShadow: "0 0 0 3px rgba(82,183,136,0.18)" }}
               />
-              live
+              live preview
             </div>
           </div>
 
@@ -334,7 +331,7 @@ export default function Hero() {
             style={{ boxShadow: "3px 3px 0 0 var(--hard-shadow-color)" }}
           >
             <span className="bg-accent-primary animate-pulse-status size-2 rounded-full shadow-[0_0_0_3px_color-mix(in_oklab,var(--accent-primary)_30%,transparent)]" />
-            v2.4 · 11 new nodes shipped
+            Open source · built in public
           </motion.div>
 
           {/* Headline */}
@@ -373,36 +370,40 @@ export default function Hero() {
               <ArrowRight className="size-4" />
             </button>
 
-            <button className="btn-stamp hover:btn-stamp-hover active:btn-stamp-active text-body-md h-12 px-[22px]">
-              <Play className="size-4 fill-current" />
-              Watch demo · 2:14
+            <button
+              onClick={() => {
+                document
+                  .getElementById("hero-mockup")
+                  ?.scrollIntoView({ behavior: "smooth", block: "start" });
+              }}
+              className="btn-stamp hover:btn-stamp-hover active:btn-stamp-active text-body-md h-12 px-[22px]"
+            >
+              <GitBranch className="size-4" />
+              See the editor
             </button>
           </motion.div>
 
-          {/* Meta */}
+          {/* Meta — verifiable claims only */}
           <motion.div
             variants={fadeUp}
             transition={{ duration: 0.3, ease: "easeOut" }}
             className="text-body-sm text-text-muted mb-16 flex flex-wrap items-center justify-center gap-3"
           >
-            <span className="font-mono">MIT licensed</span>
+            <span className="font-mono">Open source</span>
             <span className="bg-border-default size-1 rounded-full" />
-            <span className="font-mono">No credit card</span>
+            <span className="font-mono">Self-hostable</span>
             <span className="bg-border-default size-1 rounded-full" />
-            <span className="text-warning">★</span>
-            <span>
-              <span className="text-text-primary font-mono font-semibold">1.2k</span>{" "}
-              on GitHub
-            </span>
+            <span className="font-mono">No sign-up to try</span>
           </motion.div>
         </motion.div>
 
         {/* ── MacBook mockup ── */}
         <motion.div
+          id="hero-mockup"
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, ease: [0.32, 0.72, 0, 1], delay: 0.4 }}
-          className="relative w-full"
+          className="relative w-full scroll-mt-32"
         >
           {/* Glow under mockup */}
           <div

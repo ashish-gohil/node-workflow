@@ -5,11 +5,6 @@ import { HttpRequestNodeType } from "@/app/types/actions";
 
 import { ActionNodeBase } from "./action-node-base";
 
-
-
-
-
-
 export function HttpRequestNode({
   id,
   data,
@@ -19,9 +14,12 @@ export function HttpRequestNode({
     <ActionNodeBase
       id={id}
       selected={selected}
-      icon={<Globe className="text-text-secondary size-5" />}
+      icon={<Globe />}
       onEdit={data.onEdit}
       outputs={[{ id: "success" }]}
+      label="HTTP"
+      subtitle="REST"
+      badge="GET"
     />
   );
 }

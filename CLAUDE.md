@@ -65,186 +65,16 @@ Before writing any UI element, check `components/ui/`. Every core primitive exis
 
 ---
 
-## Complete semantic token → Tailwind class reference
+## Reference docs (read on demand)
 
-All of these are theme-aware: they automatically adapt for dark / light / brutalist.
+These tables don't change session to session — load them only when you need them:
 
-### Backgrounds
+- **Semantic tokens** (`bg-bg-*`, `text-text-*`, `border-border-*`, `bg-accent-*`, `shadow-*`, status colors, palette classes) → `.claude/docs/flow-tokens.md`
+- **Custom utility classes** (`card-surface`, `btn-stamp-*`, `section-container`, marketing/landing) → `.claude/docs/flow-utilities.md`
+- **Typography classes** (`text-display-*`, `text-h*`, `text-body-*`, `text-mono-*`, font + tabular-nums rules) → `.claude/docs/flow-typography.md`
+- **Theme hex values + theme rules** (dark / light / brutalist token map) → `.claude/docs/flow-themes.md`
 
-| Tailwind class   | When to use                                       |
-|------------------|---------------------------------------------------|
-| `bg-bg-canvas`   | Page base / infinite canvas                       |
-| `bg-bg-surface`  | Cards, panels, sidebars                           |
-| `bg-bg-elevated` | Dropdowns, popovers, raised cards                 |
-| `bg-bg-overlay`  | Modals, drawers                                   |
-| `bg-bg-inset`    | Inset wells (code blocks, inputs, inner regions)  |
-
-### Text
-
-| Tailwind class      | When to use                            |
-|---------------------|----------------------------------------|
-| `text-text-primary` | Body copy, headings, default text      |
-| `text-text-secondary` | Supporting labels, descriptions      |
-| `text-text-muted`   | Placeholder, icon labels, timestamps  |
-| `text-text-disabled` | Inactive / disabled states           |
-| `text-text-brand`   | Brand-colored text, links             |
-
-### Borders
-
-| Tailwind class        | When to use                        |
-|-----------------------|------------------------------------|
-| `border-border-subtle`  | Dividers, faint section breaks   |
-| `border-border-default` | Default element borders          |
-| `border-border-strong`  | Emphasized / active borders      |
-| `border-border-intense` | High-contrast borders            |
-| `border-border-focus`   | Focus rings on interactive elems |
-| `border-border-brand`   | Brand-colored borders            |
-| `border-border-stamp`   | Stamp button / card borders      |
-
-### Accents
-
-| Tailwind class       | When to use                             |
-|----------------------|-----------------------------------------|
-| `bg-accent-primary`  | Primary action background (CTA)         |
-| `bg-accent-hover`    | Hover state of primary actions          |
-| `bg-accent-press`    | Active/pressed state                    |
-| `bg-accent-subtle`   | Tinted background for selected items    |
-| `text-accent-primary` | Brand-colored icons or text           |
-| `text-accent-on`     | Text on top of accent background        |
-
-### Shadows
-
-| Tailwind class       | When to use                             |
-|----------------------|-----------------------------------------|
-| `shadow-sm`          | Subtle lift (default)                   |
-| `shadow-md`          | Elevated panels                         |
-| `shadow-lg`          | Modals, overlays                        |
-| `shadow-xl`          | Toasts, highest elevation               |
-| `shadow-glow-brand`  | Active node / selected state glow       |
-| `shadow-glow-error`  | Error highlight glow                    |
-| `shadow-card`        | Card with left-edge accent              |
-| `shadow-overlay`     | Drawer / sheet accent shadow            |
-
-### Semantic status colors (static, theme-independent)
-
-| Tailwind class       | Value     |
-|----------------------|-----------|
-| `text-success`       | `#52B788` |
-| `bg-success-surface` | `rgba(82, 183, 136, 0.12)` |
-| `text-error`         | `#E5484D` |
-| `bg-error-surface`   | `rgba(229, 72, 77, 0.12)` |
-| `text-warning`       | `#F5A524` |
-| `bg-warning-surface` | `rgba(245, 165, 36, 0.12)` |
-| `text-info`          | `#5EB1EF` |
-| `bg-info-surface`    | `rgba(94, 177, 239, 0.12)` |
-
----
-
-## Custom utility classes (defined in globals.css)
-
-These are `@utility` classes — use them as plain Tailwind classes, no prefix needed.
-
-### Surfaces
-
-| Class             | What it does                                           |
-|-------------------|--------------------------------------------------------|
-| `card-surface`    | Elevated bg + 1.5px border-stamp + 2px hard shadow     |
-| `overlay-surface` | Elevated bg + 1.5px border-stamp + 3px hard shadow     |
-
-### Stamp button states
-
-| Class                   | What it does                            |
-|-------------------------|-----------------------------------------|
-| `btn-stamp`             | Base Swiss hard-shadow button           |
-| `btn-stamp-hover`       | Translate (1,1) + shrink shadow         |
-| `btn-stamp-active`      | Translate (2,2) + remove shadow         |
-| `btn-stamp-primary`     | Accent background + text                |
-| `btn-stamp-primary-hover` | Accent hover background              |
-| `btn-stamp-ghost`       | Transparent + no shadow                 |
-| `btn-stamp-ghost-hover` | Faint bg + stronger border              |
-| `stamp-lg`              | 6px hard shadow (CTA / hero)            |
-| `stamp-xl`              | 8px hard shadow (hero highlight)        |
-
-### Layout
-
-| Class                    | What it does                  |
-|--------------------------|-------------------------------|
-| `section-container`      | Max 1280px centered container |
-| `section-container-wide` | Max 1440px centered container |
-| `rounded-node`           | 4px radius (workflow nodes only) |
-
-### Marketing / landing
-
-| Class              | What it does                             |
-|--------------------|------------------------------------------|
-| `bento-card`       | Marketing card with hard-shadow hover    |
-| `bento-card-hover` | Lifts card (-1,-1) + expands shadow      |
-| `landing-eyebrow`  | Uppercase eyebrow label (brand color)    |
-| `terminal-surface` | Dark terminal with mono font             |
-| `cta-panel`        | Deep dark bg (dark: near-black, light: forest) |
-
----
-
-## Typography classes
-
-| Tailwind class   | Size / Use                                    |
-|------------------|-----------------------------------------------|
-| `text-display-xl` | 56px — hero headlines                        |
-| `text-display-lg` | 44px — section headlines                     |
-| `text-h1`        | 32px — page titles                            |
-| `text-h2`        | 24px — section headings                       |
-| `text-h3`        | 20px — card titles                            |
-| `text-h4`        | 17px — widget headings                        |
-| `text-h5`        | 14px — compact headings                       |
-| `text-h6`        | 12px / +0.04em tracking — eyebrow labels, uppercase |
-| `text-body-lg`   | 16px — lead paragraphs                        |
-| `text-body-md`   | 14px — default body                           |
-| `text-body-sm`   | 13px — secondary text, captions              |
-| `text-caption`   | 12px — timestamps, meta, tiny labels         |
-| `text-mono-md`   | 13px mono — IDs, env vars, code              |
-| `text-mono-sm`   | 12px mono — inline code, hashes             |
-
-**Typography rules:**
-- `font-sans` (Inter) for all UI text
-- `font-mono` (JetBrains Mono) for IDs, hashes, timestamps, code, env vars, numbers in tables
-- Always add `tabular-nums` to numbers in aligned columns
-- `text-h6 uppercase tracking-wider` for all section / field labels
-
----
-
-## Color theme awareness
-
-The app uses three themes via `[data-theme="dark|light|brutalist"]` on `<html>`.
-
-| Token            | Dark (`#0A0E0C` canvas) | Light (`#F2EDE0` canvas) | Brutalist (marketing) |
-|------------------|-------------------------|--------------------------|-----------------------|
-| `bg-bg-canvas`   | `#0A0E0C`               | `#F2EDE0`                | `#F5EFE0`             |
-| `bg-bg-surface`  | `#101512`               | `#FAF7F0`                | `#FFFFFF`             |
-| `bg-bg-elevated` | `#161C18`               | `#FFFFFF`                | `#FFFFFF`             |
-| `text-text-primary` | `#FAF7F0` (cream)    | `#0E2B1C` (forest dark)  | `#0A0E0C`             |
-| `text-text-muted` | `#7A8881`              | `#5A675F`                | `#5A675F`             |
-| `border-border-default` | `rgba(255,255,255,0.18)` | `rgba(14,43,28,0.18)` | `#0A0E0C` (solid) |
-| `bg-accent-primary` | `#4FC97A`            | `#4FC97A`                | `#C5F4A5` (lime)      |
-| Hard shadow      | `#1F4D38`               | `#0E2B1C`                | `#000000`             |
-| Shadow style     | Subtle multi-layer      | Subtle, less blur        | Hard offset, no blur  |
-
-**Theme rules:**
-- Component code never needs to branch on theme — use semantic tokens and the CSS does the work
-- Shadows switch automatically (`shadow-sm` is subtle in dark/light, hard-offset in brutalist)
-- Brutalist theme is **only for marketing pages** (`data-theme="brutalist"`), never in the app shell
-
----
-
-## Palette classes (use sparingly — prefer semantic tokens)
-
-Only use raw palette classes when semantic tokens don't cover your case:
-
-```
-Forest: bg-forest-{50|100|200|300|400|500|600|700|800|900}
-Cream:  bg-cream-{50|100|200|300|400}
-Lime:   bg-lime-{50|100|200|300|400|500|600|700}  ← brutalist only
-Neutral: bg-neutral-{0|50|100|200|300|400|500|600|700|800}
-```
+Rule of thumb: if you're about to invent a class name or hardcode a hex, read the relevant doc first.
 
 ---
 
@@ -275,3 +105,17 @@ Neutral: bg-neutral-{0|50|100|200|300|400|500|600|700|800}
 - One component per file unless tightly coupled (e.g. trigger + content)
 - Import from `@/components/ui/<name>`, not relative paths from pages
 - Use `cn()` from `@/lib/utils` for conditional class merging (never string concatenation)
+- Split each page region (header, sidebar, panel, FAB, controls) into its own co-located file. Page = thin composition layer.
+
+---
+
+## Compact instructions
+
+When auto-compaction fires, preserve:
+
+1. The three rules above (no style tags / no `[var()]` / reuse components) and the hard no-list.
+2. The reference-doc pointers in this file — agents must know `.claude/docs/flow-*.md` exist.
+3. The current task's file paths, the user's last decision, and any unresolved errors.
+4. Any in-progress component split (which files were extracted, which still need extraction).
+
+Drop: chat-level reasoning, intermediate exploration, output that's already in the diff.

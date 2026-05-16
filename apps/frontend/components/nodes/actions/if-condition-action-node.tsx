@@ -5,19 +5,21 @@ import { IfNodeType } from "@/app/types/actions";
 
 import { ActionNodeBase } from "./action-node-base";
 
-
-
-
-
-
 export function IfNode({ id, data, selected }: NodeProps<IfNodeType>) {
   return (
     <ActionNodeBase
       id={id}
       selected={selected}
-      icon={<GitBranch className="text-text-secondary size-5" />}
+      tone="branch"
+      icon={<GitBranch />}
       onEdit={data.onEdit}
-      outputs={[{ id: "true" }, { id: "false" }]}
+      outputs={[
+        { id: "true", label: "true" },
+        { id: "false", label: "false" },
+      ]}
+      label="If"
+      subtitle="condition"
+      badge="Branch"
     />
   );
 }

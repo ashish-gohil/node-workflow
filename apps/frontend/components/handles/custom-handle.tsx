@@ -3,6 +3,12 @@ import { Plus } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
+/* ============================================================
+   CUSTOM HANDLE — handle visual paired with a connector stub
+   and an inline "+" affordance. Used where ButtonHandle's full
+   sheet integration isn't needed.
+   ============================================================ */
+
 type CustomHandleProps = {
   position?: Position;
   type?: "source" | "target";
@@ -30,13 +36,39 @@ export function CustomHandle({
         position={position}
         type={type}
         id={handleId}
-        className="bg-bg-inset border-border-default pointer-events-auto flex w-8 items-center justify-start rounded-full border-2"
+        className={cn(
+          "bg-bg-canvas! border-text-primary! dark:border-border-strong!",
+          "size-2.5! rounded-full! border-2!",
+          "pointer-events-auto",
+          // Invisible larger hit-target — prevents flicker on the small dot.
+          "before:absolute before:content-[''] before:rounded-full before:-inset-2",
+          "transition-[border-color,box-shadow] duration-[140ms]",
+          "hover:border-accent-primary!",
+          "hover:shadow-[0_0_0_4px_color-mix(in_oklab,var(--accent-primary)_18%,transparent)]"
+        )}
       >
         {showPlus && (
           <>
+            {/* Connector stub */}
             <div className="bg-border-strong h-px w-8" />
-            <button className="border-border-strong bg-bg-elevated hover:bg-accent-subtle pointer-events-auto absolute top-1 left-8 flex size-4 items-center justify-center rounded-full border-2 transition-colors duration-[120ms] hover:cursor-pointer">
-              <Plus size={14} className="text-text-primary" />
+            {/* Plus button */}
+            <button
+              type="button"
+              aria-label="Add next step"
+              className={cn(
+                "absolute top-1/2 left-8 -translate-y-1/2",
+                "flex size-5 items-center justify-center",
+                "border-text-primary dark:border-border-default bg-bg-elevated",
+                "text-text-primary border-[1.5px]",
+                "shadow-[2px_2px_0_0_var(--hard-shadow-color)]",
+                "transition-[transform,box-shadow,background-color] duration-[140ms]",
+                "hover:-translate-x-px hover:-translate-y-px",
+                "hover:shadow-[3px_3px_0_0_var(--hard-shadow-color)]",
+                "hover:bg-accent-primary hover:text-accent-on",
+                "pointer-events-auto cursor-pointer"
+              )}
+            >
+              <Plus size={12} strokeWidth={2.5} />
             </button>
           </>
         )}

@@ -7,11 +7,6 @@ import { WebhookTriggerNodeType } from "@/app/types/tirggers";
 
 import { TriggerNodeBase } from "./trigger-node-base";
 
-
-
-
-
-
 export function WebhookTriggerNode({
   id,
   data,
@@ -23,7 +18,10 @@ export function WebhookTriggerNode({
       selected={selected}
       status={data.execution!}
       onEdit={data.onEdit}
-      icon={<Webhook className="text-text-secondary size-5" />}
+      icon={<Webhook />}
+      label="Webhook"
+      subtitle="POST"
+      badge="Trigger"
     />
   );
 }

@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Zap } from "lucide-react";
 import { motion } from "motion/react";
+
+import AppLogo from "@/components/ui/app-logo";
 
 const SOCIALS = [
   {
@@ -71,14 +72,7 @@ export default function LandingFooter() {
           {/* Left: brand + subscribe */}
           <div className="max-w-sm flex-1">
             {/* Logo */}
-            <div className="mb-5 flex items-center gap-2.5">
-              <span className="btn-stamp bg-accent-primary text-accent-on size-7 shadow-[2px_2px_0_0_var(--hard-shadow-color)]">
-                <Zap className="size-3.5 fill-current" aria-hidden="true" />
-              </span>
-              <span className="text-body-md text-text-primary font-bold tracking-tight">
-                FLOW
-              </span>
-            </div>
+            <AppLogo className="mb-5" />
 
             <p className="text-body-sm text-text-secondary mb-6 leading-relaxed">
               Release notes and the occasional &ldquo;we shipped this&rdquo;

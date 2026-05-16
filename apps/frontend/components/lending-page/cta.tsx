@@ -18,12 +18,12 @@ type TermLine =
   | { type: "cur" };
 
 const TERM_SEQUENCE: TermLine[] = [
-  { type: "cmd", text: "npx create-flow my-app" },
-  { type: "dim", text: "→ scaffolding workspace" },
+  { type: "cmd", text: "git clone <your-fork>/flow" },
+  { type: "dim", text: "→ cloning workspace" },
+  { type: "cmd", text: "pnpm install" },
   { type: "ok", text: "✓ dependencies installed" },
-  { type: "ok", text: "✓ 12 starter workflows imported" },
-  { type: "cmd", text: "flow dev" },
-  { type: "dim", text: "listening on localhost:3030" },
+  { type: "cmd", text: "pnpm dev" },
+  { type: "dim", text: "listening on localhost:3000" },
   { type: "cur" },
 ];
 
@@ -301,7 +301,7 @@ export default function CTAStrip() {
             <div>
               <p className="text-cream-50/70 mb-5 inline-flex items-center gap-2.5 font-mono text-[11px] font-semibold tracking-[0.12em] uppercase">
                 <span className="bg-accent-primary animate-pulse-status size-1.5 rounded-full" />
-                Open source · npx-ready
+                Open source &middot; clone and run
               </p>
               <h2 className="text-cream-50 mb-5 text-[clamp(32px,4.4vw,52px)] leading-[1.0] font-semibold tracking-[-0.04em]">
                 One terminal
@@ -309,9 +309,9 @@ export default function CTAStrip() {
                 to your first workflow.
               </h2>
               <p className="text-body-md text-cream-50/70 mb-7 max-w-md leading-relaxed">
-                Run it on your laptop, your team&apos;s box, or click into the
-                hosted version. Same editor, same engine, same workflows
-                round-tripping through git.
+                Or skip the install and try the editor right here in your
+                browser &mdash; the same canvas, the same JSON, the same git
+                round-trip.
               </p>
 
               <div className="flex flex-wrap gap-3.5">
@@ -319,14 +319,7 @@ export default function CTAStrip() {
                   onClick={() => router.push("/workflows/new")}
                   className="btn-stamp text-body-md bg-accent-primary text-accent-on border-border-stamp hover:btn-stamp-hover active:btn-stamp-active hover:bg-accent-hover h-12 px-[22px]"
                 >
-                  Start free <ArrowRight className="size-4" />
-                </button>
-
-                <button
-                  className="btn-stamp text-body-md text-cream-50 border-cream-50 hover:bg-cream-50/[0.08] hover:border-cream-50 h-12 bg-transparent px-[22px] hover:translate-x-0 hover:translate-y-0"
-                  style={{ boxShadow: "none" }}
-                >
-                  Read the docs
+                  Open the editor <ArrowRight className="size-4" />
                 </button>
               </div>
             </div>

@@ -6,14 +6,10 @@ import useFlow from "@/app/store/flow-store";
 import ActionSheet from "@/app/workflows/new/action-sheet";
 import { BaseHandle } from "@/components/handles/base-handle";
 import { ButtonHandle } from "@/components/handles/button-handle";
-import { NodeStatusIndicator } from "@/components/node-status-indicator";
 import {
   BaseNode,
-  BaseNodeDivider,
-  BaseNodeFooter,
-  BaseNodeHeader,
-  BaseNodeSubtitle,
-  BaseNodeTitle,
+  BaseNodeBadge,
+  BaseNodeIcon,
 } from "@/components/nodes/base-node";
 import { cn } from "@/lib/utils";
 
@@ -33,9 +29,22 @@ interface ActionNodeBaseProps {
   icon: React.ReactNode;
   label?: string;
   subtitle?: string;
+  /** Tiny chip rendered top-left of the tile. */
+  badge?: string;
+  /** Decorative stripe tone. Defaults to "action". */
+  tone?: "default" | "action" | "branch" | "ai";
   onEdit?: (id: string) => void;
   outputs: OutputHandle[];
   inputs?: InputHandle[];
+}
+
+/* Evenly distribute handles along the tile edge.
+ * One handle → 50%. Two → 28%/72%. N → 22% .. 78%. */
+function edgeOffset(index: number, count: number): string {
+  if (count <= 1) return "50%";
+  const min = 22;
+  const max = 78;
+  return `${min + (index * (max - min)) / (count - 1)}%`;
 }
 
 export function ActionNodeBase({
@@ -44,6 +53,8 @@ export function ActionNodeBase({
   icon,
   label = "Action",
   subtitle,
+  badge,
+  tone = "action",
   onEdit,
   outputs,
   inputs,
@@ -51,80 +62,67 @@ export function ActionNodeBase({
   const { nodes, setEditingActionNodeId } = useFlow();
   const curNode = nodes.find((node) => node.id === id)!;
 
+  const inputList = inputs ?? [{ id: "in" }];
+
   return (
-    <NodeStatusIndicator status="initial" variant="border">
-      <BaseNode
-        selected={selected}
-        onDoubleClick={() => setEditingActionNodeId(id)}
-        className="min-w-[220px]"
-      >
-        {/* Input handles (left edge) */}
-        {(inputs || [{ id: "in" }]).map((input, index) => {
-          const top =
-            !inputs || inputs.length === 1
-              ? "50%"
-              : `${25 + (index * 50) / (inputs.length - 1)}%`;
+    <BaseNode
+      selected={selected}
+      tone={tone}
+      label={label}
+      subtitle={subtitle}
+      badge={badge ? <BaseNodeBadge>{badge}</BaseNodeBadge> : undefined}
+      onDoubleClick={() => (onEdit ? onEdit(id) : setEditingActionNodeId(id))}
+    >
+      <BaseNodeIcon>{icon}</BaseNodeIcon>
 
-          return (
-            <BaseHandle
-              key={`input-${index}`}
-              id={input.id ?? `input-${index}`}
-              type="target"
-              position={Position.Left}
-              style={{ top }}
-            />
-          );
-        })}
+      {/* Input handles (left edge). */}
+      {inputList.map((input, index) => (
+        <BaseHandle
+          key={input.id ?? `input-${index}`}
+          id={input.id ?? `input-${index}`}
+          type="target"
+          position={Position.Left}
+          style={{ top: edgeOffset(index, inputList.length) }}
+        />
+      ))}
 
-        {/* Header */}
-        <BaseNodeHeader>
-          <BaseNodeTitle>
-            <span className="text-forest-300 shrink-0 [&_svg]:size-4">
-              {icon}
-            </span>
-            <h5 className="text-h5 text-text-primary truncate font-semibold">
-              {label}
-            </h5>
-          </BaseNodeTitle>
+      {/* Output handles (right edge). Each carries an ActionSheet trigger. */}
+      {outputs.map((output, index) => (
+        <ButtonHandle
+          key={output.id}
+          id={output.id}
+          nodeId={id}
+          type="source"
+          position={Position.Right}
+          style={{ top: edgeOffset(index, outputs.length) }}
+        >
+          <ActionSheet
+            setConfigNodeId={setEditingActionNodeId}
+            sourceHandleId={output.id}
+            sourceNode={curNode}
+          />
+        </ButtonHandle>
+      ))}
 
-          <button
-            aria-label="Node options"
-            className="text-text-muted hover:text-text-primary hover:bg-accent-subtle inline-flex size-6 shrink-0 items-center justify-center rounded-sm transition-colors duration-[120ms]"
-          >
-            <span className="text-body-md leading-none">⋯</span>
-          </button>
-        </BaseNodeHeader>
-
-        {/* Subtitle */}
-        {subtitle && <BaseNodeSubtitle>{subtitle}</BaseNodeSubtitle>}
-
-        <BaseNodeDivider />
-
-        {/* Footer with output handles */}
-        <BaseNodeFooter className="relative">
-          <span className="text-caption text-text-muted">Action</span>
-
-          {/* Output handles (right edge) */}
-          {outputs.map((output, index) => (
-            <ButtonHandle
-              key={output.id}
-              id={output.id}
-              nodeId={id}
-              type="source"
-              position={Position.Right}
-              style={{
-                top: outputs.length === 1 ? "50%" : `${30 + index * 40}%`,
-              }}
+      {/* Inline output labels for multi-output nodes (e.g. If: true/false). */}
+      {outputs.length > 1 && (
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-y-0 -right-1 flex flex-col justify-around"
+        >
+          {outputs.map((output) => (
+            <span
+              key={`${output.id}-label`}
+              className={cn(
+                "text-text-muted translate-x-full pl-3 font-mono text-[9px] font-semibold tracking-[0.06em] uppercase",
+                "whitespace-nowrap"
+              )}
             >
-              <ActionSheet
-                setConfigNodeId={setEditingActionNodeId}
-                sourceHandleId={output.id}
-                sourceNode={curNode}
-              />
-            </ButtonHandle>
+              {output.label ?? output.id}
+            </span>
           ))}
-        </BaseNodeFooter>
-      </BaseNode>
-    </NodeStatusIndicator>
+        </div>
+      )}
+    </BaseNode>
   );
 }

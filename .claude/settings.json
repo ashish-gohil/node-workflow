@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "deny": [
+      "Read(node_modules/**)",
+      "Read(**/node_modules/**)",
+      "Read(.next/**)",
+      "Read(apps/*/.next/**)",
+      "Read(dist/**)",
+      "Read(apps/*/dist/**)",
+      "Read(.turbo/**)",
+      "Read(apps/*/.turbo/**)",
+      "Read(**/*.lock)",
+      "Read(**/*.log)",
+      "Read(.git/**)"
+    ]
+  }
+}

@@ -1418,9 +1418,11 @@ function CardBody({
   return (
     <div
       className={cn(
-        // Match top section height. `min-h` so unexpectedly long copy can grow.
+        // Pin top section at 260px (the visual height). The body uses flex-1
+        // to absorb any extra row height when a sibling card is taller, so the
+        // article's bg-elevated never shows through below the body.
         "bg-bg-surface border-text-primary dark:border-border-default",
-        "flex min-h-[260px] flex-col justify-center border-t-[1.5px] px-7 py-7"
+        "flex min-h-[260px] flex-1 flex-col justify-center border-t-[1.5px] px-7 py-7"
       )}
     >
       <p className="text-text-muted mb-3 inline-flex items-center gap-2 font-mono text-[10px] font-semibold tracking-[0.12em] uppercase">
@@ -1465,8 +1467,9 @@ export default function BentoFeatures() {
             </h2>
           </div>
           <p className="text-body-md text-text-secondary max-w-sm">
-            The same canvas handles a daily report, an agent that escalates to a
-            human, and the webhook stitching them together.
+            Same canvas runs the daily Slack report, the customer agent that
+            pages a human when it gets stuck, and the webhook gluing both to
+            whatever you already have in production.
           </p>
         </div>
 
@@ -1477,7 +1480,7 @@ export default function BentoFeatures() {
               num="01"
               eyebrow="Models & retrieval"
               title="LLMs are just nodes."
-              desc="One node interface for OpenAI, Anthropic, or whatever runs behind Ollama. Memory and retrieval live in separate nodes, so swapping a model never touches the graph."
+              desc="One node speaks to OpenAI, Anthropic, or whatever you've got running through Ollama. Switching providers means dragging in a different node. Memory, retrieval, and prompt logic stay where they are, so you can A/B test Claude against GPT-4o on the same graph without rebuilding the surrounding plumbing."
             />
           </BentoCard>
 
@@ -1487,7 +1490,7 @@ export default function BentoFeatures() {
               num="02"
               eyebrow="Tool-use loops"
               title="Agents with a stop button."
-              desc="Pause the loop on any tool call. Read the trace, edit the response, hit resume — same canvas, no separate debugger."
+              desc="Most agents are a black box until they break. Pause the loop on any tool call, read what the model was about to do, edit the args or the response, then hit resume. Same canvas you built the rest on. The debugger isn't a separate window you have to learn."
             />
           </BentoCard>
 
@@ -1497,7 +1500,7 @@ export default function BentoFeatures() {
               num="03"
               eyebrow="HTTP"
               title="HTTP without the wrappers."
-              desc="Retries, exponential backoff, OAuth refresh, and rate-limit handling live inside the HTTP node. Parallel branches are edges, not code."
+              desc="You've written this retry loop a dozen times. The HTTP node already covers exponential backoff, OAuth refresh, 429s, and idempotency keys, so you can stop writing it. Need a request to fan out across three regions? That's two extra edges, not a thread pool."
             />
           </BentoCard>
 
@@ -1507,7 +1510,7 @@ export default function BentoFeatures() {
               num="04"
               eyebrow="Triggers"
               title="Trigger it however."
-              desc="Cron strings for the 3am jobs. Webhooks for partner pushes. Queue listeners for SQS and RabbitMQ. The trigger is just a node — the rest of the graph never knows."
+              desc="Same workflow, multiple ways in. A cron string for the 3am roll-up. A webhook URL for the partner who insists on pushing instead of letting you pull. SQS and RabbitMQ listeners for when traffic spikes past what a webhook can hold. Swap the trigger node and the rest of the graph keeps running."
             />
           </BentoCard>
 
@@ -1517,7 +1520,7 @@ export default function BentoFeatures() {
               num="05"
               eyebrow="Email"
               title="Drip campaigns without the SaaS."
-              desc="Segment from a SQL query, rewrite copy per recipient with an LLM node, send through Resend or SES. Opens and clicks land back as events on the next run."
+              desc="Pull your audience from a SQL query you already trust. Rewrite the copy per recipient with an LLM node, send through Resend or SES. Opens and clicks come back as events on the next run, so tomorrow's email knows who actually read yesterday's. Your data, your prompts, your codebase. No vendor's dashboard between you and the send button."
             />
           </BentoCard>
 
@@ -1527,7 +1530,7 @@ export default function BentoFeatures() {
               num="06"
               eyebrow="ETL"
               title="Pipelines that fit on one screen."
-              desc="Branch on a column, run twenty stages in parallel, retry only the flaky one. Postgres in, S3 or another Postgres out, with run history pinned next to your code."
+              desc="Branch on a column, fan out twenty stages in parallel, retry only the flaky one when it dies on a malformed row. Postgres in, S3 or another Postgres out. Run history pins right next to the node it came from, so chasing last Tuesday's 4am failure doesn't mean tab-hopping through three observability tools."
               mutedDesc
             />
           </BentoCard>

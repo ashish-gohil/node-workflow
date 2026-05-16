@@ -1,12 +1,27 @@
-import type { ComponentProps } from "react";
+"use client";
+
+import type { ComponentProps, ReactNode } from "react";
 
 import { cn } from "@/lib/utils";
 
 /* ============================================================
-   BASE NODE — FLOW workflow node card
-   Spec: bg-bg-elevated, 1px border, 4px radius, shadow-sm
-   Status accent: inset 2px left-edge box-shadow
-   Ports: 8px circles, top/bottom edge
+   BASE NODE — FLOW workflow node, n8n classic icon-tile style
+
+   Layout per node:
+
+     ┌──────────┐
+     │          │   ← 80x80 tile (bounding box / handle anchor)
+     │   icon   │
+     │          │
+     └──────────┘
+        label       ← absolute, centered below the tile
+        subtitle    ← absolute, mono caption below the label
+
+   - Tile background: bg-bg-elevated, 1.5px stamp border, 3px hard shadow.
+   - Label sits OUTSIDE the bounding box (absolute, pointer-events-none)
+     so handles attach to the tile edges, not the label width.
+   - Status (running/success/error) is baked in — no external indicator
+     wrapper is required to render correctly.
    ============================================================ */
 
 type NodeStatus = "default" | "running" | "success" | "error" | "disabled";
@@ -14,140 +29,160 @@ type NodeStatus = "default" | "running" | "success" | "error" | "disabled";
 interface BaseNodeProps extends ComponentProps<"div"> {
   status?: NodeStatus;
   selected?: boolean;
+  /** Name rendered below the tile. */
+  label?: string;
+  /** Small mono caption rendered below the label. */
+  subtitle?: string;
+  /** Optional small chip slot rendered top-left of the tile. */
+  badge?: ReactNode;
+  /** Tone tints the left stamp stripe — purely decorative. */
+  tone?: "default" | "trigger" | "action" | "branch" | "ai";
 }
+
+const TONE_STRIPE: Record<NonNullable<BaseNodeProps["tone"]>, string> = {
+  default: "",
+  trigger: "shadow-[inset_3px_0_0_0_var(--color-warning)]",
+  action: "shadow-[inset_3px_0_0_0_var(--accent-primary)]",
+  branch: "shadow-[inset_3px_0_0_0_var(--color-info)]",
+  ai: "shadow-[inset_3px_0_0_0_var(--color-forest-300)]",
+};
 
 export function BaseNode({
   className,
   status = "default",
   selected = false,
+  label,
+  subtitle,
+  badge,
+  tone = "default",
+  children,
   ...props
 }: BaseNodeProps) {
   return (
     <div
+      tabIndex={0}
       className={cn(
-        "rounded-node relative max-w-[320px] min-w-[240px] cursor-grab",
-        "bg-bg-elevated border-border-default border",
-        "shadow-sm transition-all duration-[120ms]",
-        // Hover
+        // Bounding box = tile. Label below is absolute and doesn't affect size.
+        "relative size-20 cursor-grab focus:outline-none",
+        "rounded-node bg-bg-elevated",
+        "border-text-primary dark:border-border-default border-[1.5px]",
+        // Refined stamp shadow — softer than landing surfaces so nodes
+        // read as precise UI elements rather than poster graphics.
+        "shadow-[2px_2px_0_0_var(--hard-shadow-color)]",
+        "transition-[transform,box-shadow,border-color] duration-[160ms] ease-out",
+        // Hover lift.
+        "hover:-translate-x-px hover:-translate-y-px",
+        "hover:shadow-[3px_3px_0_0_var(--hard-shadow-color)]",
         "hover:border-border-strong",
-        // Selected
-        selected &&
-          "border-forest-500 border-2 shadow-glow-brand",
-        // Running — animated border pulse via outline
+        // Decorative tone stripe (only renders if tone provided).
+        tone !== "default" && TONE_STRIPE[tone],
+        // Selected — brand-coloured stamp shadow.
+        selected && [
+          "border-accent-primary",
+          "shadow-[3px_3px_0_0_var(--accent-primary)]",
+          "hover:shadow-[3px_3px_0_0_var(--accent-primary)]",
+        ],
+        // Status states.
         status === "running" && [
           "border-forest-300",
           "animate-[border-pulse_1.4s_ease-in-out_infinite]",
         ],
-        // Success — 2px inset left accent
         status === "success" &&
-          "shadow-[inset_2px_0_0_0_var(--color-success),var(--ds-shadow-sm)]",
-        // Error — inset left accent + glow
+          "border-success shadow-[2px_2px_0_0_var(--color-success)]",
         status === "error" &&
-          "shadow-[inset_2px_0_0_0_var(--color-error),var(--ds-shadow-glow-error)]",
-        // Disabled
-        status === "disabled" && "opacity-50",
-        className
-      )}
-      tabIndex={0}
-      {...props}
-    />
-  );
-}
-
-/* ---------- Header ---------- */
-export function BaseNodeHeader({ className, ...props }: ComponentProps<"div">) {
-  return (
-    <div
-      className={cn(
-        "flex items-start justify-between gap-2 px-4 py-3",
+          "border-error shadow-[2px_2px_0_0_var(--color-error)]",
+        status === "disabled" && "opacity-50 saturate-0",
+        // Focus ring for keyboard nav.
+        "focus-visible:ring-accent-primary focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-bg-canvas",
         className
       )}
       {...props}
-    />
-  );
-}
+    >
+      {children}
 
-/* ---------- Title area ---------- */
-export function BaseNodeTitle({ className, ...props }: ComponentProps<"div">) {
-  return (
-    <div
-      className={cn("flex min-w-0 items-center gap-2", className)}
-      {...props}
-    />
-  );
-}
-
-/* ---------- Subtitle / mono descriptor ---------- */
-export function BaseNodeSubtitle({ className, ...props }: ComponentProps<"p">) {
-  return (
-    <p
-      className={cn(
-        "text-mono-sm text-text-muted mt-0.5 truncate px-4 font-mono",
-        className
+      {/* Status corner dot — top-right. */}
+      {(status === "running" ||
+        status === "success" ||
+        status === "error") && (
+        <span
+          aria-hidden
+          className={cn(
+            "absolute -top-1.5 -right-1.5 size-2.5 rounded-full",
+            "border-bg-canvas border-2",
+            status === "running" && "bg-forest-300 animate-pulse",
+            status === "success" && "bg-success",
+            status === "error" && "bg-error"
+          )}
+        />
       )}
-      {...props}
-    />
+
+      {/* Badge slot — top-left chip (e.g. "POST", "1/3"). */}
+      {badge && (
+        <span className="absolute -top-2 left-1.5 z-10">{badge}</span>
+      )}
+
+      {/* Label block — rendered below the tile, outside the bounding box. */}
+      {(label || subtitle) && (
+        <div
+          className={cn(
+            "absolute top-full left-1/2 -translate-x-1/2 mt-2",
+            "flex w-[164px] flex-col items-center gap-0.5",
+            "pointer-events-none select-none"
+          )}
+        >
+          {label && (
+            <span className="text-text-primary max-w-full truncate text-center text-[13px] font-semibold leading-tight tracking-[-0.005em]">
+              {label}
+            </span>
+          )}
+          {subtitle && (
+            <span className="text-text-muted max-w-full truncate text-center font-mono text-[10px] leading-tight tracking-[0.04em] uppercase">
+              {subtitle}
+            </span>
+          )}
+        </div>
+      )}
+    </div>
   );
 }
 
-/* ---------- Divider ---------- */
-export function BaseNodeDivider({ className }: { className?: string }) {
-  return <div className={cn("border-border-subtle border-t", className)} />;
-}
+/* ---------- Icon slot ---------- */
 
-/* ---------- Footer / status row ---------- */
-export function BaseNodeFooter({ className, ...props }: ComponentProps<"div">) {
-  return (
-    <div
-      className={cn("flex items-center gap-2 px-4 py-2.5", className)}
-      {...props}
-    />
-  );
-}
-
-/* ---------- Port (connection handle visual) ---------- */
-
-interface PortProps {
-  position?: "top" | "bottom" | "left" | "right";
-  offset?: string;
-  className?: string;
-}
-
-export function BaseNodePort({
-  position = "bottom",
-  offset = "50%",
+/** Centered icon container for the tile. Children should be a lucide icon
+ *  (or any element); size is fixed at 32px, stroke 1.5 for a confident
+ *  visual weight that reads at canvas zoom. */
+export function BaseNodeIcon({
   className,
-}: PortProps) {
-  const posStyle: React.CSSProperties = {};
+  ...props
+}: ComponentProps<"div">) {
+  return (
+    <div
+      className={cn(
+        "pointer-events-none absolute inset-0 flex items-center justify-center",
+        "text-text-secondary",
+        "[&_svg]:size-8 [&_svg]:stroke-[1.5]",
+        className
+      )}
+      {...props}
+    />
+  );
+}
 
-  switch (position) {
-    case "top":
-      posStyle.top = "-4px";
-      posStyle.left = offset;
-      break;
-    case "bottom":
-      posStyle.bottom = "-4px";
-      posStyle.left = offset;
-      break;
-    case "left":
-      posStyle.left = "-4px";
-      posStyle.top = offset;
-      break;
-    case "right":
-      posStyle.right = "-4px";
-      posStyle.top = offset;
-      break;
-  }
+/* ---------- Badge ---------- */
 
+/** Small uppercase mono chip — pairs with the badge slot on BaseNode. */
+export function BaseNodeBadge({
+  className,
+  ...props
+}: ComponentProps<"span">) {
   return (
     <span
-      style={posStyle}
       className={cn(
-        "absolute size-2 -translate-x-1/2 rounded-full",
-        "bg-bg-canvas border-border-strong border-[1.5px]",
-        "hover:border-forest-400 transition-colors duration-[120ms]",
+        "border-text-primary dark:border-border-default bg-bg-canvas text-text-primary",
+        "inline-flex items-center border px-1 py-px font-mono text-[9px] font-bold leading-none tracking-[0.08em] uppercase",
         className
       )}
+      {...props}
     />
   );
 }

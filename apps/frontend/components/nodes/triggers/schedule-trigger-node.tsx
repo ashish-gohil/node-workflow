@@ -7,11 +7,6 @@ import { SchedulerTriggerNodeType } from "@/app/types/tirggers";
 
 import { TriggerNodeBase } from "./trigger-node-base";
 
-
-
-
-
-
 export function SchedulerTriggerNode({
   id,
   data,
@@ -23,7 +18,10 @@ export function SchedulerTriggerNode({
       selected={selected}
       status={data.execution!}
       onEdit={data.onEdit}
-      icon={<TimerIcon className="text-text-secondary size-5" />}
+      icon={<TimerIcon />}
+      label="Schedule"
+      subtitle="Cron"
+      badge="Trigger"
     />
   );
 }

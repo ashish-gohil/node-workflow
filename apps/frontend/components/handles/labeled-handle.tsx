@@ -4,6 +4,11 @@ import { type HandleProps } from "@xyflow/react";
 import { BaseHandle } from "@/components/handles/base-handle";
 import { cn } from "@/lib/utils";
 
+/* ============================================================
+   LABELED HANDLE — pairs a handle with an inline label.
+   Useful for nodes with multiple outputs (e.g. If: true/false).
+   ============================================================ */
+
 const flexDirections = {
   top: "flex-col",
   right: "flex-row-reverse justify-end",
@@ -41,7 +46,12 @@ export function LabeledHandle({
         className={handleClassName}
         {...handleProps}
       />
-      <label className={cn("text-foreground px-3", labelClassName)}>
+      <label
+        className={cn(
+          "text-text-muted px-2 font-mono text-[9px] font-semibold tracking-[0.06em] uppercase",
+          labelClassName
+        )}
+      >
         {title}
       </label>
     </div>
