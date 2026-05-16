@@ -1,4 +1,13 @@
-import type { HttpRequest } from "@repo/types";
+import type {
+  CodeNode,
+  DelayNode,
+  HttpRequest,
+  If,
+  IfCondition as SharedIfCondition,
+  IfOperator,
+  MergeNode,
+  SetVariable,
+} from "@repo/types";
 import { Node } from "@xyflow/react";
 
 import { ExecutionStatus } from "./tirggers";
@@ -46,9 +55,7 @@ export type HttpRequestNodeData = BaseActionNodeData & {
 /*  Set / Transform Node                                               */
 /* ------------------------------------------------------------------ */
 
-export type SetNodeConfig = {
-  values: Record<string, unknown>;
-};
+export type SetNodeConfig = SetVariable;
 
 export type SetNodeData = BaseActionNodeData & {
   type: ActionNodeTypes.Set;
@@ -59,23 +66,9 @@ export type SetNodeData = BaseActionNodeData & {
 /*  IF / Condition Node                                                */
 /* ------------------------------------------------------------------ */
 
-export type ConditionOperator =
-  | "equals"
-  | "notEquals"
-  | "greaterThan"
-  | "lessThan"
-  | "exists"
-  | "contains";
-
-export type IfCondition = {
-  left: string;
-  operator: ConditionOperator;
-  right?: unknown;
-};
-
-export type IfNodeConfig = {
-  conditions: IfCondition[];
-};
+export type ConditionOperator = IfOperator;
+export type IfCondition = SharedIfCondition;
+export type IfNodeConfig = If;
 
 export type IfNodeData = BaseActionNodeData & {
   type: ActionNodeTypes.If;
@@ -86,9 +79,7 @@ export type IfNodeData = BaseActionNodeData & {
 /*  Code (JavaScript) Node                                             */
 /* ------------------------------------------------------------------ */
 
-export type CodeNodeConfig = {
-  code: string;
-};
+export type CodeNodeConfig = CodeNode;
 
 export type CodeNodeData = BaseActionNodeData & {
   type: ActionNodeTypes.Code;
@@ -99,9 +90,7 @@ export type CodeNodeData = BaseActionNodeData & {
 /*  Delay / Wait Node                                                  */
 /* ------------------------------------------------------------------ */
 
-export type DelayNodeConfig =
-  | { mode: "seconds"; seconds: number }
-  | { mode: "until"; timestamp: string };
+export type DelayNodeConfig = DelayNode;
 
 export type DelayNodeData = BaseActionNodeData & {
   type: ActionNodeTypes.Delay;
@@ -112,13 +101,8 @@ export type DelayNodeData = BaseActionNodeData & {
 /*  Merge Node (multiple input → single output, n8n-style)             */
 /* ------------------------------------------------------------------ */
 
-export type MergeMode = "append" | "byIndex" | "byKey";
-
-export type MergeNodeConfig = {
-  mode: MergeMode;
-  key?: string; // required when mode === "byKey"
-  inputs?: number; // default: 2
-};
+export type MergeMode = MergeNode["mode"];
+export type MergeNodeConfig = MergeNode;
 
 export type MergeNodeData = BaseActionNodeData & {
   inputs: number;

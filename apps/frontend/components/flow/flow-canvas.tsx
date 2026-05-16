@@ -17,6 +17,7 @@ import { ActionNodeTypes } from "@/app/types/actions";
 import { FlowEdge, FlowNode } from "@/app/types/flow";
 import { TriggerNodeTypes } from "@/app/types/tirggers";
 
+import { CodeNode } from "../nodes/actions/code-action-node";
 import { DelayNode } from "../nodes/actions/delay-action-node";
 import { HttpRequestNode } from "../nodes/actions/http-action-node";
 import { IfNode } from "../nodes/actions/if-condition-action-node";
@@ -52,6 +53,7 @@ export const nodeTypes = {
   [TriggerNodeTypes.SchedulerTrigger]: SchedulerTriggerNode,
   [TriggerNodeTypes.Webhook]: WebhookTriggerNode,
 
+  [ActionNodeTypes.Code]: CodeNode,
   [ActionNodeTypes.Delay]: DelayNode,
   [ActionNodeTypes.HttpRequest]: HttpRequestNode,
   [ActionNodeTypes.If]: IfNode,

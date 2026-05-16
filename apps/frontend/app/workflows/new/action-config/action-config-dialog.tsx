@@ -1,11 +1,12 @@
 "use client";
 
 import React, { useState } from "react";
-import { Shuffle } from "lucide-react";
+import { Code2, Shuffle } from "lucide-react";
 
 import {
   ActionNodeDataTypes,
   ActionNodeTypes,
+  CodeNodeData,
   SetNodeData,
 } from "@/app/types/actions";
 import { FlowNode } from "@/app/types/flow";
@@ -13,6 +14,7 @@ import { NodeConfigDialog } from "@/components/node-config/node-config-dialog";
 import { getNodeRegistryEntry } from "@/components/node-config/node-registry";
 import { SchemaNodeConfigDialog } from "@/components/node-config/schema-node-config-dialog";
 
+import { CodeNodeConfig } from "./code-node-config";
 import { SetNodeConfig } from "./set-node-config";
 
 interface ActionConfigDialogProps {
@@ -25,6 +27,7 @@ interface ActionConfigDialogProps {
 
 const actionIconMap: Partial<Record<ActionNodeTypes, React.ReactNode>> = {
   [ActionNodeTypes.Set]: <Shuffle className="size-5" />,
+  [ActionNodeTypes.Code]: <Code2 className="size-5" />,
 };
 
 export default function ActionConfigDialog({
@@ -98,6 +101,18 @@ function LegacyActionConfigDialog({
           setConfigData={
             setTempConfigData as React.Dispatch<
               React.SetStateAction<SetNodeData>
+            >
+          }
+        />
+      );
+      break;
+    case ActionNodeTypes.Code:
+      configContent = (
+        <CodeNodeConfig
+          configData={tempConfigData as CodeNodeData}
+          setConfigData={
+            setTempConfigData as React.Dispatch<
+              React.SetStateAction<CodeNodeData>
             >
           }
         />

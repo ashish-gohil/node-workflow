@@ -1,3 +1,8 @@
+import type {
+  ManualTrigger,
+  SchedulerTrigger,
+  WebhookTrigger,
+} from "@repo/types";
 import { ReactNode } from "react";
 import { Node } from "@xyflow/react";
 
@@ -48,98 +53,37 @@ export type BaseTriggerData<TConfig> = {
 /*  Manual Trigger                                                     */
 /* ------------------------------------------------------------------ */
 
-export type ManualTriggerDataTypes = BaseTriggerData<null>;
+export type ManualTriggerDataTypes = BaseTriggerData<ManualTrigger>;
 
 /* ------------------------------------------------------------------ */
 /*  Scheduler Trigger                                                  */
+/*                                                                    */
+/*  Root config comes from @repo/types. Sub-types are derived so      */
+/*  existing consumers (Weekday, IntervalUnit, …) keep working.       */
 /* ------------------------------------------------------------------ */
 
-export type SchedulerMode = "interval" | "daily" | "weekly" | "cron";
-
-export type IntervalUnit = "seconds" | "minutes" | "hours";
-
-export type Weekday =
-  | "monday"
-  | "tuesday"
-  | "wednesday"
-  | "thursday"
-  | "friday"
-  | "saturday"
-  | "sunday";
-
-export type IntervalSchedulerConfig = {
-  mode: "interval";
-  every: number;
-  unit: IntervalUnit;
-  startAt?: string;
-  endAt?: string;
-};
-
-export type DailySchedulerConfig = {
-  mode: "daily";
-  time: string; // hour string 00–23
-  startAt?: string;
-  endAt?: string;
-};
-
-export type WeeklySchedulerConfig = {
-  mode: "weekly";
-  days: Weekday[];
-  time: string;
-  startAt?: string;
-  endAt?: string;
-};
-
-export type CronSchedulerConfig = {
-  mode: "cron";
-  cronExpression: string;
-  timezone?: string;
-};
-
-export type SchedulerConfig =
-  | IntervalSchedulerConfig
-  | DailySchedulerConfig
-  | WeeklySchedulerConfig
-  | CronSchedulerConfig;
+export type SchedulerConfig = SchedulerTrigger;
+export type SchedulerMode = SchedulerConfig["mode"];
+export type IntervalSchedulerConfig = Extract<SchedulerConfig, { mode: "interval" }>;
+export type DailySchedulerConfig = Extract<SchedulerConfig, { mode: "daily" }>;
+export type WeeklySchedulerConfig = Extract<SchedulerConfig, { mode: "weekly" }>;
+export type CronSchedulerConfig = Extract<SchedulerConfig, { mode: "cron" }>;
+export type IntervalUnit = IntervalSchedulerConfig["unit"];
+export type Weekday = WeeklySchedulerConfig["days"][number];
 
 export type SchedulerTriggerDataTypes = BaseTriggerData<SchedulerConfig>;
 
 /* ------------------------------------------------------------------ */
 /*  Webhook Trigger                                                    */
+/*                                                                    */
+/*  Same pattern — root config is imported, sub-types derived.        */
 /* ------------------------------------------------------------------ */
 
-export type WebhookHttpMethod =
-  | "GET"
-  | "POST"
-  | "PUT"
-  | "PATCH"
-  | "DELETE"
-  | "HEAD"
-  | "OPTIONS";
-
-export type WebhookAuthConfig =
-  | { type: "none" }
-  | { type: "basic"; username: string; password: string }
-  | { type: "header"; headerName: string; value: string }
-  | { type: "query"; paramName: string; value: string };
-
-export type WebhookResponseMode = "onReceived" | "lastNode" | "custom";
-
-export type WebhookCustomResponse = {
-  statusCode: number;
-  body?: string;
-  headers?: Record<string, string>;
-};
-
-export type WebhookTriggerConfig = {
-  path: string;
-  methods: WebhookHttpMethod[];
-  auth?: WebhookAuthConfig;
-  responseMode?: WebhookResponseMode;
-  customResponse?: WebhookCustomResponse;
-  allowedIps?: string[];
-  timeoutMs?: number;
-};
+export type WebhookTriggerConfig = WebhookTrigger;
+export type WebhookHttpMethod = WebhookTriggerConfig["methods"][number];
+export type WebhookAuthConfig = NonNullable<WebhookTriggerConfig["auth"]>;
+export type WebhookResponseMode = NonNullable<WebhookTriggerConfig["responseMode"]>;
+export type WebhookCustomResponse = NonNullable<WebhookTriggerConfig["customResponse"]>;
 
 export type WebhookTriggerDataTypes = BaseTriggerData<WebhookTriggerConfig>;
 

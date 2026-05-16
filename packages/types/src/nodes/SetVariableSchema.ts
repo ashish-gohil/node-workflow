@@ -1,56 +1,45 @@
 import * as z from "zod";
 
+import type { NodeUIMeta } from "./field-meta";
+
+/* ------------------------------------------------------------------ */
+/*  Root schema                                                        */
+/*                                                                    */
+/*  The frontend stores Set-node assignments as a flat object keyed   */
+/*  by variable name — see set-node-config.tsx. Values are runtime-   */
+/*  typed at the form level (string / number / boolean / object), so  */
+/*  the schema accepts `unknown` here.                                */
+/* ------------------------------------------------------------------ */
+
 export const SetVariableSchema = z.object({
-  assignments: z
-    .array(
-      z.object({
-        name: z.string().min(1, "Variable name is required"),
-        type: z.enum(["string", "number", "boolean", "object"]).default("string"),
-        value: z.union([z.string(), z.number(), z.boolean()]),
-      })
-    )
-    .min(1, "Add at least one variable"),
+  values: z
+    .record(z.string(), z.unknown())
+    .describe("Key-value assignments emitted by this node"),
 });
 
 export type SetVariable = z.infer<typeof SetVariableSchema>;
 
-// Output is a flat object keyed by assignment name — not the raw config shape.
-// SetVariableNode.execute() must flatten:
-//   { assignments: [{ name: "foo", value: "bar" }] }  →  { foo: "bar" }
-export const SetVariableUIMeta = {
-  nodeType: "setVariable",
-  displayName: "Set Variable",
+/* ------------------------------------------------------------------ */
+/*  UI metadata                                                        */
+/*                                                                    */
+/*  The frontend uses a bespoke key-value editor for this node (it    */
+/*  drives per-row type pickers). UIMeta below is informational —     */
+/*  describes the field shape for schema-driven preview/inspection.   */
+/* ------------------------------------------------------------------ */
+
+export const SetVariableUIMeta: NodeUIMeta = {
+  nodeType: "set",
+  displayName: "Set",
   icon: "Variable",
   category: "action",
   description: "Define one or more variables to pass downstream",
   fields: {
-    assignments: {
+    values: {
       label: "Variables",
-      widget: "fieldArray",
+      widget: "keyValueList",
       addLabel: "Add variable",
-      itemFields: {
-        name: {
-          label: "Name",
-          widget: "text",
-          placeholder: "customerName",
-        },
-        type: {
-          label: "Type",
-          widget: "select",
-          default: "string",
-          options: [
-            { label: "String", value: "string" },
-            { label: "Number", value: "number" },
-            { label: "Boolean", value: "boolean" },
-            { label: "Object", value: "object" },
-          ],
-        },
-        value: {
-          label: "Value",
-          widget: "text",
-          placeholder: "{{Trigger.output.body.name}}",
-        },
-      },
+      keyPlaceholder: "name",
+      valuePlaceholder: "{{Trigger.output.body.name}}",
     },
   },
 };

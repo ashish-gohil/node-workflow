@@ -7,7 +7,7 @@ import {
 export const DEFAULT_MANUAL_TRIGGER_DATA: ManualTriggerDataTypes = {
   label: "Manual Trigger",
   execution: "initial",
-  config: null,
+  config: {},
 };
 
 export const DEFAULT_SCHEDULER_TRIGGER_DATA: SchedulerTriggerDataTypes = {
