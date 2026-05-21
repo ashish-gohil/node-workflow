@@ -19,7 +19,7 @@ export function SchedulerTriggerNode({
       status={data.execution!}
       onEdit={data.onEdit}
       icon={<TimerIcon />}
-      label="Schedule"
+      label={data.label}
       subtitle="Cron"
       badge="Trigger"
     />

@@ -19,7 +19,7 @@ export function ManualTriggerNode({
       status={data.execution!}
       onEdit={data.onEdit}
       icon={<MousePointerClick />}
-      label="Manual"
+      label={data.label}
       subtitle="On click"
       badge="Trigger"
     />

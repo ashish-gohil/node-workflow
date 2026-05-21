@@ -17,9 +17,9 @@ export function HttpRequestNode({
       icon={<Globe />}
       onEdit={data.onEdit}
       outputs={[{ id: "success" }]}
-      label="HTTP"
+      label={data.label}
       subtitle="REST"
-      badge="GET"
+      badge={data.config.method}
     />
   );
 }

@@ -53,6 +53,8 @@ export default function NewWorkflow() {
     setEditingActionNodeId,
   } = useFlow(useShallow(selector));
 
+  console.log(nodes);
+
   const [configNodeId, setConfigNodeId] = useState<string | null>(null);
 
   /**

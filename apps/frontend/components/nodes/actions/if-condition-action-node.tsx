@@ -17,7 +17,7 @@ export function IfNode({ id, data, selected }: NodeProps<IfNodeType>) {
         { id: "true", label: "true" },
         { id: "false", label: "false" },
       ]}
-      label="If"
+      label={data.label}
       subtitle="condition"
       badge="Branch"
     />

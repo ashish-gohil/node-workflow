@@ -65,25 +65,23 @@ const WebhookCustomResponseSchema = z.object({
 
 export const WebhookTriggerSchema = z.object({
   path: z.string().describe("Webhook URL path, e.g. /signup"),
-  methods: z
-    .array(WebhookHttpMethodSchema)
-    .min(1, "At least one HTTP method is required"),
+  methods: z.array(WebhookHttpMethodSchema).min(1, "At least one HTTP method is required"),
+  headers: z
+    .record(z.string(), z.string())
+    .optional()
+    .describe("Expected request headers as key-value pairs"),
+  query: z
+    .record(z.string(), z.string())
+    .optional()
+    .describe("Expected query string parameters as key-value pairs"),
   auth: WebhookAuthSchema.optional(),
   responseMode: z
     .enum(["onReceived", "lastNode", "custom"])
     .optional()
     .describe("When and what the webhook responds to the caller"),
   customResponse: WebhookCustomResponseSchema.optional(),
-  allowedIps: z
-    .array(z.string())
-    .optional()
-    .describe("Optional IP allow-list"),
-  timeoutMs: z
-    .number()
-    .min(100)
-    .max(120000)
-    .optional()
-    .describe("Request timeout in milliseconds"),
+  allowedIps: z.array(z.string()).optional().describe("Optional IP allow-list"),
+  timeoutMs: z.number().min(100).max(120000).optional().describe("Request timeout in milliseconds"),
 });
 
 export type WebhookTrigger = z.infer<typeof WebhookTriggerSchema>;
@@ -116,6 +114,18 @@ export const WebhookTriggerUIMeta: NodeUIMeta = {
         { label: "HEAD", value: "HEAD" },
         { label: "OPTIONS", value: "OPTIONS" },
       ],
+    },
+    headers: {
+      widget: "keyValueList",
+      label: "Headers",
+      keyPlaceholder: "X-Header-Name",
+      valuePlaceholder: "expected-value",
+    },
+    query: {
+      widget: "keyValueList",
+      label: "Query Parameters",
+      keyPlaceholder: "param",
+      valuePlaceholder: "expected-value",
     },
     auth: {
       widget: "object",
@@ -177,6 +187,41 @@ export const WebhookTriggerUIMeta: NodeUIMeta = {
         { label: "Last node output", value: "lastNode" },
         { label: "Custom", value: "custom" },
       ],
+    },
+    customResponse: {
+      widget: "object",
+      label: "Custom response",
+      showWhen: { field: "responseMode", in: ["custom"] },
+      fields: {
+        statusCode: {
+          widget: "number",
+          label: "Status code",
+          width: "half",
+          default: 200,
+          min: 100,
+          max: 599,
+        },
+        body: {
+          widget: "textArea",
+          label: "Response body",
+          placeholder: '{ "ok": true }',
+          rows: 4,
+          mono: true,
+        },
+        headers: {
+          widget: "keyValueList",
+          label: "Response headers",
+          keyPlaceholder: "Content-Type",
+          valuePlaceholder: "application/json",
+        },
+      },
+    },
+    allowedIps: {
+      widget: "jsonEditor",
+      label: "Allowed IPs",
+      helper: 'Optional IP allow-list, e.g. ["203.0.113.5", "198.51.100.0/24"]',
+      placeholder: "[]",
+      rows: 3,
     },
     timeoutMs: {
       widget: "number",

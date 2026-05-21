@@ -51,6 +51,8 @@ interface SchemaNodeConfigDialogProps {
    * execution store provide output data for the current node.
    */
   outputData?: unknown;
+  /** Hide the input panel — used by triggers, which have no upstream. */
+  showInput?: boolean;
 }
 
 export function SchemaNodeConfigDialog({
@@ -60,6 +62,7 @@ export function SchemaNodeConfigDialog({
   onSave,
   onClose,
   outputData,
+  showInput = true,
 }: SchemaNodeConfigDialogProps) {
   const entry = getNodeRegistryEntry(nodeType);
   const [label, setLabel] = useState(data.label);
@@ -126,6 +129,7 @@ export function SchemaNodeConfigDialog({
         title={label || entry.uiMeta.displayName}
         subtitle={data.description ?? entry.uiMeta.description}
         icon={entry.icon}
+        showInput={showInput}
         inputNodes={upstreamNodes}
         outputData={currentOutput}
         outputPanel={{

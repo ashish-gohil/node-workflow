@@ -26,7 +26,7 @@ export function MergeNode({ id, data, selected }: NodeProps<MergeNodeType>) {
     <BaseNode
       selected={selected}
       tone="branch"
-      label="Merge"
+      label={data.label}
       subtitle={`${inputCount} inputs`}
       onDoubleClick={() => data.onEdit?.(id)}
     >

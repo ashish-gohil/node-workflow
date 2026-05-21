@@ -13,7 +13,7 @@ export function DelayNode({ id, data, selected }: NodeProps<DelayNodeType>) {
       icon={<Clock />}
       onEdit={data.onEdit}
       outputs={[{ id: "done" }]}
-      label="Delay"
+      label={data.label}
       subtitle="wait"
     />
   );

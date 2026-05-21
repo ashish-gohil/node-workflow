@@ -61,11 +61,7 @@ const ApiKeyAuthSchema = z.object({
   value: z.string().min(1, "Value is required"),
 });
 
-const AuthSchema = z.discriminatedUnion("type", [
-  NoAuthSchema,
-  BearerAuthSchema,
-  ApiKeyAuthSchema,
-]);
+const AuthSchema = z.discriminatedUnion("type", [NoAuthSchema, BearerAuthSchema, ApiKeyAuthSchema]);
 
 /* ------------------------------------------------------------------ */
 /*  Root schema                                                        */

@@ -13,7 +13,7 @@ export function SetNode({ id, data, selected }: NodeProps<SetNodeType>) {
       icon={<Shuffle />}
       onEdit={data.onEdit}
       outputs={[{ id: "output" }]}
-      label="Set"
+      label={data.label}
       subtitle="transform"
     />
   );

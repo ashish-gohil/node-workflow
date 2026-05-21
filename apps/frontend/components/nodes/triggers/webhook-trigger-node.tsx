@@ -19,7 +19,7 @@ export function WebhookTriggerNode({
       status={data.execution!}
       onEdit={data.onEdit}
       icon={<Webhook />}
-      label="Webhook"
+      label={data.label}
       subtitle="POST"
       badge="Trigger"
     />

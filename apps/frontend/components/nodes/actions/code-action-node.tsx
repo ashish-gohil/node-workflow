@@ -10,7 +10,7 @@ export function CodeNode({ id, data, selected }: NodeProps<CodeNodeType>) {
     <ActionNodeBase
       id={id}
       selected={selected}
-      tone="ai"
+      // tone="ai"
       icon={<Code2 />}
       onEdit={data.onEdit}
       outputs={[{ id: "out" }]}

@@ -9,6 +9,8 @@ import {
   TriggerNodeTypes,
 } from "@/app/types/tirggers";
 import { NodeConfigDialog } from "@/components/node-config/node-config-dialog";
+import { getNodeRegistryEntry } from "@/components/node-config/node-registry";
+import { SchemaNodeConfigDialog } from "@/components/node-config/schema-node-config-dialog";
 
 import { SchedulerTriggerConfig } from "./scheduler-trigger-config";
 import { WebhookTriggerConfig } from "./webhook-trigger-config";
@@ -28,6 +30,49 @@ export interface TriggerConfigProps<T> {
   setConfigData: React.Dispatch<React.SetStateAction<T>>;
 }
 
+export default function TriggerConfigDialog({
+  node,
+  onSave,
+  onClose,
+  inputData,
+  outputData,
+}: ITriggerConfigDialog) {
+  const nodeType = node.type as TriggerNodeTypes;
+  const registryEntry = getNodeRegistryEntry(nodeType);
+
+  // Schema-driven triggers route through SchemaNodeConfigDialog. Anything not
+  // yet migrated falls back to the legacy hand-written dispatcher below.
+  if (registryEntry) {
+    return (
+      <SchemaNodeConfigDialog
+        nodeId={node.id}
+        nodeType={nodeType}
+        data={node.data as TriggerNodesDataTypes & { config: unknown }}
+        onSave={(next) => onSave(next as TriggerNodesDataTypes)}
+        onClose={onClose}
+        outputData={outputData}
+        // Triggers are the entry point — there's never input data.
+        showInput={false}
+      />
+    );
+  }
+
+  return (
+    <LegacyTriggerConfigDialog
+      node={node}
+      onSave={onSave}
+      onClose={onClose}
+      inputData={inputData}
+      outputData={outputData}
+    />
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/*  Legacy hand-written dispatcher — pending migration of remaining   */
+/*  trigger types to the schema-driven form.                          */
+/* ------------------------------------------------------------------ */
+
 //@ts-ignore
 const triggerConfigMap = {
   [TriggerNodeTypes.SchedulerTrigger]: SchedulerTriggerConfig,
@@ -40,7 +85,7 @@ const triggerIconMap: Partial<Record<TriggerNodeTypes, React.ReactNode>> = {
   [TriggerNodeTypes.Webhook]: <Webhook className="size-5" />,
 };
 
-export default function TriggerConfigDialog({
+function LegacyTriggerConfigDialog({
   node,
   onSave,
   onClose,
