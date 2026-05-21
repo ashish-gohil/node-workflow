@@ -18,11 +18,6 @@ import { cn } from "@/lib/utils";
 import { DataPanel, type DataPanelProps, type InputNode } from "./data-panel";
 import { useFocusContext } from "./focus-context";
 
-
-
-
-
-
 /* ============================================================
    NodeConfigDialog — n8n NDV-style three-pane configuration
    dialog. Reusable across every node type:
@@ -86,7 +81,8 @@ export type NodeConfigDialogProps = {
   showOutput?: boolean;
 
   /* Footer actions */
-  onSave?: () => void;
+  /** Return `false` (or a Promise resolving to `false`) to keep the dialog open — e.g. when validation fails. */
+  onSave?: () => void | boolean | Promise<void | boolean>;
   onCancel?: () => void;
   onTestStep?: () => void;
   testing?: boolean;
@@ -127,7 +123,9 @@ export function NodeConfigDialog({
   const focus = useFocusContext();
 
   const handleLeafClick = (nodeLabel: string, path: (string | number)[]) => {
-    if (!focus?.hasFocusTarget()) {return;}
+    if (!focus?.hasFocusTarget()) {
+      return;
+    }
     focus.insertAtCursor(buildExpression(nodeLabel, path));
   };
   const handleCancel = () => {
@@ -135,8 +133,14 @@ export function NodeConfigDialog({
     onOpenChange(false);
   };
 
-  const handleSave = () => {
-    onSave?.();
+  const handleSave = async () => {
+    // Await so async validators (Zod) can run before we decide whether to close.
+    // If onSave explicitly returns `false`, keep the dialog open so the user
+    // can see / fix the validation errors.
+    const result = await onSave?.();
+    if (result === false) {
+      return;
+    }
     onOpenChange(false);
   };
 

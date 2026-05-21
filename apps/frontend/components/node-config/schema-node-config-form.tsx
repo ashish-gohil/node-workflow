@@ -1,6 +1,6 @@
 "use client";
 
-import { type Ref,useImperativeHandle } from "react";
+import { type Ref, useImperativeHandle } from "react";
 import {
   type FieldValues,
   FormProvider,
@@ -13,7 +13,9 @@ import type { ZodType } from "zod";
 
 import { SchemaFieldRenderer } from "./fields/schema-field-renderer";
 
-export interface SchemaNodeConfigFormHandle<T extends FieldValues = FieldValues> {
+export interface SchemaNodeConfigFormHandle<
+  T extends FieldValues = FieldValues,
+> {
   /** Trigger validation + submit. Resolves to true on success. */
   submit: () => Promise<boolean>;
   /** Current values without validating. */
@@ -42,7 +44,6 @@ export function SchemaNodeConfigForm<T extends FieldValues>({
     defaultValues: defaultValues as never,
     mode: "onBlur",
   });
-
   useImperativeHandle(
     formRef,
     () => ({

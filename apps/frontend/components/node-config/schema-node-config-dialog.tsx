@@ -111,8 +111,10 @@ export function SchemaNodeConfigDialog({
 
   const handleSave = async () => {
     const handle = formRef.current;
-    if (!handle) {return;}
-    await handle.submit();
+    if (!handle) {return false;}
+    // submit() resolves false when Zod validation fails — propagate that so
+    // the dialog stays open and the form can surface field errors.
+    return await handle.submit();
   };
 
   const handleFormSubmit = (config: FieldValues) => {
