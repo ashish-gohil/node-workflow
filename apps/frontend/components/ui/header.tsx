@@ -6,6 +6,7 @@ import { motion } from "motion/react";
 
 import useFlow from "@/app/store/flow-store";
 import { api } from "@/lib/api";
+import { buildCreateWorkflowPayload } from "@/lib/workflow-payload";
 
 import AppLogo from "./app-logo";
 import { Button } from "./button";
@@ -20,19 +21,12 @@ export default function Header() {
     pathName.includes("workflows/new") || pathName.match(/\/workflows\/[^/]+$/);
 
   const handleSaveWorkflow = () => {
-    api.post("/workflows", {
-      workflowId: "test",
+    const payload = buildCreateWorkflowPayload({
       name: "Test workflow",
-      graph: {
-        nodes: nodes.map((node) => ({
-          id: node.id,
-          type: node.type,
-          position: node.position,
-          config: node.data.config,
-        })),
-        edges,
-      },
+      nodes,
+      edges,
     });
+    api.post("/workflows", payload);
   };
 
   return (

@@ -6,6 +6,7 @@ import type { FieldMeta } from "@repo/types";
 import { cn } from "@/lib/utils";
 
 import { ConditionalField } from "./conditional-field";
+import { FieldArrayField } from "./field-array-field";
 import { JsonEditorField } from "./json-editor-field";
 import { KeyValueField } from "./key-value-field";
 import { NumberField } from "./number-field";
@@ -72,6 +73,8 @@ function FieldDispatcher({
       );
     case "object":
       return <ObjectField name={name} meta={meta} />;
+    case "fieldArray":
+      return <FieldArrayField name={name} meta={meta} />;
     default:
       return null;
   }

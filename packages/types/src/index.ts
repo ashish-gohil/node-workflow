@@ -1,3 +1,4 @@
+export * from "./workflow";
 export * from "./nodes/field-meta";
 export * from "./nodes/CodeNodeSchema";
 export * from "./nodes/DelayNodeSchema";

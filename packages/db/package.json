@@ -29,6 +29,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-ssm": "^3.980.0",
+    "@repo/types": "*",
     "@types/mongoose": "^5.11.97",
     "mongoose": "^9.1.4"
   },

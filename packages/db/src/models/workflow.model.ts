@@ -1,171 +1,28 @@
+import {
+  FlowTypeValues,
+  type IEdge,
+  type INode,
+  type IWorkflow,
+  type TriggerType,
+  type WorkflowStatus,
+} from "@repo/types";
 import { Model, Schema, model, models } from "mongoose";
 
-/* -------------------- Enums -------------------- */
-
-// Node types that perform actions — these sit in the middle/end of the DAG
-export enum ActionNodeTypes {
-  HttpRequest = "httpRequest",
-  Set = "set",       // set / transform variables in the context
-  If = "if",         // conditional branch — produces "true" or "false" handle
-  Code = "code",     // arbitrary JS execution sandbox
-  Delay = "delay",   // pause execution for N seconds
-  Merge = "merge",   // wait for multiple upstream branches to complete
-}
-
-// Node types that start a workflow — every workflow must have exactly one trigger node
-export enum TriggerNodeTypes {
-  ManualTrigger = "manualTrigger", // kicked off from the UI or API
-  SchedulerTrigger = "scheduler",  // cron-based schedule
-  Webhook = "webhook",             // inbound HTTP request
-}
-
-/* -------------------- Derived union type -------------------- */
-
-// Union of every valid node type — used in INode.nodeType
-export type FlowNodeType = ActionNodeTypes | TriggerNodeTypes;
-
-// Convenience array for Mongoose enum validation (avoids duplication)
-export const FlowTypeValues = [
-  ...Object.values(ActionNodeTypes),
-  ...Object.values(TriggerNodeTypes),
-] as const;
-
-/* -------------------- Workflow-level types -------------------- */
-
-/**
- * Lifecycle states of a workflow in the poller/queue system.
- *
- * READY      → eligible to be picked up by the cron poller
- * QUEUED     → already pushed onto SQS; poller must skip it to prevent duplicate enqueues
- * PROCESSING → a worker Lambda has claimed it and is actively running
- * FAILED     → last execution ended in an unrecoverable error
- */
-export type WorkflowStatus = "READY" | "QUEUED" | "PROCESSING" | "FAILED";
-
-/**
- * What mechanism starts this workflow.
- * Determines which fields are required (cronExpression / webhookId).
- */
-export type TriggerType = "CRON" | "WEBHOOK" | "MANUAL";
-
-/* -------------------- Graph node & edge types -------------------- */
-
-/**
- * A single node in the workflow graph.
- *
- * `id`       — stable client-generated ID (nanoid / uuid). Never changes after creation.
- * `nodeType` — the specific node implementation to run (e.g. "httpRequest", "if")
- * `type`     — broad category used by the executor to distinguish the trigger from action nodes
- * `position` — UI-only coordinates; ignored by the execution engine
- * `config`   — node-type-specific parameter bag. May contain expression strings like
- *              {{NodeName.output.field}} that the executor resolves at runtime.
- */
-export interface INode {
-  id: string;
-  name: string
-  nodeType: FlowNodeType;
-  type: "trigger" | "action";
-  position: { x: number; y: number };
-  config: Record<string, unknown>;
-  error: string | null;
-}
-
-/**
- * A directed edge connecting two nodes in the graph.
- *
- * `sourceHandle` — which output port the edge leaves from.
- *                  "main" for most nodes; "true" / "false" for IF nodes.
- * `targetHandle` — which input port the edge connects to (usually "main").
- */
-export interface IEdge {
-  id: string;
-  source: string; // nodeId of the upstream node
-  target: string; // nodeId of the downstream node
-  sourceHandle?: string;
-  targetHandle?: string;
-}
-
-/**
- * The complete workflow graph — nodes + directed edges.
- * Stored as embedded arrays because they are always read and written together.
- */
-export interface IWorkflowGraph {
-  nodes: INode[];
-  edges: IEdge[];
-}
-
-/* -------------------- Distributed-lock fields -------------------- */
-
-/**
- * Fields used by the cron poller to claim a workflow for enqueueing
- * without a separate transactions or a distributed lock service.
- *
- * Flow:
- *  1. Poller does findOneAndUpdate({ status: "READY", nextRunAt: { $lte: now } },
- *       { $set: { status: "QUEUED", lockedAt: now, lockId: uuid } })
- *  2. Only the instance that received the updated doc pushes to SQS.
- *  3. Lock is released (status → READY / FAILED) by the executor when the run finishes.
- *  4. A cleanup job resets any workflow stuck in QUEUED/PROCESSING for > 16 min
- *     (handles Lambda crash / missed SQS delivery).
- */
-export interface IWorkflowLock {
-  lockedAt: Date | null;
-  lockId: string | null;
-}
-
-/* -------------------- Main workflow interface -------------------- */
-
-export interface IWorkflow extends IWorkflowLock {
-  /** Stable external ID — safe to expose in URLs / API responses */
-  workflowId: string;
-
-  name: string;
-
-  /** Owner — matches the userId from your auth package */
-  userId: string;
-
-  /** Master switch. When false, cron poller and webhook handler skip this workflow */
-  active: boolean;
-
-  /**
-   * Incremented each time the graph is saved.
-   * The execution engine stores this in workflowSnapshot so you can always
-   * tell which version of the graph a historical run used.
-   */
-  version: number;
-
-  /** Timestamps from the last completed execution (any status) */
-  lastRunAt: Date | null;
-
-  /**
-   * For CRON workflows: the next scheduled wall-clock time to enqueue.
-   * Computed from cronExpression after each run. Indexed for poller query.
-   * Null for WEBHOOK and MANUAL workflows.
-   */
-  nextRunAt: Date | null;
-
-  /** Current position in the poller/queue lifecycle — see WorkflowStatus */
-  status: WorkflowStatus;
-
-  /** What mechanism starts this workflow */
-  triggerType: TriggerType;
-
-  /** The workflow DAG — nodes and edges */
-  graph: IWorkflowGraph;
-
-  /**
-   * Standard cron expression (5-part: min hour dom month dow).
-   * Required when triggerType === "CRON", null otherwise.
-   * Example: "0 9 * * 1"  → every Monday at 09:00 UTC
-   */
-  cronExpression: string | null;
-
-  /**
-   * Foreign key → webhook_registrations collection.
-   * Required when triggerType === "WEBHOOK", null otherwise.
-   */
-  webhookId: string | null;
-}
+// Re-export the shared workflow types so existing `@repo/db` consumers keep working.
+export {
+  ActionNodeTypes,
+  FlowTypeValues,
+  TriggerNodeTypes,
+  type CreateWorkflowPayload,
+  type FlowNodeType,
+  type IEdge,
+  type INode,
+  type IWorkflow,
+  type IWorkflowGraph,
+  type IWorkflowLock,
+  type TriggerType,
+  type WorkflowStatus,
+} from "@repo/types";
 
 /* -------------------- Sub-schemas -------------------- */
 

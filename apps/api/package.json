@@ -5,13 +5,19 @@
   "scripts": {
     "dev": "bun run build && bun run src/server.ts",
     "build": "bun build src/lambda.ts --target=node  --outdir dist  --bundle  --minify   --format=cjs",
-    "build:lambda-zip": "bun run build &&  Compress-Archive -Path dist,package.json -DestinationPath lambda.zip -Force"
+    "zip": "rm -f lambda.zip && zip -r lambda.zip dist package.json",
+    "build:zip": "bun run build && bun run zip",
+    "deploy": "aws lambda update-function-code --function-name n8n-workflow-api-dev --zip-file fileb://lambda.zip --region ap-south-1",
+    "deploy:full": "bun run build:zip && bun run deploy",
+    "logs": "aws logs tail /aws/lambda/n8n-workflow-api-dev --follow --region ap-south-1",
+    "build:lambda-zip-windows": "bun run build && Compress-Archive -Path dist,package.json -DestinationPath lambda.zip -Force"
   },
   "dependencies": {
     "@aws-sdk/client-sqs": "^3.1034.0",
     "@aws-sdk/client-ssm": "^3.1034.0",
     "@repo/auth": "*",
     "@repo/db": "*",
+    "@repo/types": "*",
     "@types/aws-lambda": "^8.10.160",
     "@types/bcryptjs": "^3.0.0",
     "@types/express": "^5.0.6",

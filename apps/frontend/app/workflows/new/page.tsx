@@ -11,6 +11,7 @@ import { TriggerNode } from "@/app/types/tirggers";
 import FlowCanvas from "@/components/flow/flow-canvas";
 import { ThemeHydrated } from "@/components/ui/theme-wraper";
 import { api } from "@/lib/api";
+import { buildCreateWorkflowPayload } from "@/lib/workflow-payload";
 
 import ActionConfigDialog from "./action-config/action-config-dialog";
 import ActionSheet from "./action-sheet";
@@ -82,18 +83,12 @@ export default function NewWorkflow() {
 
   async function handleSave() {
     try {
-      await api.post("/workflows", {
+      const payload = buildCreateWorkflowPayload({
         name: workflowName,
-        graph: {
-          nodes: nodes.map((n) => ({
-            id: n.id,
-            type: n.type,
-            position: n.position,
-            config: n.data.config,
-          })),
-          edges,
-        },
+        nodes,
+        edges,
       });
+      await api.post("workflows", payload);
     } catch {
       // silently fail — real toast notification would go here
     }

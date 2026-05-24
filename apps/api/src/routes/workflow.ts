@@ -1,8 +1,99 @@
 import { Router } from "express";
-import { connectMongo, WorkflowModel, type IWorkflow } from "@repo/db";
+import {
+  connectMongo,
+  TriggerNodeTypes,
+  WebhookRegistrationModel,
+  WorkflowModel,
+  type INode,
+  type IWebhookRegistration,
+  type IWorkflow,
+  type WebhookHttpMethod,
+} from "@repo/db";
+import type { SchedulerTrigger, TriggerType, WebhookTrigger } from "@repo/types";
 import { authMiddleware, type AuthenticatedRequest } from "../middlewares/auth";
 import { SQSClient, SendMessageCommand } from "@aws-sdk/client-sqs";
 import { SSMClient, GetParameterCommand } from "@aws-sdk/client-ssm";
+
+/* ------------------------------------------------------------------ */
+/*  Scheduler config → standard 5-part cron expression                */
+/*  Layout: "minute hour day-of-month month day-of-week"              */
+/* ------------------------------------------------------------------ */
+
+const DAY_OF_WEEK_TO_CRON: Record<string, number> = {
+  sunday: 0,
+  monday: 1,
+  tuesday: 2,
+  wednesday: 3,
+  thursday: 4,
+  friday: 5,
+  saturday: 6,
+};
+
+function getCronExpression(triggerNode: INode): string {
+  const cfg = triggerNode.config as Partial<SchedulerTrigger> | undefined;
+  if (!cfg || !cfg.mode) {
+    throw new Error("Scheduler trigger is missing a mode");
+  }
+
+  switch (cfg.mode) {
+    case "interval": {
+      const every = cfg.every ?? 1;
+      switch (cfg.unit) {
+        // Standard cron has minute granularity — sub-minute intervals fire every minute.
+        case "seconds":
+          return "* * * * *";
+        case "minutes":
+          return `*/${every} * * * *`;
+        case "hours":
+          return `0 */${every} * * *`;
+        default:
+          throw new Error(`Unsupported interval unit: ${cfg.unit}`);
+      }
+    }
+
+    case "daily": {
+      const [hh, mm] = (cfg.time ?? "00:00").split(":");
+      return `${Number(mm)} ${Number(hh)} * * *`;
+    }
+
+    case "weekly": {
+      const [hh, mm] = (cfg.time ?? "00:00").split(":");
+      const days = ((cfg.days as string[] | undefined) ?? [])
+        .map((d: string) => DAY_OF_WEEK_TO_CRON[d])
+        .filter((d): d is number => d !== undefined)
+        .join(",");
+      if (!days) throw new Error("Weekly schedule requires at least one day");
+      return `${Number(mm)} ${Number(hh)} * * ${days}`;
+    }
+
+    case "cron":
+      if (!cfg.cronExpression) throw new Error("Cron expression is required");
+      return cfg.cronExpression;
+
+    default:
+      throw new Error(`Unsupported scheduler mode: ${(cfg as { mode: string }).mode}`);
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/*  Webhook config → registration document shape                      */
+/* ------------------------------------------------------------------ */
+
+function resolveHttpMethod(methods: WebhookTrigger["methods"] | undefined): WebhookHttpMethod {
+  if (!methods || methods.length === 0) return "POST";
+  if (methods.length > 1) return "ANY";
+  const single = methods[0];
+  // WebhookTrigger allows HEAD/OPTIONS too, but the registration model only stores
+  // the limited set — collapse anything outside that to ANY.
+  return (["GET", "POST", "PUT", "PATCH", "DELETE"] as const).includes(single as never)
+    ? (single as WebhookHttpMethod)
+    : "ANY";
+}
+
+function normalizeWebhookPath(raw: string | undefined, fallback: string): string {
+  const p = (raw ?? "").trim().replace(/^\/+/, "").toLowerCase();
+  return p || fallback;
+}
 
 const router: Router = Router();
 /**
@@ -34,13 +125,77 @@ router.post("/", authMiddleware, async (req: AuthenticatedRequest, res) => {
 
     await connectMongo();
 
-    const workflowData = req.body as Partial<IWorkflow>; // type-safe request body
-    const workflow: IWorkflow = await WorkflowModel.create({
-      userId,
-      ...workflowData
-    });
+    const workflowData = req.body as Partial<IWorkflow>;
+    const triggerNode = workflowData.graph?.nodes.find((node) => node.type === "trigger");
 
-    res.status(201).json(workflow);
+    const triggerType: TriggerType =
+      triggerNode?.nodeType === TriggerNodeTypes.Webhook
+        ? "WEBHOOK"
+        : triggerNode?.nodeType === TriggerNodeTypes.SchedulerTrigger
+          ? "CRON"
+          : "MANUAL";
+
+    const workflowId = crypto.randomUUID();
+
+    let cronExpression: string | null = null;
+    if (triggerType === "CRON") {
+      if (!triggerNode) return res.status(400).json({ error: "Scheduler trigger node missing" });
+      try {
+        cronExpression = getCronExpression(triggerNode);
+      } catch (e) {
+        return res.status(400).json({ error: (e as Error).message });
+      }
+    }
+
+    // Register the webhook BEFORE the workflow so a duplicate-path collision fails
+    // fast and we don't leave an orphan workflow without a registration.
+    let webhookId: string | null = null;
+    let createdWebhookId: string | null = null;
+    if (triggerType === "WEBHOOK") {
+      if (!triggerNode) return res.status(400).json({ error: "Webhook trigger node missing" });
+      const cfg = (triggerNode.config ?? {}) as Partial<WebhookTrigger>;
+      const path = normalizeWebhookPath(cfg.path, workflowId);
+
+      const registration: Partial<IWebhookRegistration> = {
+        webhookId: crypto.randomUUID(),
+        workflowId,
+        userId,
+        path,
+        httpMethod: resolveHttpMethod(cfg.methods),
+        isActive: true,
+        secret: null,
+        allowedIps: cfg.allowedIps ?? [],
+      };
+
+      try {
+        const created = await WebhookRegistrationModel.create(registration);
+        webhookId = created.webhookId;
+        createdWebhookId = created.webhookId;
+      } catch (e: any) {
+        if (e?.code === 11000) {
+          return res.status(409).json({ error: `Webhook path "${path}" is already in use` });
+        }
+        throw e;
+      }
+    }
+
+    try {
+      const workflow: IWorkflow = await WorkflowModel.create({
+        userId,
+        ...workflowData,
+        workflowId,
+        triggerType,
+        cronExpression,
+        webhookId,
+      });
+      res.status(201).json(workflow);
+    } catch (err) {
+      // Roll back the webhook registration if the workflow itself failed to persist.
+      if (createdWebhookId) {
+        await WebhookRegistrationModel.deleteOne({ webhookId: createdWebhookId }).catch(() => {});
+      }
+      throw err;
+    }
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Server error" });
@@ -55,9 +210,7 @@ router.post("/:id/run", authMiddleware, async (req: AuthenticatedRequest, res) =
   const ssmParamName = process.env.QUEUE_URL_PATH!;
 
   if (!ssmParamName) {
-    throw new Error(
-      "QUEUE_URL is not defined in environment variables"
-    );
+    throw new Error("QUEUE_URL is not defined in environment variables");
   }
 
   console.log("Fetching QUEUE URL from AWS SSM:", ssmParamName);
@@ -74,13 +227,13 @@ router.post("/:id/run", authMiddleware, async (req: AuthenticatedRequest, res) =
     throw new Error(`SSM parameter "${ssmParamName}" has no value`);
   }
   const sqs = new SQSClient({ region: "ap-south-1" });
-  const QUEUE_URL = queueUrl
+  const QUEUE_URL = queueUrl;
   try {
     const userId = req.user?.id;
     if (!userId) {
       return res.status(401).json({
         success: false,
-        message: "Unauthorized access"
+        message: "Unauthorized access",
       });
     }
 
@@ -112,7 +265,7 @@ router.post("/:id/run", authMiddleware, async (req: AuthenticatedRequest, res) =
         },
       },
       {
-        returnDocument: 'after'
+        returnDocument: "after",
       }
     );
 
@@ -129,7 +282,7 @@ router.post("/:id/run", authMiddleware, async (req: AuthenticatedRequest, res) =
       MessageBody: JSON.stringify({
         workflowId,
       }),
-      MessageGroupId: "api-events"
+      MessageGroupId: "api-events",
     });
 
     const response = await sqs.send(command);
