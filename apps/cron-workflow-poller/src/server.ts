@@ -77,7 +77,7 @@ export const handler = async () => {
       },
       {
         $set: {
-          status: "PROCESSING",
+          status: "QUEUED",
           lockedAt: now,
           lockId,
         },

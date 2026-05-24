@@ -1,9 +1,10 @@
-import { ExecutionModel, FlowNodeType, IEdge, INode, WorkflowModel } from "@repo/db";
+import { ActionNodeTypes, ExecutionModel, FlowNodeType, IEdge, INode, WorkflowModel } from "@repo/db";
 import { BaseNode } from "../nodes/BaseNode";
 import { DAGResolver } from "./DagResolver";
 import { ContextManager } from "./ContextManager";
 import { NodeRunner } from "./NodeRunner";
 import { CronExpressionParser } from 'cron-parser';
+import { ResolvedValue } from "../utils/expression-resolver";
 
 export class ExecutionEngine {
 
@@ -76,14 +77,60 @@ export class ExecutionEngine {
             // set up node runner
             const nodeRunner = new NodeRunner(this.nodeRegistry, contextManager, this.workflowId, this.executionId)
 
-            // loop over each tier and run nodes in parallel using promiss.allSettled
+            // ── Branching support ─────────────────────────────────────
+            // A node runs only if it's a root OR at least one incoming edge
+            // is "live". An edge becomes live when its source node completes
+            // AND (for IF nodes) the edge's sourceHandle matches the result.
+            // Nodes that never become reachable are marked SKIPPED.
+            const incomingEdges: Record<string, IEdge[]> = {};
+            for (const node of nodes) incomingEdges[node.id] = [];
+            for (const edge of edges) incomingEdges[edge.target]?.push(edge);
+
+            const liveEdgeIds = new Set<string>();
+
+            const isIfNode = (n: INode) => n.nodeType === ActionNodeTypes.If;
+
+            const activateOutgoingEdges = (node: INode, output: ResolvedValue) => {
+                const outgoing = edges.filter(e => e.source === node.id);
+                if (isIfNode(node)) {
+                    const passed = (output as { passed?: boolean })?.passed === true;
+                    for (const e of outgoing) {
+                        // Edges with a true/false handle are gated by the result;
+                        // edges with no handle (legacy graphs) stay live.
+                        if (e.sourceHandle === "true") {
+                            if (passed) liveEdgeIds.add(e.id);
+                        } else if (e.sourceHandle === "false") {
+                            if (!passed) liveEdgeIds.add(e.id);
+                        } else {
+                            liveEdgeIds.add(e.id);
+                        }
+                    }
+                } else {
+                    for (const e of outgoing) liveEdgeIds.add(e.id);
+                }
+            };
+
+            // loop over each tier and run runnable nodes in parallel via Promise.allSettled
             for (const tier of nodeTiers) {
-                const tierNodes = tier.map(nodeId =>
-                    nodes.find(n => n.id === nodeId)!
-                )
+                const tierNodes = tier.map(nodeId => nodes.find(n => n.id === nodeId)!);
+
+                const runnable: INode[] = [];
+                const skipped: INode[] = [];
+                for (const node of tierNodes) {
+                    const incoming = incomingEdges[node.id];
+                    const isReachable =
+                        incoming.length === 0 || incoming.some(e => liveEdgeIds.has(e.id));
+                    if (isReachable) runnable.push(node);
+                    else skipped.push(node);
+                }
+
+                // Mark skipped nodes so the execution record reflects the branch decision
+                for (const node of skipped) {
+                    await contextManager.setNodeStatus(node.id, "SKIPPED");
+                }
 
                 const results = await Promise.allSettled(
-                    tierNodes.map(node => nodeRunner.run(node))
+                    runnable.map(node => nodeRunner.run(node))
                 );
                 console.log("-------results after all settled run-------")
                 console.log(results)
@@ -92,6 +139,14 @@ export class ExecutionEngine {
                 const failed = results.find(r => r.status === "rejected")
                 if (failed) {
                     throw (failed as PromiseRejectedResult).reason
+                }
+
+                // Activate outgoing edges for nodes that ran successfully
+                for (let i = 0; i < runnable.length; i++) {
+                    const result = results[i];
+                    if (result.status === "fulfilled") {
+                        activateOutgoingEdges(runnable[i], result.value);
+                    }
                 }
             }
 
