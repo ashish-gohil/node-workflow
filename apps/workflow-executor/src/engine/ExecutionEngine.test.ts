@@ -193,10 +193,11 @@ describe("Exeecution engine", () => {
             await engine.executeWorkflow()
 
             // assert
+            // CRON path: lastRunAt is stamped by SchedulerTriggerNode at trigger
+            // time, not by the engine. Engine writes only status + nextRunAt.
             expect(WorkflowModel.findOneAndUpdate).toHaveBeenCalledWith({ workflowId: "wf_1" },
                 expect.objectContaining({
                     $set: {
-                        lastRunAt: expect.any(Date),
                         status: "READY",
                         nextRunAt: expect.any(Date)
                     }

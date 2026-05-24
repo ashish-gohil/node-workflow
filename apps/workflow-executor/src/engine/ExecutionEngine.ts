@@ -102,18 +102,22 @@ export class ExecutionEngine {
                 }
             })
 
-            // update workflow status too ready again and set last run and next run
+            // update workflow status to ready again and set next run
             const update: any = {
-                lastRunAt: new Date(),
                 status: "READY",
             };
 
             if (workflow.triggerType === "CRON" && workflow.cronExpression) {
-
+                // CRON: lastRunAt was already stamped by SchedulerTriggerNode at
+                // trigger time, so we only need to compute the next scheduled run.
                 const cronExpression = workflow.cronExpression;
                 const interval = CronExpressionParser.parse(cronExpression);
                 const nextRun = interval.next().toDate();
                 update.nextRunAt = nextRun;
+            } else {
+                // MANUAL/WEBHOOK triggers don't have a per-trigger lastRunAt
+                // writer, so the engine stamps it on completion as a fallback.
+                update.lastRunAt = new Date();
             }
 
             await WorkflowModel.findOneAndUpdate(

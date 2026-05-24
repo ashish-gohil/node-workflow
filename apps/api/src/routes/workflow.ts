@@ -9,7 +9,7 @@ import {
   type IWorkflow,
   type WebhookHttpMethod,
 } from "@repo/db";
-import type {  SchedulerTrigger, TriggerType, WebhookTrigger } from "@repo/types";
+import type { SchedulerTrigger, TriggerType, WebhookTrigger } from "@repo/types";
 import { authMiddleware, type AuthenticatedRequest } from "../middlewares/auth";
 import { SQSClient, SendMessageCommand } from "@aws-sdk/client-sqs";
 import { SSMClient, GetParameterCommand } from "@aws-sdk/client-ssm";
@@ -29,6 +29,14 @@ const DAY_OF_WEEK_TO_CRON: Record<string, number> = {
   friday: 5,
   saturday: 6,
 };
+
+// Wall-clock cron modes (daily/weekly/cron) need a timezone to be interpretable.
+// Interval mode is TZ-agnostic so this is ignored there.
+function getSchedulerTimezone(triggerNode: INode): string {
+  const cfg = (triggerNode.config ?? {}) as { timezone?: unknown };
+  if (typeof cfg.timezone === "string" && cfg.timezone.trim()) return cfg.timezone;
+  return process.env.SCHEDULER_DEFAULT_TZ ?? "Asia/Kolkata";
+}
 
 function getCronExpression(triggerNode: INode): string {
   const cfg = triggerNode.config as Partial<SchedulerTrigger> | undefined;
@@ -117,6 +125,29 @@ router.get("/", authMiddleware, async (req: AuthenticatedRequest, res) => {
 });
 
 /**
+ * GET a single workflow for the authenticated user
+ */
+router.get("/:workflowId", authMiddleware, async (req: AuthenticatedRequest, res) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) return res.status(401).json({ error: "Unauthorized" });
+
+    const { workflowId } = req.params;
+    if (!workflowId) return res.status(400).json({ error: "workflowId is required" });
+
+    await connectMongo();
+
+    const workflow = await WorkflowModel.findOne({ workflowId, userId }).exec();
+    if (!workflow) return res.status(404).json({ error: "Workflow not found" });
+
+    res.json(workflow);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+/**
  * POST create a new workflow
  */
 router.post("/", authMiddleware, async (req: AuthenticatedRequest, res) => {
@@ -144,7 +175,8 @@ router.post("/", authMiddleware, async (req: AuthenticatedRequest, res) => {
       if (!triggerNode) return res.status(400).json({ error: "Scheduler trigger node missing" });
       try {
         cronExpression = getCronExpression(triggerNode);
-        nextRunAt = CronExpressionParser.parse(cronExpression).next().toDate();
+        const tz = getSchedulerTimezone(triggerNode);
+        nextRunAt = CronExpressionParser.parse(cronExpression, { tz }).next().toDate();
       } catch (e) {
         return res.status(400).json({ error: (e as Error).message });
       }
@@ -200,6 +232,112 @@ router.post("/", authMiddleware, async (req: AuthenticatedRequest, res) => {
       }
       throw err;
     }
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+/**
+ * PUT update an existing workflow
+ */
+router.put("/:workflowId", authMiddleware, async (req: AuthenticatedRequest, res) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) return res.status(401).json({ error: "Unauthorized" });
+
+    const workflowId = req.params.workflowId as string | undefined;
+    if (!workflowId) return res.status(400).json({ error: "workflowId is required" });
+
+    await connectMongo();
+
+    const existing = await WorkflowModel.findOne({ workflowId, userId }).exec();
+    if (!existing) return res.status(404).json({ error: "Workflow not found" });
+
+    const workflowData = req.body as Partial<IWorkflow>;
+    const triggerNode = workflowData.graph?.nodes.find((node) => node.type === "trigger");
+
+    const triggerType: TriggerType =
+      triggerNode?.nodeType === TriggerNodeTypes.Webhook
+        ? "WEBHOOK"
+        : triggerNode?.nodeType === TriggerNodeTypes.SchedulerTrigger
+          ? "CRON"
+          : "MANUAL";
+
+    let cronExpression: string | null = null;
+    let nextRunAt: Date | null = null;
+    if (triggerType === "CRON") {
+      if (!triggerNode) return res.status(400).json({ error: "Scheduler trigger node missing" });
+      try {
+        cronExpression = getCronExpression(triggerNode);
+        const tz = getSchedulerTimezone(triggerNode);
+        nextRunAt = CronExpressionParser.parse(cronExpression, { tz }).next().toDate();
+      } catch (e) {
+        return res.status(400).json({ error: (e as Error).message });
+      }
+    }
+
+    // ── Reconcile webhook registration ───────────────────────────────
+    // - WEBHOOK → upsert the registration (update if one exists for this
+    //   workflowId, create otherwise)
+    // - Anything else → delete the stale registration if one exists
+    let webhookId: string | null = null;
+    if (triggerType === "WEBHOOK") {
+      if (!triggerNode) return res.status(400).json({ error: "Webhook trigger node missing" });
+      const cfg = (triggerNode.config ?? {}) as Partial<WebhookTrigger>;
+      const path = normalizeWebhookPath(cfg.path, workflowId);
+      const httpMethod = resolveHttpMethod(cfg.methods);
+      const allowedIps = cfg.allowedIps ?? [];
+
+      const currentReg = await WebhookRegistrationModel.findOne({ workflowId }).exec();
+
+      try {
+        if (currentReg) {
+          currentReg.path = path;
+          currentReg.httpMethod = httpMethod;
+          currentReg.allowedIps = allowedIps;
+          currentReg.isActive = true;
+          await currentReg.save();
+          webhookId = currentReg.webhookId;
+        } else {
+          const newReg: Partial<IWebhookRegistration> = {
+            webhookId: crypto.randomUUID(),
+            workflowId,
+            userId,
+            path,
+            httpMethod,
+            isActive: true,
+            secret: null,
+            allowedIps,
+          };
+          const created = await WebhookRegistrationModel.create(newReg);
+          webhookId = created.webhookId;
+        }
+      } catch (e: any) {
+        if (e?.code === 11000) {
+          return res.status(409).json({ error: `Webhook path "${path}" is already in use` });
+        }
+        throw e;
+      }
+    } else if (existing.webhookId) {
+      await WebhookRegistrationModel.deleteOne({ workflowId }).catch(() => {});
+    }
+
+    // ── Persist workflow ─────────────────────────────────────────────
+    // Only update mutable fields. Never let the client overwrite userId,
+    // workflowId, status, lock fields, version, or timestamps.
+    existing.set({
+      name: workflowData.name ?? existing.name,
+      graph: workflowData.graph ?? existing.graph,
+      active: workflowData.active ?? existing.active,
+      triggerType,
+      cronExpression,
+      nextRunAt,
+      webhookId,
+    });
+    const updated = await existing.save();
+
+    res.json(updated);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Server error" });

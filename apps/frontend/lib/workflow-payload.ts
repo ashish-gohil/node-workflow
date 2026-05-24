@@ -3,11 +3,12 @@ import {
   type FlowNodeType,
   type IEdge,
   type INode,
+  type IWorkflow,
   TriggerNodeTypes,
   type TriggerType,
 } from "@repo/types";
 
-import type { FlowEdge, FlowNode } from "@/app/types/flow";
+import type { FlowEdge, FlowNode, FlowNodeData } from "@/app/types/flow";
 
 const TRIGGER_NODE_TYPES = new Set<string>(Object.values(TriggerNodeTypes));
 
@@ -63,5 +64,44 @@ export function buildCreateWorkflowPayload(args: {
       nodes: args.nodes.map(toINode),
       edges: args.edges.map(toIEdge),
     },
+  };
+}
+
+/* ------------------------------------------------------------------ */
+/*  Server → editor — inverse of buildCreateWorkflowPayload           */
+/* ------------------------------------------------------------------ */
+
+function fromINode(node: INode): FlowNode {
+  return {
+    id: node.id,
+    type: node.nodeType,
+    position: node.position,
+    data: {
+      label: node.name,
+      execution: "initial",
+      config: node.config,
+    } as FlowNodeData,
+  };
+}
+
+function fromIEdge(edge: IEdge): FlowEdge {
+  return {
+    id: edge.id,
+    source: edge.source,
+    target: edge.target,
+    sourceHandle: edge.sourceHandle,
+    targetHandle: edge.targetHandle,
+  };
+}
+
+export function hydrateWorkflowForEditor(workflow: IWorkflow): {
+  name: string;
+  nodes: FlowNode[];
+  edges: FlowEdge[];
+} {
+  return {
+    name: workflow.name,
+    nodes: workflow.graph.nodes.map(fromINode),
+    edges: workflow.graph.edges.map(fromIEdge),
   };
 }

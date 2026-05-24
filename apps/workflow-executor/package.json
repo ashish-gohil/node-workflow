@@ -2,7 +2,13 @@
   "name": "workflow-worker",
   "private": true,
   "scripts": {
-    "build": "bun build src/index.ts --target=node  --outdir dist  --bundle  --minify   --format=cjs",
+    "build": "bun build src/index.ts --target=node --outdir dist --bundle --minify --format=cjs",
+    "zip": "rm -f lambda.zip && zip -r lambda.zip dist package.json",
+    "build:zip": "bun run build && bun run zip",
+    "deploy": "aws lambda update-function-code --function-name n8n-workflow-executor-dev --zip-file fileb://lambda.zip --region ap-south-1",
+    "deploy:full": "bun run build:zip && bun run deploy",
+    "logs": "aws logs tail /aws/lambda/n8n-workflow-executor-dev --follow --region ap-south-1",
+    "build:lambda-zip-windows": "bun run build && Compress-Archive -Path dist,package.json -DestinationPath lambda.zip -Force",
     "test": "vitest",
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage"
