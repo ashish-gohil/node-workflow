@@ -51,7 +51,6 @@ router.post("/", authMiddleware, async (req: AuthenticatedRequest, res) => {
         // Create execution
         const execution = await ExecutionModel.create({
             ...body,
-            userId: req.user.id,
             status: body.status ?? "pending",
             startedAt: body.startedAt ?? new Date(),
         });

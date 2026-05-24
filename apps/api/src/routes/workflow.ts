@@ -9,10 +9,11 @@ import {
   type IWorkflow,
   type WebhookHttpMethod,
 } from "@repo/db";
-import type { SchedulerTrigger, TriggerType, WebhookTrigger } from "@repo/types";
+import type {  SchedulerTrigger, TriggerType, WebhookTrigger } from "@repo/types";
 import { authMiddleware, type AuthenticatedRequest } from "../middlewares/auth";
 import { SQSClient, SendMessageCommand } from "@aws-sdk/client-sqs";
 import { SSMClient, GetParameterCommand } from "@aws-sdk/client-ssm";
+import { CronExpressionParser } from "cron-parser";
 
 /* ------------------------------------------------------------------ */
 /*  Scheduler config → standard 5-part cron expression                */
@@ -138,10 +139,12 @@ router.post("/", authMiddleware, async (req: AuthenticatedRequest, res) => {
     const workflowId = crypto.randomUUID();
 
     let cronExpression: string | null = null;
+    let nextRunAt: Date | null = null;
     if (triggerType === "CRON") {
       if (!triggerNode) return res.status(400).json({ error: "Scheduler trigger node missing" });
       try {
         cronExpression = getCronExpression(triggerNode);
+        nextRunAt = CronExpressionParser.parse(cronExpression).next().toDate();
       } catch (e) {
         return res.status(400).json({ error: (e as Error).message });
       }
@@ -186,6 +189,7 @@ router.post("/", authMiddleware, async (req: AuthenticatedRequest, res) => {
         workflowId,
         triggerType,
         cronExpression,
+        nextRunAt,
         webhookId,
       });
       res.status(201).json(workflow);
