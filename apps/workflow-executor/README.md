@@ -36,7 +36,7 @@ A stateless AWS Lambda service that consumes jobs from SQS and executes workflow
 This service does **one thing**: given an execution job on SQS, run the corresponding workflow to completion and write the results to MongoDB.
 
 It does **not**:
-- Decide when a workflow should run (that is `workflow-cron-poller`)
+- Decide when a workflow should run (that is `cron-workflow-poller`)
 - Expose HTTP endpoints (that is the `api` service)
 - Render any UI (that is the `frontend` service)
 - Own the database schemas (those live in `packages/db`)
@@ -46,7 +46,7 @@ It does **not**:
 ## How it fits into the platform
 
 ```
-workflow-cron-poller  ─────┐
+cron-workflow-poller  ─────┐
                            ├──► SQS (workflow-jobs) ──► workflow-executor ──► MongoDB
 api (manual / webhook) ────┘
 ```
@@ -57,15 +57,15 @@ Any service that wants to run a workflow creates an `Execution` document in Mong
 
 ## How it works
 
-1. SQS delivers a job message to the Lambda trigger.
-2. The handler parses the message and calls `ExecutionEngine.run()`.
+1. SQS delivers job messages to the Lambda trigger.
+2. The handler parses every message in `event.Records` and creates an `ExecutionEngine` per job.
 3. The engine atomically claims the execution in MongoDB (`PENDING → RUNNING`). If the record is already `RUNNING` (duplicate message), the Lambda exits immediately — no work is done twice.
 4. The engine loads the workflow definition from the `workflowSnapshot` on the execution record and passes the graph to `DagResolver`, which returns an ordered list of execution tiers via topological sort.
 5. Each tier is a group of nodes that have no dependencies on each other within the tier and can run in parallel.
 6. For each node, `NodeRunner` resolves input expressions (e.g. `{{HTTP Request.output.body.id}}`), calls the correct node adapter, and writes the output back to the execution context via `ContextManager`.
-7. On `IF` nodes, only the active branch is marked for execution. The inactive branch nodes are visited but immediately marked `SKIPPED`.
+7. On `IF` nodes the engine activates only the matching-handle edges (`sourceHandle === "true"` if `output.passed` is true, `"false"` otherwise). Any node whose only path is through a non-matching handle is marked `SKIPPED` and never runs.
 8. After all tiers complete, the execution is marked `SUCCESS`. On any unrecoverable failure it is marked `FAILED` with an error summary.
-9. If `stopAtNodeId` is set in the job message, execution halts cleanly after that node and the status is set to `PARTIAL_SUCCESS`.
+9. On success the workflow status is reset to `READY`. For `CRON` triggers the next `nextRunAt` is recomputed via `cron-parser`; `lastRunAt` for cron is owned by `SchedulerTriggerNode` (stamped at trigger time). For `MANUAL`/`WEBHOOK` triggers the engine stamps `lastRunAt` on completion as a fallback.
 
 ---
 
@@ -74,46 +74,36 @@ Any service that wants to run a workflow creates an `Execution` document in Mong
 ```
 apps/workflow-executor/
 ├── src/
-│   ├── handler.ts                  # Lambda entrypoint — parses SQS event, calls engine
+│   ├── index.ts                          # Lambda entrypoint — parses SQS event, runs one ExecutionEngine per record
 │   │
 │   ├── engine/
-│   │   ├── ExecutionEngine.ts      # Orchestrates the full run end-to-end
-│   │   ├── DagResolver.ts          # Topological sort + execution tier grouping
-│   │   ├── NodeRunner.ts           # Runs one node: resolve inputs → execute → store output
-│   │   ├── ContextManager.ts       # Reads/writes nodeResults to MongoDB during the run
-│   │   └── ExpressionResolver.ts   # Resolves {{NodeName.output.field}} syntax
+│   │   ├── ExecutionEngine.ts            # Orchestrates the full run end-to-end (incl. IF branching)
+│   │   ├── DagResolver.ts                # Topological sort + execution tier grouping
+│   │   ├── NodeRunner.ts                 # Runs one node: resolve inputs → execute → store output
+│   │   ├── ContextManager.ts             # Reads/writes nodeResults to MongoDB during the run
+│   │   ├── ExecutionEngine.test.ts
+│   │   └── DagResolver.test.ts
 │   │
 │   ├── nodes/
-│   │   ├── BaseNode.ts             # Abstract base: execute(inputs, params, ctx) → output
-│   │   ├── HttpRequestNode.ts      # Outbound HTTP calls
-│   │   ├── CodeNode.ts             # Sandboxed arbitrary JS execution
-│   │   ├── IfNode.ts               # Evaluates a condition, returns active handle
-│   │   ├── SetVariableNode.ts      # Maps / transforms values between nodes
-│   │   ├── DelayNode.ts            # Pauses execution for N seconds
-│   │   ├── MergeNode.ts            # Waits for multiple upstream branches
-│   │   └── index.ts                # NODE_REGISTRY — maps nodeType string → class
+│   │   ├── BaseNode.ts                   # Abstract base: execute(inputs, context, meta) → output
+│   │   ├── ManualTriggerNode.ts          # Passthrough — outputs the trigger inputs
+│   │   ├── SchedulerTriggerNode.ts       # Stamps workflow.lastRunAt at trigger time; emits cron metadata
+│   │   ├── HttpRequestNode.ts            # Outbound HTTP calls with timeout + typed error
+│   │   ├── HttpRequestNode.test.ts
+│   │   ├── SetVariableNode.ts            # Maps / transforms values between nodes
+│   │   ├── IfNode.ts                     # Evaluates conditions → { passed, results }; engine gates branch edges
+│   │   ├── DelayNode.ts                  # Scaffold — not yet wired into the registry
+│   │   └── index.ts                      # nodeRegistry — maps FlowNodeType → instance
 │   │
 │   └── utils/
-│       ├── logger.ts               # Structured JSON logger (CloudWatch-friendly)
-│       └── errors.ts               # Typed error classes (NodeExecutionError, etc.)
+│       ├── expression-resolver.ts        # Resolves {{NodeName.output.field}} syntax
+│       └── expresstion-resolver.test.tsx
 │
-├── tests/
-│   ├── engine/
-│   │   ├── DagResolver.test.ts
-│   │   ├── NodeRunner.test.ts
-│   │   └── ExpressionResolver.test.ts
-│   └── nodes/
-│       ├── HttpRequestNode.test.ts
-│       ├── IfNode.test.ts
-│       └── ...
-│
-├── scripts/
-│   └── deploy.sh                   # Manual zip-and-upload deploy script
-│
-├── .env.example
 ├── package.json
 └── README.md
 ```
+
+Tests are co-located with the modules they cover (Vitest). There is no separate `tests/` directory.
 
 ---
 
@@ -121,24 +111,28 @@ apps/workflow-executor/
 
 ### handler
 
-**File:** `src/handler.ts`
+**File:** `src/index.ts`
 
-The Lambda entrypoint. AWS invokes this with an SQS event. Batch size is configured to 1 (see [Lambda and SQS configuration](#lambda-and-sqs-configuration)) so `event.Records` always contains a single message.
+The Lambda entrypoint. AWS invokes this with an SQS event. The handler loops through `event.Records`, parses each message body, and runs one `ExecutionEngine` per job sequentially.
 
 Responsibilities:
-- Parse and validate the SQS message body
-- Initialize the MongoDB connection (reused across warm invocations — declared outside the handler body)
-- Call `ExecutionEngine.run()` with the parsed job
-- Return cleanly so SQS deletes the message; throw only on unrecoverable parse errors so malformed messages go to the DLQ immediately rather than retrying
+- Initialize the MongoDB connection via the `connectMongo()` singleton (re-used across warm invocations)
+- Parse every SQS message body as `{ workflowId, executionId }`
+- Instantiate `ExecutionEngine(executionId, workflowId, nodeRegistry)` for each job and call `executeWorkflow()`
+- Return cleanly so SQS deletes the messages
 
 ```ts
-// Connection is initialized once, outside the handler, so it persists across warm invocations
-await connectDb();
-
-export const handler = async (event: SQSEvent): Promise<void> => {
-  const record = event.Records[0];
-  const job = JSON.parse(record.body) as ExecutionJob;
-  await ExecutionEngine.run(job);
+export const handler = async (event: SQSEvent) => {
+  await connectMongo();
+  const workflows = event.Records.map((r) => JSON.parse(r.body) as {
+    workflowId: string;
+    executionId: string;
+  });
+  for (const wf of workflows) {
+    const engine = new ExecutionEngine(wf.executionId, wf.workflowId, nodeRegistry);
+    await engine.executeWorkflow();
+  }
+  return { success: true };
 };
 ```
 
@@ -151,22 +145,47 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 The top-level coordinator. Owns the execution lifecycle from claim to completion.
 
 Responsibilities:
+- Load the workflow document (used for trigger type + cron expression at tail-end)
 - Atomically claim the execution (`PENDING → RUNNING`) using `findOneAndUpdate`
-- Load the workflow graph from `workflowSnapshot` on the execution record
+- Mark the workflow `PROCESSING` (poller had set it `QUEUED`)
+- Load the graph from `execution.workflowSnapshot` (NOT the live workflow — snapshot is frozen at trigger time)
 - Call `DagResolver` to produce the ordered tier list
-- Iterate over tiers, running all nodes in a tier concurrently via `Promise.allSettled`
-- Mark the execution `SUCCESS`, `FAILED`, or `PARTIAL_SUCCESS` when done
-- Write a top-level error summary to MongoDB on failure
+- Track `liveEdgeIds: Set<string>` across tiers and decide per-tier which nodes are runnable vs skipped
+- Mark skipped nodes via `ContextManager.setNodeStatus(nodeId, "SKIPPED")`
+- Run runnable nodes in a tier concurrently via `Promise.allSettled`
+- Activate outgoing edges after each successful node (IF nodes activate only the handle that matches `output.passed`)
+- Mark the execution `SUCCESS` or `FAILED` when done
+- On success: reset workflow `status: READY`; for CRON recompute `nextRunAt` via `CronExpressionParser`; for MANUAL/WEBHOOK stamp `lastRunAt`
+- On failure: write `Execution.error = { message }` and set `Workflow.status = FAILED`
 
 Key pattern — the atomic claim that prevents duplicate processing:
 
 ```ts
 const claimed = await ExecutionModel.findOneAndUpdate(
-  { executionId: job.executionId, status: "PENDING" },
-  { $set: { status: "RUNNING", startedAt: new Date() } },
-  { new: true }
+  { executionId: this.executionId, status: "PENDING" },
+  { $set: { status: "RUNNING" } }
 );
 if (!claimed) return; // already claimed by another worker — exit silently
+```
+
+Key pattern — IF branch gating per tier:
+
+```ts
+const isReachable =
+  incoming.length === 0 || incoming.some(e => liveEdgeIds.has(e.id));
+// ... runnable nodes run; unreachable nodes get setNodeStatus("SKIPPED")
+
+// After a successful run:
+if (isIfNode(node)) {
+  const passed = (output as { passed?: boolean })?.passed === true;
+  for (const e of outgoing) {
+    if (e.sourceHandle === "true"  && passed)  liveEdgeIds.add(e.id);
+    else if (e.sourceHandle === "false" && !passed) liveEdgeIds.add(e.id);
+    else if (!e.sourceHandle) liveEdgeIds.add(e.id); // backwards compat
+  }
+} else {
+  for (const e of outgoing) liveEdgeIds.add(e.id);
+}
 ```
 
 ---
@@ -193,10 +212,10 @@ Output tiers:
   ]
 ```
 
-Also handles:
-- **Cycle detection** — throws `CyclicGraphError` if a circular dependency exists; the execution is immediately marked `FAILED`
-- **Disconnected nodes** — nodes with no path from the trigger are detected and marked `SKIPPED` without running
-- **Conditional edges** — edges tagged `sourceHandle: "true"` or `"false"` are only activated after the `IF` node resolves its condition; inactive branch nodes are excluded from remaining tiers
+Notes:
+- **Cycle detection** — if the topo-sort output is shorter than the node set, a cycle exists. The engine treats this as a failed run.
+- **Disconnected nodes** — nodes with no path from the trigger end up in the topo sort but get pruned at execution time by the live-edge check (they have incoming edges but no live predecessor).
+- **Conditional edges** — the resolver itself is unaware of `IF` handles; gating is enforced by `ExecutionEngine` via the live-edge set, which is what actually decides if a node runs or is marked `SKIPPED`.
 
 ---
 
@@ -204,25 +223,18 @@ Also handles:
 
 **File:** `src/engine/NodeRunner.ts`
 
-Executes a single node. Called by `ExecutionEngine` for every node in every tier.
+Executes a single node. Called by `ExecutionEngine` for every runnable node in every tier.
 
 Responsibilities:
+- Look up the adapter in `nodeRegistry`; throw if no adapter registered for `node.nodeType`
+- Build `NodeExecutionMeta` = `{ nodeId, nodeName, workflowId, executionId }`
+- Call `expressionResolver(node.config, context)` to substitute `{{...}}` tokens with prior node outputs
 - Mark the node `RUNNING` in the execution context
-- Fetch predecessor outputs from `ContextManager`
-- Call `ExpressionResolver` to substitute `{{...}}` tokens in the node's `config`
-- Look up the correct adapter from `NODE_REGISTRY` and call `adapter.execute()`
-- Write the node output back to `ContextManager`
-- Implement retry logic with exponential backoff based on `node.retryConfig`
-- Mark the node `SUCCESS`, `FAILED`, or `SKIPPED`
+- Call `adapter.execute(inputs, context, meta)`
+- Mark the node `SUCCESS`, write the output via `ContextManager.setNodeOutput`, and upsert to `prev_run_data`
+- On throw: mark the node `FAILED`, write the error message, and re-throw so the engine fails the run
 
-Retry behaviour:
-```
-Attempt 1 → fails → wait 1000ms
-Attempt 2 → fails → wait 2000ms
-Attempt 3 → fails → mark FAILED, propagate
-```
-
-If `node.continueOnFail` is `true`, a `FAILED` node does not halt the execution — the engine continues with the next tier using `null` as the node's output.
+> The current implementation does **not** yet support per-node retry policies or a `continueOnFail` flag — any thrown error from a tier causes the engine to mark the execution `FAILED`. Lambda-level retries (via SQS) still apply.
 
 ---
 
@@ -233,10 +245,10 @@ If `node.continueOnFail` is `true`, a `FAILED` node does not halt the execution 
 Manages the live execution state that accumulates as nodes run. Acts as the shared memory for a single execution — every node writes its output here and every downstream node reads from here.
 
 Responsibilities:
-- Hold the full `nodeResults` map **in memory** for the duration of the Lambda invocation (fast O(1) reads via a plain `Map`)
-- **Persist** each node result to MongoDB after it completes (durable writes for observability and future resume support)
-- Expose `getOutput(nodeId)` for `ExpressionResolver` to fetch any previous node's output
-- Write the `prev_run_data` upsert after each successful node so `$prevRunData` is available on the next run
+- Hold the full `nodeEntries` map **in memory** for the duration of the Lambda invocation (fast O(1) reads via a plain `Map`)
+- Maintain a parallel `expressionContext` keyed by node **name** (not ID) — this is what `expressionResolver` reads
+- **Persist** each node status, output, and error transition to MongoDB on the execution record (durable writes for observability)
+- Upsert the latest successful node output to `PrevRunDataModel` so future workflow runs can reference the previous run's outputs
 
 The in-memory map means expression resolution never hits MongoDB mid-execution. All reads within a single run are in-process.
 
@@ -244,9 +256,9 @@ The in-memory map means expression resolution never hits MongoDB mid-execution. 
 
 ### ExpressionResolver
 
-**File:** `src/engine/ExpressionResolver.ts`
+**File:** `src/utils/expression-resolver.ts`
 
-Scans a node's `config` object recursively and replaces all `{{NodeName.output.field}}` expressions with their resolved values from the current execution context before the node runs.
+Exported as a plain function `expressionResolver(template, context)`, not a class. Scans a node's `config` object recursively and replaces all `{{NodeName.output.field}}` expressions with their resolved values from the current execution context **before** the node's adapter is called.
 
 Syntax: `{{<NodeName>.<path>.<to>.<field>}}`
 
@@ -257,10 +269,11 @@ Syntax: `{{<NodeName>.<path>.<to>.<field>}}`
 ```
 
 Handles:
-- **Nested paths** — `body.user.address.city` resolved via lodash `get`
+- **Whole-string expression** — returns the **raw typed value** (number/object/array stays typed; only a single `{{...}}` with no surrounding text gets this treatment)
+- **Embedded expression** — `"Hello {{...}}, ID: {{...}}"` returns a string with each token stringified independently
+- **Nested paths** — dot notation walks any plain object
 - **Missing values** — returns `""` rather than throwing; a missing expression is a workflow logic error, not a system error
-- **Multiple expressions in one string** — `"Hello {{Trigger.output.body.name}}, ID: {{Trigger.output.body.id}}"` resolves both tokens independently
-- **Non-string values** — numbers, booleans, and nested objects in `config` are passed through untouched; only strings are scanned
+- **Non-string passthrough** — numbers, booleans, and nested objects in `config` are walked recursively; only strings are scanned for tokens
 
 ---
 
@@ -273,27 +286,32 @@ Each node type is a class extending `BaseNode` and implementing a single `execut
 ```ts
 abstract class BaseNode {
   abstract execute(
-    inputs: Record<string, unknown>,    // resolved config (expressions already substituted)
-    rawParams: Record<string, unknown>, // original config before resolution
-    context: ExecutionContext           // read-only view of the full execution context
-  ): Promise<Record<string, unknown>>;  // output — stored as nodeResults[nodeId].output
+    inputs: ResolvedValue,         // resolved config (expressions already substituted)
+    context: ExecutionContext,     // read-only view of the full execution context
+    meta: NodeExecutionMeta        // { nodeId, nodeName, workflowId, executionId }
+  ): Promise<ResolvedValue>;       // output — stored as nodeResults[nodeId].output
 }
 ```
 
-| Adapter | What it does |
-|---|---|
-| `HttpRequestNode` | Makes outbound HTTP calls. Supports method, URL, headers, body, query params. Returns `{ statusCode, body, headers }`. |
-| `CodeNode` | Runs user-provided JS in a sandboxed `vm.Script` context. Exposes `$input`, `$context`, and `$prevRunData` to the script. |
-| `IfNode` | Evaluates a condition against the input. Returns `{ activeHandle: "true" \| "false" }`. The engine uses this to activate or deactivate downstream edges. |
-| `SetVariableNode` | Maps and transforms values into a new object from upstream outputs — no code required. |
-| `DelayNode` | Pauses execution for N seconds. Throws if the requested delay would exceed remaining Lambda execution time. |
-| `MergeNode` | Collects outputs from all upstream branches into a single array and passes them downstream. |
+Currently registered in `src/nodes/index.ts`:
+
+| Adapter | nodeType key | What it does |
+|---|---|---|
+| `ManualTriggerNode` | `manualTrigger` | Passthrough — outputs the trigger inputs unchanged |
+| `SchedulerTriggerNode` | `scheduler` | Stamps `workflow.lastRunAt = now`; emits `{ triggeredAt, lastRunAt, cronExpression, nextRunAt, mode, every, unit, time, days, timezone }` for downstream nodes |
+| `HttpRequestNode` *(also aliased to `webhook`)* | `httpRequest`, `webhook` | Outbound `fetch` with `AbortController` timeout and typed `HttpRequestError`. Returns `{ statusCode, body, headers, ok }`. The webhook alias is a **placeholder** — webhook trigger semantics are not yet implemented. |
+| `SetVariableNode` | `set` | Maps and transforms values into a new object from upstream outputs — no code required |
+| `IfNode` | `if` | Evaluates AND-combined conditions. Returns `{ passed, results }`. The engine reads `output.passed` to gate edges by `sourceHandle: "true" \| "false"`. |
+| `DelayNode` | *(not in registry)* | Scaffold — needs to be wired up in `nodes/index.ts` once implementation lands |
+
+Future additions noted in `nodes/index.ts`: `Code`, `Delay`, `Merge`.
 
 **Adding a new node type:**
 1. Create `src/nodes/YourNode.ts` extending `BaseNode`
-2. Register it in `src/nodes/index.ts`: `your_node_type: YourNode`
+2. Register it in `src/nodes/index.ts`: `[ActionNodeTypes.YourType]: new YourNode()`
 3. The `nodeType` value on the workflow node in MongoDB must match the registry key exactly
-4. Write tests in `tests/nodes/YourNode.test.ts`
+4. (Optional) define a Zod schema + UIMeta in `packages/types/src/nodes/YourNodeSchema.ts` so the frontend renders a config form automatically
+5. Write tests co-located: `src/nodes/YourNode.test.ts`
 
 ---
 
@@ -305,21 +323,12 @@ Every message body is a JSON string. This is the input contract — any service 
 interface ExecutionJob {
   executionId: string;    // must already exist in MongoDB with status "PENDING"
   workflowId: string;
-  triggeredBy: "CRON" | "WEBHOOK" | "MANUAL";
-  inputData: {
-    body: Record<string, unknown>;
-    headers: Record<string, unknown>;
-    query: Record<string, unknown>;
-  };
-  idempotencyKey: string;
-
-  // Optional — if set, execution halts after this node completes
-  // and status is set to PARTIAL_SUCCESS. Used by the builder "run until here" feature.
-  stopAtNodeId?: string;
 }
 ```
 
-> **Important:** this service does not create the `Execution` document. The calling service must create it with `status: "PENDING"` before enqueuing the message. If the executor receives a job for a non-existent or already-completed execution ID, it logs an error and returns without retrying — this is a caller error, not a transient failure.
+> **Important:** this service does not create the `Execution` document. The calling service (`cron-workflow-poller` for CRON triggers, future webhook receiver for WEBHOOK) must create it with `status: "PENDING"` along with a `workflowSnapshot` of the graph **before** enqueuing the message. If the executor receives a job for an execution that is not in `PENDING` state, the atomic claim returns null and the executor exits silently.
+
+The schema (`IExecution`) supports additional fields — `idempotencyKey`, `triggeredBy`, `inputData`, `stopAtNodeId` — but they are written by the caller when the Execution doc is created, not passed through the SQS message body.
 
 ---
 
@@ -328,12 +337,11 @@ interface ExecutionJob {
 ```
 PENDING ──► RUNNING ──► SUCCESS
                     ──► FAILED
-                    ──► PARTIAL_SUCCESS   (stopAtNodeId reached)
 ```
 
-Transitions managed by this service: `PENDING → RUNNING`, then `RUNNING → SUCCESS / FAILED / PARTIAL_SUCCESS`.
+Transitions managed by this service: `PENDING → RUNNING`, then `RUNNING → SUCCESS / FAILED`.
 
-`TIMED_OUT` and `CANCELLED` are written by other services (`workflow-cron-poller` cleanup job and the `api` service respectively). This service never writes those statuses.
+`TIMED_OUT`, `CANCELLED`, and `PARTIAL_SUCCESS` are reserved statuses in the schema. `TIMED_OUT` would be written by a future cleanup job; `CANCELLED` by the `api` service; `PARTIAL_SUCCESS` is reserved for the planned `stopAtNodeId` feature. This service never writes those statuses.
 
 ---
 
@@ -343,53 +351,38 @@ SQS delivers messages *at least once* — in rare cases the same message may arr
 
 ```ts
 const claimed = await ExecutionModel.findOneAndUpdate(
-  { executionId: job.executionId, status: "PENDING" },
-  { $set: { status: "RUNNING", startedAt: new Date() } },
-  { new: true }
+  { executionId: this.executionId, status: "PENDING" },
+  { $set: { status: "RUNNING" } }
 );
 if (!claimed) return; // already claimed — exit silently, no duplicate work
 ```
 
 A second Lambda instance receiving the duplicate finds the status is no longer `PENDING`, gets `null` back, and exits. No distributed lock service required.
 
+In addition, the `cron-workflow-poller` writes each execution with a unique `idempotencyKey` (`<workflowId>__<scheduledAt ISO>`). The unique index on that field prevents two pollers from even creating duplicate executions for the same tick.
+
 ---
 
 ## Error handling and retries
 
-**Node-level retries** are configured per-node in the workflow definition via `node.retryConfig`:
-
-```ts
-interface RetryConfig {
-  maxAttempts: number; // default: 3
-  backoffMs: number;   // base delay, doubles on each attempt (default: 1000ms)
-}
-```
-
-**Workflow-level failure** — if a node exhausts all retries and `continueOnFail` is `false`, the engine marks the execution `FAILED` and stops. Nodes that had not yet run remain in `PENDING` status in `nodeResults`.
+**Workflow-level failure** — the executor uses `Promise.allSettled` per tier but throws on the **first** rejection. The execution is marked `FAILED` with `error.message`, and the workflow is set to `FAILED`. Per-node retry policies and a `continueOnFail` flag are planned but not yet implemented.
 
 **Lambda-level retries** — if the Lambda itself throws (OOM, timeout), SQS redelivers the message up to `maxReceiveCount` times. After that the message moves to the DLQ. Because the executor only claims executions in `PENDING` status, a redelivery for an execution that already completed is safely ignored.
+
+**Stale-lock recovery** — if a Lambda crashes after marking a workflow `PROCESSING` but before the execution finishes, the `cron-workflow-poller`'s stale-lock sweep (every minute, threshold 5 min) flips the workflow back to `READY` so the next tick can retry.
 
 ---
 
 ## Environment variables
 
-Copy `.env.example` to `.env` for local development. Set these as Lambda environment variables in AWS.
+Lambda environment variables:
 
 ```bash
 # Required
 MONGODB_URI=mongodb+srv://user:pass@cluster.mongodb.net/your-db
-NODE_ENV=production
-
-# 32-byte hex key for decrypting credential values at execution time
-# Generate: node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
-CREDENTIAL_ENCRYPTION_KEY=your-32-byte-hex-key
-
-# Optional — defaults shown
-LOG_LEVEL=info
-EXECUTION_TIMEOUT_SECONDS=840
-NODE_MAX_RETRY_ATTEMPTS=3
-NODE_RETRY_BACKOFF_MS=1000
 ```
+
+For local dev, drop the same value in `apps/workflow-executor/.env`. Bun auto-loads `.env` so there's no need for `dotenv`.
 
 ---
 
@@ -397,7 +390,7 @@ NODE_RETRY_BACKOFF_MS=1000
 
 ### Prerequisites
 
-- Node.js 20+ or Bun
+- Bun v1.3+
 - MongoDB (local or Atlas free tier)
 - AWS CLI (only needed for deployment)
 
@@ -410,156 +403,92 @@ bun install
 
 ### Run a workflow locally
 
-The executor is a pure function — there is no server to start. Invoke it directly with a mock SQS event:
+The executor is a pure function — there is no server to start. Build, then invoke the bundled handler directly with a mock SQS event:
 
 ```bash
-# 1. Seed an Execution document in MongoDB with status "PENDING" first
+# 1. Seed an Execution document in MongoDB with status "PENDING" + workflowSnapshot
 
-# 2. Create a test event
-cat > tmp/test-event.json << 'EOF'
+# 2. Build
+bun run build
+
+# 3. Create a test event
+cat > /tmp/test-event.json << 'EOF'
 {
   "Records": [{
     "messageId": "local-test",
-    "body": "{\"executionId\":\"YOUR_EXECUTION_ID\",\"workflowId\":\"YOUR_WORKFLOW_ID\",\"triggeredBy\":\"MANUAL\",\"inputData\":{\"body\":{},\"headers\":{},\"query\":{}},\"idempotencyKey\":\"local-test-1\"}"
+    "body": "{\"workflowId\":\"YOUR_WORKFLOW_ID\",\"executionId\":\"YOUR_EXECUTION_ID\"}"
   }]
 }
 EOF
 
-# 3. Invoke
-bun run src/handler.ts
+# 4. Invoke via Node
+node -e "
+  const { handler } = require('./dist/index.js');
+  const evt = require('/tmp/test-event.json');
+  handler(evt).then(r => console.log(r)).catch(e => console.error(e));
+"
 ```
 
 ---
 
 ## Running tests
 
-```bash
-# All tests
-bun test
+Vitest with v8 coverage. Tests are co-located with the modules they cover (`*.test.ts` / `*.test.tsx`).
 
+```bash
 # Watch mode
-bun test --watch
+bun run test
+
+# One-shot run
+bun run test:run
+
+# With coverage
+bun run test:coverage
 
 # Single file
-bun test tests/engine/DagResolver.test.ts
+bun run test src/engine/DagResolver.test.ts
 ```
 
 ### Key scenarios per module
 
 | Module | Scenarios to cover |
 |---|---|
-| `DagResolver` | Linear graph, branching, parallel merge, disconnected nodes, cycle detection |
-| `ExpressionResolver` | Nested paths, missing field returns `""`, multiple tokens in one string, non-string passthrough |
-| `NodeRunner` | First-attempt success, retry on failure, exhausted retries, `continueOnFail: true` |
-| `IfNode` | True branch active + false skipped, false branch active + true skipped |
-| `HttpRequestNode` | 2xx success, 4xx/5xx triggers retry, network timeout |
-| `ContextManager` | Output written after success, `$prevRunData` upserted correctly |
+| `DagResolver` | Linear graph, branching, parallel merge, disconnected nodes |
+| `ExecutionEngine` | Atomic claim, workflow status transitions, CRON `nextRunAt` recomputation, MANUAL `lastRunAt` fallback |
+| `expressionResolver` | Nested paths, missing field returns `""`, multiple tokens in one string, whole-string returns raw typed value |
+| `IfNode` | All 6 operators, AND-combination, missing/null operands |
+| `HttpRequestNode` | 2xx success, error propagation, timeout via `AbortController` |
 
 ---
 
 ## Deployment
 
-### Option A — deploy script
+The same script set used by every Lambda app in this monorepo. From `apps/workflow-executor/`:
 
-Add to `package.json`:
-```json
-{ "scripts": { "deploy": "bash scripts/deploy.sh" } }
-```
-
-`scripts/deploy.sh`:
 ```bash
-#!/bin/bash
-set -e
-
-FUNCTION_NAME="workflow-executor"
-REGION="ap-south-1"   # update to your region
-
-echo "→ Installing production deps..."
-bun install --production
-
-echo "→ Zipping..."
-zip -r workflow-executor.zip . \
-  --exclude "*.test.ts" \
-  --exclude "tests/*" \
-  --exclude ".env*" \
-  --exclude "tmp/*" \
-  --exclude "*.md" \
-  --exclude "node_modules/.cache/*"
-
-echo "→ Uploading..."
-aws lambda update-function-code \
-  --function-name $FUNCTION_NAME \
-  --zip-file fileb://workflow-executor.zip \
-  --region $REGION
-
-echo "→ Waiting for update to propagate..."
-aws lambda wait function-updated \
-  --function-name $FUNCTION_NAME \
-  --region $REGION
-
-echo "✓ Deployed $FUNCTION_NAME"
-rm workflow-executor.zip
+bun run build           # bun build src/index.ts → dist/index.js (CJS, minified)
+bun run zip             # dist/ + package.json → lambda.zip
+bun run build:zip       # build + zip
+bun run deploy          # aws lambda update-function-code
+bun run deploy:full     # build + zip + deploy in one go
+bun run logs            # aws logs tail … --follow
 ```
 
-Run with: `bun run deploy`
+`deploy:full` is the day-to-day redeploy command. The handler entry-point and other Lambda config (memory, timeout, role) are set when the function is first created and are **not** updated by `update-function-code` — only the code zip is shipped.
 
----
+### First-time function creation
 
-### Option B — GitHub Actions (recommended)
-
-Triggers automatically on push to `main` when files in this service or `packages/db` change.
-
-Create `.github/workflows/deploy-executor.yml` in the monorepo root:
-
-```yaml
-name: Deploy workflow-executor
-
-on:
-  push:
-    branches: [main]
-    paths:
-      - 'apps/workflow-executor/**'
-      - 'packages/db/**'
-
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: oven-sh/setup-bun@v2
-
-      - name: Install production deps
-        working-directory: apps/workflow-executor
-        run: bun install --production
-
-      - name: Zip
-        working-directory: apps/workflow-executor
-        run: |
-          zip -r ../../workflow-executor.zip . \
-            --exclude "*.test.ts" --exclude "tests/*" \
-            --exclude ".env*" --exclude "*.md"
-
-      - uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ap-south-1
-
-      - name: Deploy to Lambda
-        run: |
-          aws lambda update-function-code \
-            --function-name workflow-executor \
-            --zip-file fileb://workflow-executor.zip
-          aws lambda wait function-updated \
-            --function-name workflow-executor
-
-      - run: rm workflow-executor.zip
+```bash
+aws lambda create-function \
+  --function-name n8n-workflow-executor-dev \
+  --runtime nodejs20.x \
+  --handler dist/index.handler \
+  --zip-file fileb://lambda.zip \
+  --role arn:aws:iam::<ACCOUNT_ID>:role/lambda-basic-role \
+  --region ap-south-1
 ```
 
-**Required GitHub secrets:** `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`
-
-**Required IAM permissions for the CI user:** `lambda:UpdateFunctionCode`, `lambda:GetFunction`
+After creating, wire the SQS queue as an event source (see root `DEPLOYMENT.md` STEP 16).
 
 ---
 
@@ -569,15 +498,15 @@ jobs:
 
 | Setting | Value | Reason |
 |---|---|---|
-| Runtime | Node.js 20.x | |
-| Handler | `src/handler.handler` | |
+| Function name | `n8n-workflow-executor-dev` | |
+| Region | `ap-south-1` | |
+| Runtime | `nodejs20.x` | Lambda doesn't run Bun at runtime — Bun is used only to build a Node-compatible CJS bundle |
+| Handler | `dist/index.handler` | Exported from `src/index.ts` |
 | Timeout | 900s (15 min) | Maximum allowed — long workflows need headroom |
-| Memory | 512 MB | Increase to 1024 MB if `CodeNode` runs heavy scripts |
-| Trigger | SQS `workflow-jobs`, batch size **1** | One execution per invocation — simplifies error handling |
+| Memory | 512 MB | Increase if HTTP request bodies are large or future `CodeNode` runs heavy scripts |
+| Trigger | SQS workflow queue | One execution per record (records are processed sequentially within an invocation) |
 | Reserved concurrency | 10 | Adjust based on expected queue depth |
-| DLQ | SQS `workflow-jobs-dlq` | Catches messages that fail all retries |
-
-> Batch size must be **1**. Each execution is a potentially long-running job — processing multiple records in one invocation would risk timeout mid-batch and complicate partial failure handling.
+| DLQ | SQS DLQ on the source queue | Catches messages that fail all retries |
 
 ### SQS queue settings
 
@@ -605,12 +534,12 @@ mongosh "$MONGODB_URI" --eval "
 ### Tail Lambda logs
 
 ```bash
-# Live tail
-aws logs tail /aws/lambda/workflow-executor --follow --region ap-south-1
+# Live tail (or use `bun run logs` from apps/workflow-executor/)
+aws logs tail /aws/lambda/n8n-workflow-executor-dev --follow --region ap-south-1
 
 # Filter by execution ID
 aws logs filter-log-events \
-  --log-group-name /aws/lambda/workflow-executor \
+  --log-group-name /aws/lambda/n8n-workflow-executor-dev \
   --filter-pattern "YOUR_EXECUTION_ID" \
   --region ap-south-1
 ```
@@ -619,30 +548,33 @@ aws logs filter-log-events \
 
 ```bash
 aws sqs receive-message \
-  --queue-url https://sqs.ap-south-1.amazonaws.com/ACCOUNT_ID/workflow-jobs-dlq \
+  --queue-url https://sqs.ap-south-1.amazonaws.com/ACCOUNT_ID/<your-dlq-name> \
   --max-number-of-messages 10 \
   --region ap-south-1
 ```
 
 ### Common issues
 
-**"Execution not claimed — already running"** in logs
-Normal. A duplicate SQS message arrived and was correctly ignored by the atomic claim check. No action needed.
+**Execution exits immediately with no node output**
+The atomic claim returned null — a duplicate SQS message arrived and was correctly ignored. No action needed. Confirm by checking the original execution's status in MongoDB.
+
+**Workflow stuck in `PROCESSING`**
+Lambda crashed mid-run. The `cron-workflow-poller`'s stale-lock sweep (5 min threshold) will flip it back to `READY` automatically on the next tick. Manual recovery:
+
+```bash
+mongosh "$MONGODB_URI" --eval "
+  db.workflows.updateMany(
+    { status: 'PROCESSING', lockedAt: { \$lt: new Date(Date.now() - 5 * 60 * 1000) } },
+    { \$set: { status: 'READY', lockedAt: null, lockId: null } }
+  )
+"
+```
 
 **Lambda OOM (exit code 137)**
-A `CodeNode` script is consuming too much memory. Increase Lambda memory to 1024 MB, or add a memory cap inside the `CodeNode` VM sandbox.
+Most often caused by very large HTTP response bodies being loaded into memory. Increase Lambda memory to 1024 MB, or add a size cap inside `HttpRequestNode`.
 
 **`MongooseServerSelectionError` on cold start**
 Lambda cannot reach MongoDB. Check: Atlas IP allowlist includes `0.0.0.0/0` (development) or Lambda is in the correct VPC with the right security group rules (production). Verify `MONGODB_URI` is set correctly in Lambda environment variables.
 
-**Execution stuck in `RUNNING` indefinitely**
-Lambda timed out or crashed after claiming but before completing. The `workflow-cron-poller` cleanup job finds executions in `RUNNING` with `startedAt` older than 16 minutes and marks them `TIMED_OUT`. If the cleanup job is not running, do it manually:
-
-```bash
-mongosh "$MONGODB_URI" --eval "
-  db.executions.updateMany(
-    { status: 'RUNNING', startedAt: { \$lt: new Date(Date.now() - 16 * 60 * 1000) } },
-    { \$set: { status: 'TIMED_OUT', finishedAt: new Date() } }
-  )
-"
-```
+**Node marked `SKIPPED` unexpectedly**
+The node's only incoming edge came from an IF branch whose handle didn't match `output.passed`. Check the IF node's `nodeResults` entry for `output.results[]` to see which condition flipped the branch.
