@@ -1,287 +1,161 @@
-# ⚡ n8n-like Workflow Automation Platform (Monorepo)
+# Node Workflow — Workflow Automation Platform
 
-A **production-grade, event-driven workflow automation platform** inspired by **n8n**, built with **TypeScript**, **Turborepo**, **Next.js**, and **AWS Serverless**.
+A serverless, n8n-style visual workflow automation platform. Users draw workflows on a canvas; the platform schedules them, executes nodes in topological order, and persists every run.
 
-This repository contains a **full-stack monorepo** that powers a visual workflow builder (frontend) and a scalable backend capable of **trigger polling, queue-based execution, and secure API access**.
-
----
-
-## 🧠 High-Level Overview
-
-This system allows users to:
-
-* Create workflows made of nodes and triggers
-* Periodically evaluate which workflows are ready to run
-* Execute workflow nodes asynchronously and reliably
-* Scale automatically with zero server management
-
-The architecture is **fully serverless**, **event-driven**, and **cost-efficient**.
+Built with **TypeScript**, **Turborepo**, **Bun**, **Next.js 15 (App Router)**, **Tailwind v4**, **Express on AWS Lambda**, **MongoDB Atlas**, **SQS**, **EventBridge**.
 
 ---
 
-## 🧱 Architecture Diagram (Conceptual)
+## Architecture
 
 ```
-┌──────────────┐
-│   Frontend   │  (Next.js, Vercel)
-│  Workflow UI │
-└──────┬───────┘
-       │ HTTPS
-       ▼
-┌────────────────────┐
-│ API Gateway (HTTP) │
-└─────────┬──────────┘
-          ▼
-┌────────────────────┐
-│ Main API Service   │  (AWS Lambda)
-│ - Auth             │
-│ - Workflow CRUD    │
-│ - User APIs        │
-└─────────┬──────────┘
-          │
-          ▼
-┌────────────────────┐
-│ MongoDB Atlas      │
-│ (Workflows, Users) │
-└────────────────────┘
-
-
-⏱ EventBridge (every 1 min)
-          │
-          ▼
-┌────────────────────┐
-│ Trigger Poller     │  (AWS Lambda)
-│ - Scan workflows   │
-│ - Detect ready jobs│
-└─────────┬──────────┘
-          ▼
-┌────────────────────┐
-│ SQS Queue          │
-│ (Execution tasks)  │
-└─────────┬──────────┘
-          ▼
-┌────────────────────┐
-│ Worker Service     │  (AWS Lambda)
-│ - Execute nodes    │
-│ - Update workflow  │
-└────────────────────┘
+                            ┌──────────────────────┐
+                            │  Frontend (Next.js)  │ ── Vercel
+                            │  React Flow editor   │
+                            └──────────┬───────────┘
+                                       │ HTTPS
+                                       ▼
+                            ┌──────────────────────┐
+                            │ API Gateway HTTP v2  │
+                            └──────────┬───────────┘
+                                       ▼
+                            ┌──────────────────────┐
+                            │  apps/api            │ ── Lambda (Express)
+                            │  Auth · Workflow CRUD│
+                            │  Webhook registration│
+                            └──────────┬───────────┘
+                                       │
+                                       ▼
+                            ┌──────────────────────┐
+                            │  MongoDB Atlas       │
+                            │  workflows · users   │
+                            │  executions · creds  │
+                            └──────────────────────┘
+                                       ▲
+            EventBridge (rate 1 min)   │            SQS FIFO queue
+                    │                  │                    │
+                    ▼                  │                    ▼
+   ┌──────────────────────────┐        │      ┌──────────────────────────┐
+   │ apps/cron-workflow-poller│────────┼─────▶│ apps/workflow-executor   │
+   │ Find ready workflows     │        │      │ Read execution snapshot  │
+   │ Create PENDING execution │        │      │ Walk DAG · run nodes     │
+   │ Push {wfId,execId} → SQS │        │      │ Honor IF branch handles  │
+   └──────────────────────────┘        │      │ Persist node results     │
+                                       └──────└──────────────────────────┘
 ```
+
+### Data flow at a glance
+
+1. **User creates a workflow** in the editor; `apps/api` POST `/workflows` persists it. For CRON triggers, the API computes `cronExpression` + `nextRunAt`. For WEBHOOK triggers, it inserts a `WebhookRegistration` doc.
+2. **EventBridge fires every minute** → `apps/cron-workflow-poller` runs. It finds workflows with `nextRunAt <= now`, locks them (PROCESSING), creates a PENDING `Execution` doc carrying a snapshot of the graph, then sends `{ workflowId, executionId }` to SQS.
+3. **SQS triggers `apps/workflow-executor`**. It reads the snapshot from the execution, builds tiers via `DAGResolver`, runs each node through `NodeRunner`, and honors IF-node branch handles (false-branch subtrees are marked SKIPPED).
+4. **Engine writes** node statuses/outputs to the `Execution` doc and bumps the workflow's `lastRunAt` + `nextRunAt`.
 
 ---
 
-## 📦 Monorepo Structure
+## Repo layout
 
 ```
-.
-├── apps/
-│   ├── web/                # Next.js frontend (n8n-like UI)
-│   ├── api/                # Main backend API (Lambda)
-│   ├── trigger-poller/     # Scheduled workflow poller
-│   └── worker/             # Queue-based node executor
-│
-├── packages/
-│   ├── db/                 # MongoDB + Mongoose (singleton)
-│   └── auth/               # Shared auth middleware & types
-│
-├── turbo.json
-└── README.md
+apps/
+├── frontend/                 Next.js 15 App Router · React Flow · Tailwind v4
+├── api/                      Express on Lambda — auth + workflow CRUD
+├── cron-workflow-poller/     EventBridge-triggered Lambda — finds & queues due workflows
+└── workflow-executor/        SQS-triggered Lambda — runs the DAG
+
+packages/
+├── types/                    Pure-TS Zod schemas + node UI metadata (no Mongoose)
+├── db/                       Mongoose models + connection singleton (re-exports @repo/types)
+├── auth/                     JWT middleware shared by api + frontend session route
+├── eslint-config/            Shared ESLint config
+└── typescript-config/        Shared tsconfig.base
 ```
 
 ---
 
-## 🖥️ Frontend (Next.js)
+## Build & deploy
 
-**Location:** `apps/web`
-**Deployed on:** **Vercel**
+Each Lambda service has the same script set in its `package.json`:
 
-### Responsibilities
+```bash
+bun run build          # bundle entrypoint → dist/*.js (CJS, minified)
+bun run zip            # dist + package.json → lambda.zip
+bun run build:zip      # build + zip
+bun run deploy         # aws lambda update-function-code …
+bun run deploy:full    # build + zip + deploy
+bun run logs           # aws logs tail … --follow
+```
 
-* Visual workflow editor (n8n-like)
-* User authentication (NextAuth)
-* Workflow creation, editing, deletion
-* Trigger and node configuration
-* Calls backend APIs securely
+Deployed function names (all in `ap-south-1`):
 
-### Deployment
+| Service                 | Lambda function name          | Trigger              |
+| ----------------------- | ----------------------------- | -------------------- |
+| `apps/api`              | `n8n-workflow-api-dev`        | API Gateway HTTP v2  |
+| `apps/cron-workflow-poller` | `n8n-workflow-poller-dev` | EventBridge `rate(1 minute)` |
+| `apps/workflow-executor`| `n8n-workflow-executor-dev`   | SQS                  |
 
-* Automatically deployed via Vercel
-* Environment variables managed via Vercel dashboard
+The first-time AWS setup (IAM role, SSM secrets, API Gateway, SQS, EventBridge wiring) is in [`DEPLOYMENT.md`](./DEPLOYMENT.md). Per-service Lambda redeploy cheat-sheets live in each `apps/*/README.md`.
 
----
-
-## 🔐 Main Backend API Service
-
-**Location:** `apps/api`
-**Deployed on:** **AWS Lambda + API Gateway (HTTP API)**
-
-### Responsibilities
-
-* User authentication & authorization
-* Workflow CRUD APIs
-* Secure verification of frontend sessions
-* MongoDB persistence
-* Entry point for all client requests
-
-### Key Characteristics
-
-* Stateless
-* Serverless
-* Auto-scaling
-* Uses MongoDB connection singleton for performance
+Frontend deploys via **Vercel** on push to `main`.
 
 ---
 
-## ⏱ Trigger Poller Service
-
-**Location:** `apps/trigger-poller`
-**Deployed on:** **AWS Lambda + EventBridge**
-
-### Why this exists
-
-Running infinite loops in serverless is a **bad practice**.
-Instead, this service runs **on a fixed schedule**.
-
-### Responsibilities
-
-* Runs every minute via EventBridge
-* Scans workflows in MongoDB
-* Determines which workflows or nodes are ready to execute
-* Pushes execution tasks to SQS
-
-### Benefits
-
-* No infinite loops
-* Predictable execution
-* Cheap and reliable
-* Easy to scale
-
----
-
-## 📬 Worker (Node Executor) Service
-
-**Location:** `apps/worker`
-**Deployed on:** **AWS Lambda + SQS**
-
-### Responsibilities
-
-* Listens to SQS messages
-* Executes workflow nodes
-* Handles retries and failures
-* Updates execution state in MongoDB
-
-### Why SQS?
-
-* Decouples execution from polling
-* Automatic retries
-* Backpressure handling
-* Horizontal scaling
-
----
-
-## 🗄️ Shared Packages
-
-### `@repo/db`
-
-* MongoDB + Mongoose
-* Type-safe schemas
-* Singleton connection (Lambda-safe)
-* Shared across all services
-
-### `@repo/auth`
-
-* Auth middleware
-* Shared request typing
-* JWT verification utilities
-
----
-
-## 🔐 Secrets & Configuration (Best Practice)
-
-Secrets are **never committed**.
-
-All sensitive values are stored in:
-
-* **AWS SSM Parameter Store**
-* **Vercel Environment Variables**
-
-Examples:
-
-* `MONGODB_URI`
-* `JWT_SECRET`
-
-Injected at runtime via AWS / Vercel.
-
----
-
-## 🚀 Deployments Summary
-
-| Service        | Platform      | Method               |
-| -------------- | ------------- | -------------------- |
-| Frontend       | Vercel        | Git-based deployment |
-| API            | AWS Lambda    | Serverless Framework |
-| Trigger Poller | AWS Lambda    | EventBridge schedule |
-| Worker         | AWS Lambda    | SQS trigger          |
-| Database       | MongoDB Atlas | Managed              |
-
----
-
-## 🧪 Running Locally
-
-### 1️⃣ Install dependencies
+## Local development
 
 ```bash
 bun install
+bun run dev        # turborepo runs everything in parallel
 ```
 
-### 2️⃣ Setup environment variables
-
-Create `.env` files where required:
-
-```env
-MONGODB_URI=mongodb://localhost:27017/n8n
-JWT_SECRET=dev-secret
-```
-
-### 3️⃣ Start MongoDB
+Or per-service:
 
 ```bash
-docker run -p 27017:27017 mongo
-```
-
-### 4️⃣ Run all services in dev mode
-
-```bash
-bun run dev
-```
-
-Or individually:
-
-```bash
-cd apps/web && bun run dev
+cd apps/frontend && bun run dev
 cd apps/api && bun run dev
-cd apps/trigger-poller && bun run dev
-cd apps/worker && bun run dev
+cd apps/workflow-executor && bun run build && bun run dist/index.js
 ```
 
----
+### Required env vars
 
-## 🧠 Design Principles
+| Service                  | Vars                                                |
+| ------------------------ | --------------------------------------------------- |
+| `apps/api`               | `MONGODB_URI`, `JWT_SECRET`, `QUEUE_URL_PATH` (SSM) |
+| `apps/cron-workflow-poller` | `MONGODB_URI`, `QUEUE_URL_PATH` (SSM)            |
+| `apps/workflow-executor` | `MONGODB_URI`                                       |
+| `apps/frontend`          | `NEXT_PUBLIC_API_URL`, `NEXTAUTH_SECRET`            |
 
-* Event-driven
-* Serverless-first architecture
-* Strong typing everywhere (TypeScript)
-* Shared logic via packages
-* Cost-efficient & scalable
-* Production-grade patterns
-
----
-
-## ✨ Future Enhancements
-
-* Visual node execution debugger
-* Retry & DLQ handling
-* Workflow versioning
-* Custom triggers (webhooks, cron, email, telegram, gooogle sheet)
-* OAuth providers per workflow
+All Lambda secrets are stored in **AWS SSM Parameter Store**; nothing sensitive in env files or git.
 
 ---
+
+## Key concepts
+
+### Trigger types
+
+| triggerType | How it fires                                                       | Fields populated on workflow                |
+| ----------- | ------------------------------------------------------------------ | ------------------------------------------- |
+| `MANUAL`    | API POST `/workflows/:id/run` (pushes directly to SQS)             | —                                           |
+| `CRON`      | Poller finds `nextRunAt <= now`, queues execution                  | `cronExpression`, `nextRunAt`               |
+| `WEBHOOK`   | Inbound HTTP request hits the webhook handler (registration → SQS) | `webhookId` (FK to `WebhookRegistration`)   |
+
+### Node types (executor registry)
+
+- **Triggers:** `manualTrigger`, `scheduler`, `webhook`
+- **Actions:** `httpRequest`, `set`, `if`, `code`*, `delay`*, `merge`*
+
+\* not yet implemented in the executor registry; schemas exist in `@repo/types`.
+
+### IF branching
+
+IF nodes have `true` and `false` output handles. The engine inspects `output.passed`, marks edges with the matching `sourceHandle` as live, and skips any node whose only path is through a non-matching handle (recorded with `NodeExecutionStatus = "SKIPPED"`).
+
+### Idempotency
+
+Cron-triggered executions use `idempotencyKey = "<workflowId>__<nextRunAt ISO>"`. Two pollers covering the same tick can't double-create — the unique index on `Execution.idempotencyKey` makes the second insert fail, and the poller releases its workflow lock cleanly.
+
+---
+
+## Conventions
+
+- **Bun** for everything (`bun install`, `bun run`, `bun build`, `bun test`). Avoid `npm`/`yarn`/`pnpm`.
+- **No Mongoose imports in `@repo/types`** — that package must stay pure TypeScript so the frontend can import workflow types without dragging in `mongoose`.
+- **Frontend** uses the FLOW design system: no inline styles, semantic Tailwind tokens, reuse components from `apps/frontend/components/ui/`.

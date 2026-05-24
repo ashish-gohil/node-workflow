@@ -7,12 +7,29 @@ This is a node-based workflow automation platform using the **FLOW design system
 ## Project layout
 
 ```
-apps/frontend/          — Next.js app (main UI)
-  app/                  — App Router pages
-  components/ui/        — All reusable UI components
-  design-system/        — Design system documentation + rules
-apps/backend/           — Node.js backend
+apps/
+├── frontend/                 Next.js 15 · React Flow editor · Tailwind v4
+├── api/                      Express on Lambda — workflow CRUD, webhook reg, manual run
+├── cron-workflow-poller/     EventBridge Lambda — queues due workflows
+└── workflow-executor/        SQS Lambda — runs the DAG (honors IF branching)
+
+packages/
+├── types/                    Pure-TS shared types (NO Mongoose — frontend uses these)
+├── db/                       Mongoose models + connection singleton
+└── auth/                     JWT middleware
 ```
+
+For backend/service work, read the matching per-service CLAUDE.md FIRST — they have
+the entry points, build/deploy commands, contracts, and gotchas without you needing
+to grep:
+
+- `apps/api/CLAUDE.md`
+- `apps/cron-workflow-poller/CLAUDE.md`
+- `apps/workflow-executor/CLAUDE.md`
+- `packages/db/CLAUDE.md`
+- `packages/types/CLAUDE.md`
+
+The rest of THIS file is the **frontend** rulebook (design system).
 
 ---
 
